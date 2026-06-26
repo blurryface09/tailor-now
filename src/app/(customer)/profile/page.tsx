@@ -6,19 +6,19 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { Profile, Measurements } from '@/types'
 import toast from 'react-hot-toast'
-import { Ruler, User, Phone, MapPin } from 'lucide-react'
+import { Ruler, User, Phone, MapPin, CheckCircle } from 'lucide-react'
 
 const MEASUREMENT_FIELDS = [
-  { key: 'chest', label: 'Chest (inches)' },
-  { key: 'waist', label: 'Waist (inches)' },
-  { key: 'hips', label: 'Hips (inches)' },
-  { key: 'inseam', label: 'Inseam (inches)' },
-  { key: 'shoulder', label: 'Shoulder (inches)' },
-  { key: 'sleeve_length', label: 'Sleeve length (inches)' },
-  { key: 'neck', label: 'Neck (inches)' },
-  { key: 'thigh', label: 'Thigh (inches)' },
-  { key: 'ankle', label: 'Ankle (inches)' },
-  { key: 'back_length', label: 'Back length (inches)' },
+  { key: 'chest',         label: 'Chest',         hint: 'Fullest part of chest' },
+  { key: 'waist',         label: 'Waist',         hint: 'Natural waistline' },
+  { key: 'hips',          label: 'Hips',          hint: 'Fullest part of hips' },
+  { key: 'inseam',        label: 'Inseam',        hint: 'Crotch to ankle' },
+  { key: 'shoulder',      label: 'Shoulder',      hint: 'Shoulder tip to tip' },
+  { key: 'sleeve_length', label: 'Sleeve',        hint: 'Shoulder to wrist' },
+  { key: 'neck',          label: 'Neck',          hint: 'Around base of neck' },
+  { key: 'thigh',         label: 'Thigh',         hint: 'Fullest part of thigh' },
+  { key: 'ankle',         label: 'Ankle',         hint: 'Around ankle bone' },
+  { key: 'back_length',   label: 'Back Length',   hint: 'Nape of neck to waist' },
 ]
 
 export default function ProfilePage() {
@@ -64,23 +64,39 @@ export default function ProfilePage() {
     setSavingMeasurements(false)
   }
 
-  if (!profile) return <div className="min-h-screen bg-gray-50"><Navbar /><div className="flex justify-center py-20"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div></div>
+  const filled = MEASUREMENT_FIELDS.filter(f => (measurements as Record<string, unknown>)[f.key]).length
+  const pct = Math.round((filled / MEASUREMENT_FIELDS.length) * 100)
+
+  if (!profile) return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="flex justify-center py-20"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {/* Profile info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-700 text-2xl font-bold">
+
+        {/* Profile header */}
+        <div className="bg-gradient-to-br from-violet-700 to-violet-900 rounded-2xl p-6 text-white relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+          <div className="relative flex items-center gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 border-2 border-white/30 flex items-center justify-center text-3xl font-black">
               {profile.full_name?.[0]?.toUpperCase() || 'U'}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">{profile.full_name}</h1>
-              <p className="text-sm text-gray-500">{profile.email || profile.phone}</p>
+              <h1 className="text-xl font-bold">{profile.full_name}</h1>
+              <p className="text-violet-300 text-sm">{profile.email || profile.phone}</p>
+              <span className="inline-block mt-1 text-xs bg-white/20 px-2.5 py-0.5 rounded-full capitalize">{profile.role}</span>
             </div>
           </div>
+        </div>
+
+        {/* Profile info */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h2 className="text-base font-bold text-gray-900 mb-5 flex items-center gap-2"><User size={18} className="text-violet-600" /> Personal Details</h2>
           <form onSubmit={saveProfile} className="space-y-4">
             <Input label="Full name" value={profile.full_name || ''} icon={<User size={16} />}
               onChange={e => setProfile(p => p ? { ...p, full_name: e.target.value } : p)} />
@@ -100,25 +116,63 @@ export default function ProfilePage() {
 
         {/* Measurements */}
         <div id="measurements" className="bg-white rounded-2xl border border-gray-100 p-6">
-          <div className="flex items-center gap-2 mb-2">
-            <Ruler size={20} className="text-violet-700" />
-            <h2 className="text-lg font-bold text-gray-900">My Measurements</h2>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <Ruler size={18} className="text-violet-600" /> My Measurements
+            </h2>
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${pct === 100 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+              {filled}/{MEASUREMENT_FIELDS.length} filled
+            </span>
           </div>
-          <p className="text-sm text-gray-500 mb-6">Saved measurements are automatically shared with tailors when you place an order.</p>
+
+          {/* Progress bar */}
+          <div className="w-full bg-gray-100 rounded-full h-2 mb-1 mt-3">
+            <div
+              className="h-2 rounded-full transition-all duration-500"
+              style={{ width: `${pct}%`, background: pct === 100 ? '#16a34a' : '#7c3aed' }}
+            />
+          </div>
+          <p className="text-xs text-gray-400 mb-5">
+            {pct === 100
+              ? <span className="text-green-600 font-medium flex items-center gap-1"><CheckCircle size={12} /> All measurements saved — tailors can use them automatically</span>
+              : 'Fill in your measurements once and they\'ll be shared with tailors on every order.'}
+          </p>
+
+          {/* Guide tip */}
+          <div className="bg-violet-50 border border-violet-100 rounded-xl px-4 py-3 mb-5 text-xs text-violet-700">
+            <span className="font-semibold">How to measure:</span> Use a soft tape measure. Measure in inches, standing straight in light clothing. Ask someone to help for accuracy.
+          </div>
+
           <form onSubmit={saveMeasurements}>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {MEASUREMENT_FIELDS.map(f => (
-                <Input key={f.key} label={f.label} type="number" step="0.5" min="0"
-                  value={(measurements as Record<string, unknown>)[f.key] as string || ''}
-                  onChange={e => setMeasurements(m => ({ ...m, [f.key]: e.target.value ? parseFloat(e.target.value) : null }))} />
-              ))}
+            <div className="grid grid-cols-2 gap-4 mb-5">
+              {MEASUREMENT_FIELDS.map(f => {
+                const val = (measurements as Record<string, unknown>)[f.key]
+                const isFilled = val !== undefined && val !== null && val !== ''
+                return (
+                  <div key={f.key} className="relative">
+                    <Input
+                      label={`${f.label} (inches)`}
+                      type="number" step="0.5" min="0"
+                      placeholder={f.hint}
+                      value={val as string || ''}
+                      onChange={e => setMeasurements(m => ({ ...m, [f.key]: e.target.value ? parseFloat(e.target.value) : null }))}
+                    />
+                    {isFilled && (
+                      <CheckCircle size={13} className="absolute right-3 top-[38px] text-green-500 pointer-events-none" />
+                    )}
+                  </div>
+                )
+              })}
             </div>
-            <div>
+            <div className="mb-5">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes for tailors</label>
-              <textarea className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
-                rows={3} placeholder="e.g. I have broad shoulders, prefer extra room in chest..."
+              <textarea
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                rows={3}
+                placeholder="e.g. broad shoulders, prefer extra room in chest, petite frame..."
                 value={measurements.notes || ''}
-                onChange={e => setMeasurements(m => ({ ...m, notes: e.target.value }))} />
+                onChange={e => setMeasurements(m => ({ ...m, notes: e.target.value }))}
+              />
             </div>
             <Button type="submit" loading={savingMeasurements}><Ruler size={16} /> Save Measurements</Button>
           </form>

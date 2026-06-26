@@ -47,7 +47,7 @@ function SignupContent() {
       return
     }
     toast.success('Account created! Welcome to TailorNow.')
-    router.push(role === 'tailor' ? '/onboarding/tailor' : '/browse')
+    router.push(role === 'tailor' ? '/onboarding/tailor' : '/home')
   }
 
   return (

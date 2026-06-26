@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { SERVICE_LABELS, formatCurrency, cn } from '@/lib/utils'
 import type { TailorProfile, Profile } from '@/types'
 
@@ -164,33 +165,25 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
 function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: number }) {
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length]
   const delayClass = ['fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][index % 6]
+  const isDemo = tailor.id.startsWith('demo-')
+  const cardClass = cn('group bg-white rounded-2xl border border-gray-100 hover:border-violet-200 transition-all duration-300 overflow-hidden card-lift', delayClass)
 
-  return (
-    <Link
-      href={`/tailors/${tailor.id}`}
-      className={cn('group bg-white rounded-2xl border border-gray-100 hover:border-violet-200 transition-all duration-300 overflow-hidden card-lift', delayClass)}
-    >
-      {/* Cover gradient */}
+  const body = (
+    <>
       <div className={cn('h-36 bg-gradient-to-br relative overflow-hidden', gradient)}>
-        {/* Dot pattern overlay */}
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
-        {/* Scissors watermark */}
         <div className="absolute right-4 bottom-2 text-white/20 text-7xl leading-none select-none">✂</div>
-
         {tailor.is_verified && (
           <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-sm">
             <CheckCircle size={11} className="text-violet-600" /> Verified
           </div>
         )}
-
-        {/* Avatar */}
         <div className="absolute bottom-0 left-4 translate-y-1/2">
           <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
             {tailor.business_name?.[0]?.toUpperCase() || '✂'}
           </div>
         </div>
       </div>
-
       <div className="px-4 pt-10 pb-4">
         <div className="flex items-start justify-between mb-1">
           <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors leading-tight text-base">
@@ -202,16 +195,10 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
             <span className="text-gray-400 text-xs">({tailor.total_reviews})</span>
           </div>
         </div>
-
         <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
           <MapPin size={11} /> {tailor.city}, {tailor.state}
         </p>
-
-        {tailor.bio && (
-          <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{tailor.bio}</p>
-        )}
-
-        {/* Specialties */}
+        {tailor.bio && <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{tailor.bio}</p>}
         <div className="flex flex-wrap gap-1.5 mb-3">
           {(tailor.specialties || []).slice(0, 3).map(s => (
             <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2.5 py-1 rounded-full font-medium">
@@ -224,7 +211,6 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
             </span>
           )}
         </div>
-
         <div className="flex items-center justify-between pt-3 border-t border-gray-50">
           <div className="flex items-center gap-1 text-xs text-gray-400">
             <Clock size={11} />
@@ -234,16 +220,28 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
             {tailor.total_orders} orders
           </span>
         </div>
-
-        {/* Book CTA — appears on hover */}
         <div className="mt-3 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300">
           <div className="pt-1">
             <div className="w-full bg-violet-700 text-white text-xs font-bold py-2.5 rounded-xl text-center tracking-wide">
-              Book Now
+              {isDemo ? 'Coming Soon' : 'Book Now'}
             </div>
           </div>
         </div>
       </div>
+    </>
+  )
+
+  if (isDemo) {
+    return (
+      <div className={cardClass} onClick={() => toast('Real tailor profiles coming soon! Sign up tailors are joining daily.', { icon: '✂️' })}>
+        {body}
+      </div>
+    )
+  }
+
+  return (
+    <Link href={`/tailors/${tailor.id}`} className={cardClass}>
+      {body}
     </Link>
   )
 }
