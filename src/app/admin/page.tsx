@@ -3,7 +3,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { Users, Scissors, Package, TrendingUp, CheckCircle, Clock, AlertCircle } from 'lucide-react'
+import { Users, Scissors, Package, TrendingUp, Clock, Star } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +19,7 @@ export default async function AdminDashboard() {
     { count: totalTailors },
     { count: totalOrders },
     { count: pendingVerifications },
+    { count: totalReviews },
     { data: recentOrders },
     { data: commissionData },
   ] = await Promise.all([
@@ -26,6 +27,7 @@ export default async function AdminDashboard() {
     supabase.from('tailor_profiles').select('*', { count: 'exact', head: true }),
     supabase.from('orders').select('*', { count: 'exact', head: true }),
     supabase.from('tailor_profiles').select('*', { count: 'exact', head: true }).eq('is_verified', false),
+    supabase.from('ratings').select('*', { count: 'exact', head: true }),
     supabase.from('orders').select('*, customer:profiles(full_name), tailor:tailor_profiles(business_name)')
       .order('created_at', { ascending: false }).limit(8),
     supabase.from('payouts').select('commission_amount').eq('status', 'paid'),
@@ -49,6 +51,12 @@ export default async function AdminDashboard() {
             <Link href="/admin/payouts" className="bg-white border border-green-200 text-green-700 text-sm px-4 py-2 rounded-xl hover:bg-green-50 transition-colors">
               Payouts
             </Link>
+            <Link href="/admin/users" className="bg-white border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+              Accounts
+            </Link>
+            <Link href="/admin/reviews" className="bg-white border border-amber-200 text-amber-700 text-sm px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors">
+              Reviews
+            </Link>
             <Link href="/admin/orders" className="bg-violet-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-violet-800 transition-colors">
               All Orders
             </Link>
@@ -56,12 +64,13 @@ export default async function AdminDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           {[
             { icon: <Users size={20} />, label: 'Total Customers', value: totalUsers || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
             { icon: <Scissors size={20} />, label: 'Total Tailors', value: totalTailors || 0, color: 'text-violet-600', bg: 'bg-violet-50' },
             { icon: <Package size={20} />, label: 'Total Orders', value: totalOrders || 0, color: 'text-green-600', bg: 'bg-green-50' },
-            { icon: <TrendingUp size={20} />, label: 'Commission Earned', value: formatCurrency(totalCommission), color: 'text-amber-600', bg: 'bg-amber-50' },
+            { icon: <Star size={20} />, label: 'Total Reviews', value: totalReviews || 0, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { icon: <TrendingUp size={20} />, label: 'Commission Earned', value: formatCurrency(totalCommission), color: 'text-violet-600', bg: 'bg-violet-50' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-5">
               <div className={`w-10 h-10 ${s.bg} ${s.color} rounded-xl flex items-center justify-center mb-3`}>{s.icon}</div>
@@ -113,7 +122,8 @@ export default async function AdminDashboard() {
             <div className="space-y-3">
               {[
                 { href: '/admin/tailors', icon: <Scissors size={18} />, label: 'Manage Tailors', desc: 'Verify, suspend, view profiles' },
-                { href: '/admin/users', icon: <Users size={18} />, label: 'Manage Users', desc: 'View all customers' },
+                { href: '/admin/users', icon: <Users size={18} />, label: 'Manage Accounts', desc: 'Customers, tailors, admins' },
+                { href: '/admin/reviews', icon: <Star size={18} />, label: 'Reviews', desc: 'Moderate ratings & reviews' },
                 { href: '/admin/orders', icon: <Package size={18} />, label: 'All Orders', desc: 'Monitor disputes, view history' },
                 { href: '/admin/payouts', icon: <TrendingUp size={18} />, label: 'Payouts', desc: 'Process tailor payouts' },
               ].map(a => (
