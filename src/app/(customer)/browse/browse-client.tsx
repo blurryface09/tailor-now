@@ -1,0 +1,228 @@
+'use client'
+import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap } from 'lucide-react'
+import { SERVICE_LABELS, formatCurrency, cn } from '@/lib/utils'
+import type { TailorProfile, Profile } from '@/types'
+
+type TailorWithProfile = TailorProfile & { profile: Profile }
+
+interface BrowseClientProps {
+  tailors: TailorWithProfile[]
+  initialService?: string
+  initialCity?: string
+}
+
+const SERVICE_ICONS: Record<string, string> = {
+  custom_outfit: '👗',
+  alterations: '✂️',
+  bridal: '💍',
+  ready_to_wear: '👕',
+  fabric_sourcing: '🧵',
+  uniforms: '👔',
+}
+
+const COVER_GRADIENTS = [
+  'from-violet-500 to-purple-700',
+  'from-indigo-500 to-violet-600',
+  'from-purple-600 to-pink-500',
+  'from-violet-600 to-indigo-700',
+  'from-fuchsia-500 to-violet-600',
+  'from-violet-700 to-purple-500',
+]
+
+export function BrowseClient({ tailors, initialService, initialCity }: BrowseClientProps) {
+  const router = useRouter()
+  const [search, setSearch] = useState('')
+  const [selectedService, setSelectedService] = useState(initialService || '')
+  const [selectedCity, setSelectedCity] = useState(initialCity || '')
+
+  const handleFilter = () => {
+    const params = new URLSearchParams()
+    if (selectedService) params.set('service', selectedService)
+    if (selectedCity) params.set('city', selectedCity)
+    router.push(`/browse?${params.toString()}`)
+  }
+
+  const filtered = tailors.filter(t =>
+    !search ||
+    t.business_name.toLowerCase().includes(search.toLowerCase()) ||
+    t.profile?.full_name?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Search bar */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-8 fade-up">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+              placeholder="Search tailors by name..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              className="pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-44"
+              placeholder="City"
+              value={selectedCity}
+              onChange={e => setSelectedCity(e.target.value)}
+            />
+          </div>
+          <button
+            onClick={handleFilter}
+            className="flex items-center justify-center gap-2 bg-violet-700 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-violet-800 transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] shadow-sm shadow-violet-300"
+          >
+            <Filter size={16} /> Filter
+          </button>
+        </div>
+
+        {/* Service chips */}
+        <div className="flex gap-2 mt-4 overflow-x-auto scrollbar-hide pb-1">
+          <button
+            onClick={() => setSelectedService('')}
+            className={cn(
+              'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200',
+              !selectedService
+                ? 'bg-violet-700 text-white shadow-sm shadow-violet-300'
+                : 'bg-gray-100 text-gray-600 hover:bg-violet-50 hover:text-violet-700'
+            )}
+          >
+            All Services
+          </button>
+          {Object.entries(SERVICE_LABELS).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setSelectedService(selectedService === key ? '' : key)}
+              className={cn(
+                'flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200',
+                selectedService === key
+                  ? 'bg-violet-700 text-white shadow-sm shadow-violet-300 scale-[1.04]'
+                  : 'bg-gray-100 text-gray-600 hover:bg-violet-50 hover:text-violet-700'
+              )}
+            >
+              {SERVICE_ICONS[key]} {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between mb-5 fade-up-1">
+        <p className="text-sm text-gray-500">
+          <span className="font-semibold text-gray-900">{filtered.length}</span> tailors found
+        </p>
+        {filtered.length > 0 && (
+          <span className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium">
+            <Zap size={12} /> Ready to book
+          </span>
+        )}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center py-24 fade-up">
+          <div className="text-6xl mb-4">✂️</div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No tailors found</h3>
+          <p className="text-gray-500">Try adjusting your filters or search terms</p>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map((tailor, i) => (
+            <TailorCard key={tailor.id} tailor={tailor} index={i} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: number }) {
+  const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length]
+  const delayClass = ['fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][index % 6]
+
+  return (
+    <Link
+      href={`/tailors/${tailor.id}`}
+      className={cn('group bg-white rounded-2xl border border-gray-100 hover:border-violet-200 transition-all duration-300 overflow-hidden card-lift', delayClass)}
+    >
+      {/* Cover gradient */}
+      <div className={cn('h-36 bg-gradient-to-br relative overflow-hidden', gradient)}>
+        {/* Dot pattern overlay */}
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
+        {/* Scissors watermark */}
+        <div className="absolute right-4 bottom-2 text-white/20 text-7xl leading-none select-none">✂</div>
+
+        {tailor.is_verified && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-sm">
+            <CheckCircle size={11} className="text-violet-600" /> Verified
+          </div>
+        )}
+
+        {/* Avatar */}
+        <div className="absolute bottom-0 left-4 translate-y-1/2">
+          <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
+            {tailor.business_name?.[0]?.toUpperCase() || '✂'}
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 pt-10 pb-4">
+        <div className="flex items-start justify-between mb-1">
+          <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors leading-tight text-base">
+            {tailor.business_name}
+          </h3>
+          <div className="flex items-center gap-1 text-sm flex-shrink-0 ml-2">
+            <Star size={13} className="text-amber-400 fill-amber-400" />
+            <span className="font-semibold text-gray-900">{tailor.avg_rating?.toFixed(1) || 'New'}</span>
+            <span className="text-gray-400 text-xs">({tailor.total_reviews})</span>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
+          <MapPin size={11} /> {tailor.city}, {tailor.state}
+        </p>
+
+        {tailor.bio && (
+          <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{tailor.bio}</p>
+        )}
+
+        {/* Specialties */}
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {(tailor.specialties || []).slice(0, 3).map(s => (
+            <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2.5 py-1 rounded-full font-medium">
+              {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
+            </span>
+          ))}
+          {(tailor.specialties || []).length > 3 && (
+            <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
+              +{tailor.specialties.length - 3} more
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+          <div className="flex items-center gap-1 text-xs text-gray-400">
+            <Clock size={11} />
+            {tailor.response_time_hours ? `Replies in ~${tailor.response_time_hours}h` : 'Quick responder'}
+          </div>
+          <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full">
+            {tailor.total_orders} orders
+          </span>
+        </div>
+
+        {/* Book CTA — appears on hover */}
+        <div className="mt-3 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300">
+          <div className="pt-1">
+            <div className="w-full bg-violet-700 text-white text-xs font-bold py-2.5 rounded-xl text-center tracking-wide">
+              Book Now
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  )
+}
