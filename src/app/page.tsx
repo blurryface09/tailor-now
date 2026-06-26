@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { SERVICE_LABELS } from '@/lib/utils'
-import { Logo } from '@/components/ui/logo'
+
 import { TailoringBg } from '@/components/ui/tailoring-bg'
 
 const features = [
@@ -38,7 +38,7 @@ export default function LandingPage() {
       {/* ── Navbar ──────────────────────────────────── */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm shadow-violet-100/50">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/"><Logo size="sm" animated /></Link>
+          <Link href="/"><span className="text-lg font-black text-white">Tailor<span className="text-amber-400">NOW</span></span></Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <Link href="/browse" className="hover:text-violet-700 transition-colors font-medium">Find Tailors</Link>
             <Link href="/login?as=tailor" className="hover:text-violet-700 transition-colors font-medium">Join as Tailor</Link>
@@ -68,7 +68,7 @@ export default function LandingPage() {
         <div className="relative w-full max-w-6xl mx-auto px-4 py-24 md:py-36 text-center">
           {/* Big logo in hero */}
           <div className="fade-up flex justify-center mb-8">
-            <Logo size="xl" variant="full" dark animated />
+            <span className="text-5xl font-black text-white">Tailor<span className="text-amber-400">NOW</span></span>
           </div>
 
           <div className="fade-up-1 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-5 py-2 text-sm mb-8 backdrop-blur-sm">
@@ -237,7 +237,7 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 py-14">
           <div className="grid md:grid-cols-4 gap-10 mb-12">
             <div className="md:col-span-2">
-              <Logo size="md" dark className="mb-4" />
+              <span className="text-2xl font-black text-white block mb-4">Tailor<span className="text-amber-400">NOW</span></span>
               <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
                 Nigeria&apos;s premier tailoring marketplace. Connecting skilled tailors with customers who deserve a perfect fit.
               </p>

@@ -1,12 +1,10 @@
 import Link from 'next/link'
-import { Logo } from '@/components/ui/logo'
-
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
       <div className="text-center max-w-sm">
         <div className="mb-6">
-          <Logo size="lg" variant="full" animated />
+          <span className="text-3xl font-black text-violet-700">Tailor<span className="text-amber-500">NOW</span></span>
         </div>
 
         <div className="relative mb-6">

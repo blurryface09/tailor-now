@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react'
 import type { Profile } from '@/types'
 import { Bell, MessageSquare, User, LogOut, Scissors, LayoutDashboard, ChevronDown, Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Logo } from '@/components/ui/logo'
 
 export function Navbar() {
   const pathname = usePathname()
@@ -50,7 +49,7 @@ export function Navbar() {
           href={profile?.role === 'tailor' ? '/dashboard' : profile?.role === 'admin' ? '/admin' : '/'}
           className="transition-transform hover:scale-[1.02] duration-200"
         >
-          <Logo size="sm" animated />
+          <span className="text-lg font-black text-violet-700">Tailor<span className="text-amber-500">NOW</span></span>
         </Link>
 
         {/* Desktop nav */}
