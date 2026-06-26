@@ -32,11 +32,22 @@ const COVER_GRADIENTS = [
   'from-violet-700 to-purple-500',
 ]
 
+const DEMO_TAILORS: TailorWithProfile[] = [
+  { id: 'demo-1', user_id: 'demo-1', business_name: "Adaeze Couture", bio: "Lagos-based fashion house specialising in Aso-Oke, Ankara, and custom bridal gowns. 10+ years experience.", city: "Lagos", state: "Lagos", specialties: ["bridal", "custom_outfit", "alterations"], is_verified: true, avg_rating: 4.9, total_reviews: 134, total_orders: 312, response_time_hours: 2, profile: { id: 'demo-1', full_name: "Adaeze Okonkwo", role: "tailor" } as Profile } as TailorWithProfile,
+  { id: 'demo-2', user_id: 'demo-2', business_name: "Kemi Stitch & Style", bio: "Your go-to for office wear, casual fits, and alterations. Fast turnaround guaranteed.", city: "Abuja", state: "FCT", specialties: ["custom_outfit", "alterations", "ready_to_wear"], is_verified: true, avg_rating: 4.7, total_reviews: 88, total_orders: 201, response_time_hours: 4, profile: { id: 'demo-2', full_name: "Kemi Adeyemi", role: "tailor" } as Profile } as TailorWithProfile,
+  { id: 'demo-3', user_id: 'demo-3', business_name: "Emeka Fashion House", bio: "Men's agbada, suits, and senator wear. We deliver quality traditional and western wear across Nigeria.", city: "Enugu", state: "Enugu", specialties: ["custom_outfit", "uniforms"], is_verified: false, avg_rating: 4.5, total_reviews: 52, total_orders: 120, response_time_hours: 6, profile: { id: 'demo-3', full_name: "Emeka Nwosu", role: "tailor" } as Profile } as TailorWithProfile,
+  { id: 'demo-4', user_id: 'demo-4', business_name: "Zara Fabrics & Sewing", bio: "Fabric sourcing, school uniforms, and custom designs. Serving Port Harcourt since 2015.", city: "Port Harcourt", state: "Rivers", specialties: ["fabric_sourcing", "uniforms", "alterations"], is_verified: true, avg_rating: 4.8, total_reviews: 76, total_orders: 185, response_time_hours: 3, profile: { id: 'demo-4', full_name: "Zara Williams", role: "tailor" } as Profile } as TailorWithProfile,
+  { id: 'demo-5', user_id: 'demo-5', business_name: "Adeola Bridal Studio", bio: "Luxury bridal couture and asoebi coordination. We make your big day unforgettable.", city: "Ibadan", state: "Oyo", specialties: ["bridal", "custom_outfit"], is_verified: true, avg_rating: 5.0, total_reviews: 41, total_orders: 89, response_time_hours: 1, profile: { id: 'demo-5', full_name: "Adeola Fashola", role: "tailor" } as Profile } as TailorWithProfile,
+  { id: 'demo-6', user_id: 'demo-6', business_name: "TrendWear by Chidi", bio: "Ready-to-wear and quick alterations. Same-day service available in Kano.", city: "Kano", state: "Kano", specialties: ["ready_to_wear", "alterations"], is_verified: false, avg_rating: 4.3, total_reviews: 29, total_orders: 67, response_time_hours: 8, profile: { id: 'demo-6', full_name: "Chidi Okafor", role: "tailor" } as Profile } as TailorWithProfile,
+]
+
 export function BrowseClient({ tailors, initialService, initialCity }: BrowseClientProps) {
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [selectedService, setSelectedService] = useState(initialService || '')
   const [selectedCity, setSelectedCity] = useState(initialCity || '')
+  const displayTailors = tailors.length > 0 ? tailors : DEMO_TAILORS
+  const isDemo = tailors.length === 0
 
   const handleFilter = () => {
     const params = new URLSearchParams()
@@ -45,7 +56,7 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
     router.push(`/browse?${params.toString()}`)
   }
 
-  const filtered = tailors.filter(t =>
+  const filtered = displayTailors.filter(t =>
     !search ||
     t.business_name.toLowerCase().includes(search.toLowerCase()) ||
     t.profile?.full_name?.toLowerCase().includes(search.toLowerCase())
@@ -111,6 +122,16 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
           ))}
         </div>
       </div>
+
+      {isDemo && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3 fade-up">
+          <span className="text-amber-500 text-xl">✂️</span>
+          <div>
+            <p className="text-sm font-semibold text-amber-800">Sample profiles</p>
+            <p className="text-xs text-amber-700">These are demo tailors. Real tailors will appear here once they sign up.</p>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-5 fade-up-1">
         <p className="text-sm text-gray-500">
