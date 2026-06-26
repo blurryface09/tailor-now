@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate } from '@/lib/utils'
 import { Scissors } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CustomerOrdersPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

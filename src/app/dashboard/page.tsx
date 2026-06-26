@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } from '@/lib/utils'
 import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TailorDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

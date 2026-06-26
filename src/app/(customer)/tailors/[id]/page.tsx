@@ -3,6 +3,8 @@ import { Navbar } from '@/components/layout/navbar'
 import { TailorProfileClient } from './tailor-profile-client'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TailorProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()

@@ -3,6 +3,8 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import { AdminTailorsClient } from './admin-tailors-client'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AdminTailorsPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
   const { filter } = await searchParams
   const supabase = await createClient()
