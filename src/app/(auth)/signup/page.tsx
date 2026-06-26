@@ -28,8 +28,13 @@ function SignupContent() {
       password: form.password,
       options: { data: { full_name: form.full_name, role } },
     })
-    if (error) { toast.error(error.message); setLoading(false); return }
-    toast.success('Account created! Check your email.')
+    if (error) {
+      console.error('Signup error:', error)
+      toast.error(error.message || 'Signup failed — check console')
+      setLoading(false)
+      return
+    }
+    toast.success('Account created!')
     router.push(role === 'tailor' ? '/onboarding/tailor' : '/browse')
   }
 
