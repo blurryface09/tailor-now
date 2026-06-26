@@ -1,10 +1,6 @@
 import type { Metadata } from 'next'
-import { Inter, Dancing_Script } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap', preload: false })
-const dancing = Dancing_Script({ subsets: ['latin'], weight: ['700'], variable: '--font-script', display: 'swap', preload: false })
 
 export const metadata: Metadata = {
   title: 'Tailor Now — Find Expert Tailors Near You',
@@ -15,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.variable} ${dancing.variable} ${inter.className} min-h-full bg-gray-50`}>
+      <body className="min-h-full bg-gray-50 font-sans">
         {children}
         <Toaster
           position="top-center"

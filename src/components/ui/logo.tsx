@@ -81,7 +81,7 @@ export function Logo({ size = 'md', variant = 'icon', className, animated = fals
       <div className="flex flex-col leading-none gap-[2px]">
         <span
           className={cn('font-bold leading-none', s.script, tailorColor)}
-          style={{ fontFamily: 'var(--font-script, "Dancing Script", cursive)' }}
+          style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
         >
           Tailor
         </span>
