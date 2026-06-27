@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { SERVICE_LABELS } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
 import { TailoringBg } from '@/components/ui/tailoring-bg'
 
@@ -19,11 +18,6 @@ const stats = [
   { value: '24hrs', label: 'Avg Response Time' },
 ]
 
-const SERVICE_ICONS: Record<string, string> = {
-  custom_outfit: '👗', alterations: '✂️', bridal: '💍',
-  ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
-}
-
 const steps = [
   { step: '01', icon: '🔍', title: 'Browse Creatives', desc: 'Filter by service, location, rating, and price range. View portfolios and reviews.' },
   { step: '02', icon: '💬', title: 'Book and Chat', desc: 'Send an order request with your measurements and style references. Chat to agree on price.' },
@@ -42,7 +36,7 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
             <Link href="/browse" className="hover:text-violet-700 transition-colors font-medium">Find Creatives</Link>
             <Link href="/login?as=tailor" className="hover:text-violet-700 transition-colors font-medium">Join as Creative</Link>
-            <Link href="#how-it-works" className="hover:text-violet-700 transition-colors font-medium">How it works</Link>
+            <a href="#how-it-works" className="hover:text-violet-700 transition-colors font-medium">How it works</a>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm font-semibold text-gray-700 hover:text-violet-700 transition-colors px-3 py-2 rounded-xl hover:bg-violet-50">
@@ -113,41 +107,44 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Services ────────────────────────────────── */}
+      {/* ── Community ──────────────────────────────── */}
       <section className="py-24 bg-gray-50 relative overflow-hidden">
         <TailoringBg />
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-14 page-enter">
-            <span className="text-xs font-bold tracking-widest text-violet-500 uppercase mb-3 block">Services</span>
-            <h2 className="text-4xl font-black text-gray-900">What can we make for you?</h2>
-            <p className="text-gray-500 mt-3 text-lg">From everyday wear to once-in-a-lifetime pieces</p>
+            <span className="text-xs font-bold tracking-widest text-violet-500 uppercase mb-3 block">Community</span>
+            <h2 className="text-4xl font-black text-gray-900">Connect with Nigerian creatives</h2>
+            <p className="text-gray-500 mt-3 text-lg">Discover talent, follow the feed, and commission your next look</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {/* Asoebi — featured card */}
-            <Link href="/orders/asoebi"
+            {/* Feed — featured card */}
+            <Link href="/feed"
               className="group col-span-2 md:col-span-1 bg-gradient-to-br from-violet-600 to-violet-800 rounded-2xl p-6 border border-violet-500 card-lift transition-all fade-up relative overflow-hidden">
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
               <div className="relative">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300">👗</div>
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300">✨</div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-white text-base">Asoebi Group Orders</h3>
-                  <span className="text-xs bg-amber-400 text-amber-950 font-bold px-2 py-0.5 rounded-full">New</span>
+                  <h3 className="font-bold text-white text-base">Creative Feed</h3>
+                  <span className="text-xs bg-amber-400 text-amber-950 font-bold px-2 py-0.5 rounded-full">Live</span>
                 </div>
-                <p className="text-xs text-violet-200 mt-1">Coordinate outfits for weddings, parties and events →</p>
+                <p className="text-xs text-violet-200 mt-1">See the latest looks and styles from creatives →</p>
               </div>
             </Link>
 
-            {Object.entries(SERVICE_LABELS).filter(([k]) => k !== 'asoebi').map(([key, label], i) => (
-              <Link
-                key={key}
-                href={`/browse?service=${key}`}
-                className={`group bg-white rounded-2xl p-6 border border-gray-100 hover:border-violet-300 card-lift transition-all ${['fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5', 'fade-up'][i]}`}
-              >
+            {([
+              { href: '/browse', icon: '🔍', title: 'Browse Creatives', desc: 'Filter by city, style, and rating' },
+              { href: '/orders/asoebi', icon: '👗', title: 'Asoebi Group Orders', desc: 'Coordinate outfits for events' },
+              { href: '/browse', icon: '📍', title: 'Find Nearby', desc: 'Discover talent in your city' },
+              { href: '/signup?as=tailor', icon: '🎨', title: 'Become a Creative', desc: 'Set up your profile and start earning' },
+              { href: '/browse', icon: '⭐', title: 'Top Rated', desc: 'Highest-rated creatives this month' },
+            ] as { href: string; icon: string; title: string; desc: string }[]).map(({ href, icon, title, desc }, i) => (
+              <Link key={title} href={href}
+                className={`group bg-white rounded-2xl p-6 border border-gray-100 hover:border-violet-300 card-lift transition-all ${['fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][i]}`}>
                 <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 group-hover:bg-violet-100 transition-all duration-300">
-                  {SERVICE_ICONS[key]}
+                  {icon}
                 </div>
-                <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors text-base">{label}</h3>
-                <p className="text-xs text-gray-400 mt-1 group-hover:text-violet-400 transition-colors">Explore creatives →</p>
+                <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors text-base">{title}</h3>
+                <p className="text-xs text-gray-400 mt-1 group-hover:text-violet-400 transition-colors">{desc} →</p>
               </Link>
             ))}
           </div>
@@ -225,9 +222,9 @@ export default function LandingPage() {
             <Link href="/signup?as=tailor" className="btn-press bg-violet-700 hover:bg-violet-800 text-white font-black text-lg px-10 py-4 rounded-2xl transition-all shadow-lg shadow-violet-900/30 hover:scale-105">
               Start Taking Orders →
             </Link>
-            <Link href="#how-it-works" className="btn-press bg-amber-950/10 hover:bg-amber-950/20 text-amber-950 font-bold text-lg px-10 py-4 rounded-2xl transition-all">
+            <a href="#how-it-works" className="btn-press bg-amber-950/10 hover:bg-amber-950/20 text-amber-950 font-bold text-lg px-10 py-4 rounded-2xl transition-all">
               Learn how it works
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -249,7 +246,7 @@ export default function LandingPage() {
                 <li><Link href="/orders/asoebi" className="hover:text-violet-400 transition-colors">Asoebi Group Orders</Link></li>
                 <li><Link href="/signup?as=tailor" className="hover:text-violet-400 transition-colors">Join as Creative</Link></li>
                 <li><Link href="/referral" className="hover:text-amber-400 transition-colors">Refer and Earn</Link></li>
-                <li><Link href="#how-it-works" className="hover:text-violet-400 transition-colors">How it works</Link></li>
+                <li><a href="#how-it-works" className="hover:text-violet-400 transition-colors">How it works</a></li>
               </ul>
             </div>
             <div>
