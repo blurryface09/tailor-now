@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { StarRating } from '@/components/ui/star-rating'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, formatRelativeTime, calculateCommission } from '@/lib/utils'
 import { MessageSquare, CheckCircle, AlertCircle, Clock, AlertTriangle, Images } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Order, Rating } from '@/types'
@@ -13,7 +13,7 @@ import Link from 'next/link'
 
 const TRACKING_STEPS = [
   { status: 'pending', label: 'Order placed', icon: '📋' },
-  { status: 'accepted', label: 'Accepted by tailor', icon: '🤝' },
+  { status: 'accepted', label: 'Accepted by creative', icon: '🤝' },
   { status: 'measuring', label: 'Taking measurements', icon: '📏' },
   { status: 'in_progress', label: 'Being sewn', icon: '✂️' },
   { status: 'ready', label: 'Ready', icon: '🎉' },
@@ -66,29 +66,25 @@ function OrderDetailContent() {
     if (!order) return
     setConfirmingDelivery(true)
 
-    // If there's a balance to pay, go through Paystack
-    if (order.balance_amount && order.balance_amount > 0 && !order.balance_paid) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { toast.error('Please log in'); setConfirmingDelivery(false); return }
-      const res = await fetch('/api/payments/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: id, amount: order.balance_amount, email: user.email, type: 'balance' }),
-      })
-      const data = await res.json()
-      if (data.authorization_url) {
-        window.location.href = data.authorization_url
-      } else {
-        toast.error(data.error || 'Could not initialize payment')
-        setConfirmingDelivery(false)
-      }
-      return
-    }
-
-    // No balance to pay — mark completed directly
+    const { data: orderData } = await supabase.from('orders').select('agreed_price, tailor_id').eq('id', id).single()
     const { error } = await supabase.from('orders').update({ status: 'completed' }).eq('id', id)
     if (error) { toast.error(error.message); setConfirmingDelivery(false); return }
-    toast.success('Delivery confirmed!')
+
+    // Create payout record if not already exists
+    if (orderData?.agreed_price) {
+      const { commission, net } = calculateCommission(orderData.agreed_price)
+      await supabase.from('payouts').upsert({
+        tailor_id: orderData.tailor_id,
+        order_id: id,
+        gross_amount: orderData.agreed_price,
+        commission_rate: 0.20,
+        commission_amount: commission,
+        net_amount: net,
+        status: 'pending',
+      }, { onConflict: 'order_id' })
+    }
+
+    toast.success('Delivery confirmed! Payment released to creative.')
     fetchOrder()
     setConfirmingDelivery(false)
   }
@@ -183,11 +179,11 @@ function OrderDetailContent() {
           <div className="flex flex-wrap gap-3">
             <Link href={`/chat?order=${id}&tailor=${order.tailor_id}`}
               className="flex items-center gap-2 px-4 py-2 border border-violet-700 text-violet-700 rounded-xl text-sm font-medium hover:bg-violet-50 transition-colors">
-              <MessageSquare size={16} /> Chat with {isTailor ? 'Customer' : 'Tailor'}
+              <MessageSquare size={16} /> Chat with {isTailor ? 'Customer' : 'Creative'}
             </Link>
             {canConfirmDelivery && (
               <Button onClick={confirmDelivery} loading={confirmingDelivery} size="md">
-                <CheckCircle size={16} /> Confirm Delivery & Pay Balance
+                <CheckCircle size={16} /> Confirm Delivery
               </Button>
             )}
             {isCustomer && !['completed','cancelled','disputed'].includes(order.status) && order.deposit_paid && (
@@ -229,20 +225,19 @@ function OrderDetailContent() {
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <h2 className="font-bold text-gray-900 mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-500">Total agreed price</span><span className="font-medium">{formatCurrency(order.agreed_price)}</span></div>
               <div className="flex justify-between">
-                <span className="text-gray-500">50% deposit</span>
-                <span className={`font-medium flex items-center gap-1 ${order.deposit_paid ? 'text-green-600' : 'text-amber-600'}`}>
-                  {order.deposit_paid ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
-                  {formatCurrency(order.deposit_amount || 0)} {order.deposit_paid ? '(Paid)' : '(Pending)'}
-                </span>
+                <span className="text-gray-500">Total price</span>
+                <span className="font-bold text-violet-700">{formatCurrency(order.agreed_price)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
-                <span className="text-gray-500">Balance on delivery</span>
-                <span className={`font-bold ${order.balance_paid ? 'text-green-600' : 'text-gray-900'}`}>
-                  {formatCurrency(order.balance_amount || 0)} {order.balance_paid ? '(Paid)' : ''}
+                <span className="text-gray-500">Status</span>
+                <span className={`font-medium flex items-center gap-1 ${order.deposit_paid ? 'text-green-600' : 'text-amber-600'}`}>
+                  {order.deposit_paid ? <><CheckCircle size={14} /> Paid</> : <><AlertCircle size={14} /> Awaiting payment</>}
                 </span>
               </div>
+              {order.deposit_paid && !['completed'].includes(order.status) && (
+                <p className="text-xs text-gray-400">Payment held securely — released to creative after you confirm delivery</p>
+              )}
             </div>
           </div>
         )}
@@ -251,7 +246,7 @@ function OrderDetailContent() {
         {canRate && (
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <h2 className="font-bold text-gray-900 mb-1">
-              Rate {isTailor ? 'this customer' : 'this tailor'}
+              Rate {isTailor ? 'this customer' : 'this creative'}
             </h2>
             <p className="text-sm text-gray-500 mb-4">Your feedback helps build trust on the platform</p>
             <div className="mb-4">

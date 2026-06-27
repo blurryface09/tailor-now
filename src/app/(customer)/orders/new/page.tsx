@@ -56,7 +56,6 @@ function NewOrderContent() {
     if (!user) { toast.error('Please log in first'); router.push('/login'); return }
 
     const agreedPrice = customPrice ? parseFloat(customPrice) : selectedService?.base_price || 0
-    const deposit = Math.round(agreedPrice * 0.5)
 
     const { data: order, error } = await supabase.from('orders').insert({
       customer_id: user.id,
@@ -69,8 +68,6 @@ function NewOrderContent() {
       pickup_address: form.pickup_address || null,
       delivery_address: form.delivery_address || null,
       agreed_price: agreedPrice || null,
-      deposit_amount: agreedPrice ? deposit : null,
-      balance_amount: agreedPrice ? agreedPrice - deposit : null,
       deadline: form.deadline || null,
       notes: form.notes || null,
       style_reference_urls: styleRefs,
@@ -87,9 +84,9 @@ function NewOrderContent() {
     }).catch(() => {})
 
     if (agreedPrice > 0) {
-      await initPaystack(order.id, deposit, user.email || '')
+      await initPaystack(order.id, agreedPrice, user.email || '')
     } else {
-      toast.success('Order placed! Tailor will send a price quote.')
+      toast.success('Order placed! Creative will confirm and get started.')
       router.push(`/orders/${order.id}`)
     }
   }
@@ -98,7 +95,7 @@ function NewOrderContent() {
     const res = await fetch('/api/payments/initialize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, amount, email, type: 'deposit' }),
+      body: JSON.stringify({ orderId, amount, email, type: 'full' }),
     })
     const { authorization_url } = await res.json()
     if (authorization_url) window.location.href = authorization_url
@@ -107,7 +104,7 @@ function NewOrderContent() {
   const steps: Step[] = ['service', 'details', 'measurements', 'payment', 'confirm']
   const stepIndex = steps.indexOf(step)
 
-  if (!tailorId) return <div className="min-h-screen bg-gray-50"><Navbar /><div className="text-center py-20 text-gray-500">No tailor selected. <a href="/browse" className="text-violet-700 underline">Browse tailors</a></div></div>
+  if (!tailorId) return <div className="min-h-screen bg-gray-50"><Navbar /><div className="text-center py-20 text-gray-500">No creative selected. <a href="/browse" className="text-violet-700 underline">Browse creatives</a></div></div>
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -189,7 +186,7 @@ function NewOrderContent() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Delivery preference</label>
                   <div className="grid grid-cols-2 gap-3">
                     {[{ val: 'pickup_delivery', label: '🚚 Pickup & Delivery', sub: 'We come to you' },
-                      { val: 'visit_shop', label: '🏪 Visit Shop', sub: 'You go to tailor' }].map(opt => (
+                      { val: 'visit_shop', label: '🏪 Visit Shop', sub: 'You go to them' }].map(opt => (
                       <button key={opt.val} onClick={() => setForm(f => ({ ...f, delivery_type: opt.val }))}
                         className={`p-3 rounded-xl border-2 text-left transition-all ${form.delivery_type === opt.val ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-gray-300'}`}>
                         <p className="text-sm font-medium">{opt.label}</p>
@@ -254,7 +251,7 @@ function NewOrderContent() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional notes for tailor</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Additional notes for your creative</label>
                 <textarea className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 min-h-[80px]"
                   placeholder="Any extra notes, fabric preferences, inspirations..."
                   value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
@@ -279,7 +276,7 @@ function NewOrderContent() {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-medium text-gray-900">{selectedService.title}</p>
-                      <p className="text-xs text-gray-500">Base price</p>
+                      <p className="text-xs text-gray-500">Full price — paid now via Paystack</p>
                     </div>
                     <p className="text-lg font-bold text-violet-700">{formatCurrency(selectedService.base_price)}</p>
                   </div>
@@ -293,9 +290,9 @@ function NewOrderContent() {
                 </div>
               ) : (
                 <div className="mb-4">
-                  <Input label="Agreed price with tailor (optional)" type="number" placeholder="Leave blank to negotiate via chat"
+                  <Input label="Agreed price (optional)" type="number" placeholder="Leave blank to negotiate via chat"
                     value={customPrice} onChange={e => setCustomPrice(e.target.value)} />
-                  <p className="text-xs text-gray-500 mt-1">You can also send the order and agree on price via chat</p>
+                  <p className="text-xs text-gray-500 mt-1">You can send the order and agree on price via chat, then pay</p>
                 </div>
               )}
 
@@ -303,12 +300,11 @@ function NewOrderContent() {
                 <div className="p-4 bg-gray-50 rounded-xl space-y-2 text-sm mb-4">
                   {(() => {
                     const total = parseFloat(customPrice || String(selectedService?.base_price || 0))
-                    const deposit = Math.round(total * 0.5)
                     return (
                       <>
                         <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{formatCurrency(total)}</span></div>
-                        <div className="flex justify-between text-violet-700"><span>50% deposit now</span><span className="font-bold">{formatCurrency(deposit)}</span></div>
-                        <div className="flex justify-between text-gray-500"><span>Balance on delivery</span><span>{formatCurrency(total - deposit)}</span></div>
+                        <div className="flex justify-between text-violet-700 font-semibold"><span>You pay now (full)</span><span>{formatCurrency(total)}</span></div>
+                        <p className="text-xs text-gray-400">Held securely — released to creative after delivery</p>
                       </>
                     )
                   })()}
@@ -354,8 +350,8 @@ function NewOrderContent() {
 
               <div className="mt-6 p-4 bg-violet-50 border border-violet-200 rounded-xl text-sm text-violet-800">
                 {customPrice || selectedService?.base_price
-                  ? `Paystack will collect 50% deposit of ${formatCurrency(Math.round(parseFloat(customPrice || String(selectedService?.base_price || 0)) * 0.5))} securely.`
-                  : 'Order will be sent to the tailor. Agree on price via chat before payment.'}
+                  ? `Paystack will securely collect ${formatCurrency(parseFloat(customPrice || String(selectedService?.base_price || 0)))} — released to the creative after you confirm delivery.`
+                  : 'Order will be sent to the creative. Agree on price via chat before payment.'}
               </div>
 
               <div className="flex gap-3 mt-6">

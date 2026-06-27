@@ -72,7 +72,7 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-              placeholder="Search tailors by name..."
+              placeholder="Search creatives by name..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -129,14 +129,14 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
           <span className="text-amber-500 text-xl">✂️</span>
           <div>
             <p className="text-sm font-semibold text-amber-800">Sample profiles</p>
-            <p className="text-xs text-amber-700">These are demo tailors. Real tailors will appear here once they sign up.</p>
+            <p className="text-xs text-amber-700">These are demo creatives. Real creatives will appear here once they sign up.</p>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between mb-5 fade-up-1">
         <p className="text-sm text-gray-500">
-          <span className="font-semibold text-gray-900">{filtered.length}</span> tailors found
+          <span className="font-semibold text-gray-900">{filtered.length}</span> creatives found
         </p>
         {filtered.length > 0 && (
           <span className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium">
@@ -148,7 +148,7 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
       {filtered.length === 0 ? (
         <div className="text-center py-24 fade-up">
           <div className="text-6xl mb-4">✂️</div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">No tailors found</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No creatives found</h3>
           <p className="text-gray-500">Try adjusting your filters or search terms</p>
         </div>
       ) : (
@@ -233,7 +233,7 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
 
   if (isDemo) {
     return (
-      <div className={cardClass} onClick={() => toast('Real tailor profiles coming soon! Sign up tailors are joining daily.', { icon: '✂️' })}>
+      <div className={cardClass} onClick={() => toast('Real creative profiles coming soon! Creatives are joining daily.', { icon: '✂️' })}>
         {body}
       </div>
     )

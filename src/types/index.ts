@@ -181,3 +181,45 @@ export interface Payout {
   paid_at: string | null
   created_at: string
 }
+
+export interface Post {
+  id: string
+  user_id: string
+  creative_id: string | null
+  caption: string | null
+  image_urls: string[]
+  service_type: ServiceType | null
+  likes_count: number
+  comments_count: number
+  created_at: string
+  author?: Profile
+  creative?: TailorProfile
+  liked_by_me?: boolean
+}
+
+export interface PostComment {
+  id: string
+  post_id: string
+  user_id: string
+  content: string
+  created_at: string
+  author?: Profile
+}
+
+export interface Follow {
+  id: string
+  follower_id: string
+  following_id: string
+  created_at: string
+}
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: 'order_update' | 'new_follower' | 'post_like' | 'post_comment' | 'payment'
+  title: string
+  body: string | null
+  data: Record<string, string>
+  read: boolean
+  created_at: string
+}

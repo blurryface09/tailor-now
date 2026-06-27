@@ -48,7 +48,7 @@ export default async function TailorDashboard() {
             )}
             {tailor.is_verified && (
               <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-4 py-2 text-sm text-green-700">
-                <CheckCircle size={16} /> Verified tailor
+                <CheckCircle size={16} /> Verified creative
               </div>
             )}
             <Link href={`/tailors/${tailor.id}`} className="text-sm border border-violet-700 text-violet-700 px-4 py-2 rounded-xl hover:bg-violet-50 transition-colors">

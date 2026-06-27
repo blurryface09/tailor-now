@@ -68,7 +68,7 @@ export default function TailorOnboarding() {
           <Link href="/" className="inline-flex mb-6 justify-center">
             <Logo size="md" variant="full" animated />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Set up your tailor profile</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Set up your creative profile</h1>
           <p className="text-gray-500 mt-1 text-sm">This is what customers see when they find you</p>
         </div>
 

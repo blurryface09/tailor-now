@@ -75,7 +75,7 @@ function SignupContent() {
               <button type="button" onClick={() => setRole('tailor')}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${role === 'tailor' ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-gray-300'}`}>
                 <Scissors className={role === 'tailor' ? 'text-violet-700' : 'text-gray-400'} size={24} />
-                <span className={`text-sm font-semibold ${role === 'tailor' ? 'text-violet-700' : 'text-gray-600'}`}>Tailor</span>
+                <span className={`text-sm font-semibold ${role === 'tailor' ? 'text-violet-700' : 'text-gray-600'}`}>Creative</span>
                 <span className="text-xs text-gray-400">I want to offer services</span>
               </button>
             </div>

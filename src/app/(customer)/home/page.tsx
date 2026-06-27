@@ -70,10 +70,10 @@ export default function CustomerHome() {
           <div className="relative">
             <p className="text-violet-300 text-sm font-medium mb-1">Welcome back</p>
             <h1 className="text-3xl font-black mb-2">{firstName} 👋</h1>
-            <p className="text-violet-200 text-sm mb-6">Ready to find your perfect tailor?</p>
+            <p className="text-violet-200 text-sm mb-6">Ready to connect with a creative?</p>
             <Link href="/browse"
               className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold px-5 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.03] text-sm shadow-lg shadow-amber-900/20">
-              <Search size={16} /> Browse Tailors <ArrowRight size={14} />
+              <Search size={16} /> Browse Creatives <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function CustomerHome() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-amber-900 text-sm">Save your measurements once</p>
-              <p className="text-xs text-amber-700 mt-0.5">Tailors will use them automatically — no re-measuring ever again</p>
+              <p className="text-xs text-amber-700 mt-0.5">Creatives will use them automatically — no re-measuring ever again</p>
             </div>
             <ArrowRight size={18} className="text-amber-600 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
           </Link>
@@ -95,7 +95,7 @@ export default function CustomerHome() {
         {hasMeasurements === true && (
           <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-3">
             <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
-            <p className="text-sm text-green-800 font-medium">Measurements saved — tailors can use them when you book</p>
+            <p className="text-sm text-green-800 font-medium">Measurements saved — creatives can use them when you book</p>
             <Link href="/profile#measurements" className="ml-auto text-xs text-green-700 underline hover:text-green-900">Update</Link>
           </div>
         )}
@@ -103,7 +103,7 @@ export default function CustomerHome() {
         {/* Quick actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { href: '/browse', icon: <Search size={22} />, label: 'Find a Tailor', sub: 'Browse & book', color: 'bg-violet-700 text-white' },
+            { href: '/browse', icon: <Search size={22} />, label: 'Find a Creative', sub: 'Browse & book', color: 'bg-violet-700 text-white' },
             { href: '/orders', icon: <ShoppingBag size={22} />, label: 'My Orders', sub: `${orders.length} total`, color: 'bg-white border border-gray-200 text-gray-900' },
             { href: '/profile#measurements', icon: <Ruler size={22} />, label: 'Measurements', sub: hasMeasurements ? 'Saved ✓' : 'Not set', color: 'bg-white border border-gray-200 text-gray-900' },
             { href: '/orders/asoebi', icon: '👗', label: 'Asoebi Orders', sub: 'Group outfits', color: 'bg-white border border-gray-200 text-gray-900', emoji: true },
@@ -158,9 +158,9 @@ export default function CustomerHome() {
           <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
             <div className="text-5xl mb-3">✂️</div>
             <h3 className="font-bold text-gray-900 mb-1">No orders yet</h3>
-            <p className="text-sm text-gray-500 mb-5">Browse tailors and place your first order</p>
+            <p className="text-sm text-gray-500 mb-5">Browse creatives and place your first order</p>
             <Link href="/browse" className="inline-flex items-center gap-2 bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-800 transition-colors text-sm">
-              <Search size={15} /> Find a Tailor
+              <Search size={15} /> Find a Creative
             </Link>
           </div>
         )}

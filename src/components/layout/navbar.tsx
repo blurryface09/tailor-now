@@ -14,14 +14,14 @@ import { Logo } from '@/components/ui/logo'
 
 const ADMIN_LINKS = [
   { href: '/admin',                 icon: <LayoutDashboard size={14} />, label: 'Dashboard' },
-  { href: '/admin/tailors',         icon: <Scissors size={14} />,        label: 'Tailors' },
+  { href: '/admin/tailors',         icon: <Scissors size={14} />,        label: 'Creatives' },
   { href: '/admin/users',           icon: <Users size={14} />,           label: 'Accounts' },
   { href: '/admin/orders',          icon: <Package size={14} />,         label: 'Orders' },
   { href: '/admin/reviews',         icon: <Star size={14} />,            label: 'Reviews' },
   { href: '/admin/disputes',        icon: <AlertTriangle size={14} />,   label: 'Disputes' },
   { href: '/admin/payouts',         icon: <TrendingUp size={14} />,      label: 'Payouts' },
   { href: '/admin/marketplace',     icon: <Store size={14} />,           label: 'Marketplace' },
-  { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Tailor' },
+  { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Creative' },
 ]
 
 export function Navbar() {
@@ -73,12 +73,20 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-1">
           {/* Customer nav */}
           {profile?.role === 'customer' && (
-            <Link href="/browse" className={cn(
-              'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
-              isActive('/browse') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
-            )}>
-              Find Tailors
-            </Link>
+            <>
+              <Link href="/feed" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/feed') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              )}>
+                Feed
+              </Link>
+              <Link href="/browse" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/browse') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              )}>
+                Find Creatives
+              </Link>
+            </>
           )}
 
           {/* Tailor nav */}
@@ -95,6 +103,12 @@ export function Navbar() {
                 isActive('/tailor/orders') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
               )}>
                 Orders
+              </Link>
+              <Link href="/tailor/posts" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/tailor/posts') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              )}>
+                Posts
               </Link>
               <Link href="/tailor/portfolio" className={cn(
                 'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
@@ -219,9 +233,14 @@ export function Navbar() {
       )}>
         <div className="bg-white border-t border-gray-100 px-4 py-3 space-y-1">
           {profile?.role === 'customer' && (
-            <Link href="/browse" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
-              Find Tailors
-            </Link>
+            <>
+              <Link href="/feed" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+                Feed
+              </Link>
+              <Link href="/browse" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+                Find Creatives
+              </Link>
+            </>
           )}
           {profile?.role === 'tailor' && (
             <>
@@ -230,6 +249,9 @@ export function Navbar() {
               </Link>
               <Link href="/tailor/orders" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
                 Orders
+              </Link>
+              <Link href="/tailor/posts" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+                Posts
               </Link>
             </>
           )}

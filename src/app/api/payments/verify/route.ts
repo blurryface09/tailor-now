@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
 
   if (type === 'deposit') {
     await supabase.from('orders').update({ deposit_paid: true, paystack_ref: reference }).eq('id', orderId)
+  } else if (type === 'full') {
+    await supabase.from('orders').update({ deposit_paid: true, balance_paid: true, paystack_ref: reference }).eq('id', orderId)
   } else if (type === 'balance') {
     const { data: order } = await supabase.from('orders').select('agreed_price, tailor_id').eq('id', orderId).single()
     await supabase.from('orders').update({ balance_paid: true, status: 'completed' }).eq('id', orderId)
