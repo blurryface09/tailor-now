@@ -4,16 +4,16 @@ import { Logo } from '@/components/ui/logo'
 import { TailoringBg } from '@/components/ui/tailoring-bg'
 
 const features = [
-  { icon: '✂️', title: 'Expert Tailors', desc: 'Verified professionals with proven portfolios and real customer reviews.' },
+  { icon: '✂️', title: 'Expert Creatives', desc: 'Verified professionals with proven portfolios and real customer reviews.' },
   { icon: '📏', title: 'Save Your Measurements', desc: 'Store your measurements once. Use them for every order — no re-measuring ever again.' },
   { icon: '🚚', title: 'Pickup and Delivery', desc: 'We collect your fabric and deliver your finished outfit to your door.' },
-  { icon: '💬', title: 'Direct Chat', desc: 'Message your tailor directly. Share style references, discuss details, agree on price.' },
+  { icon: '💬', title: 'Direct Chat', desc: 'Message your creative directly. Share style references, discuss details, agree on price.' },
   { icon: '📍', title: 'Live Order Tracking', desc: 'Track every stage from cutting to delivery in real time.' },
-  { icon: '⭐', title: 'Mutual Ratings', desc: 'Customers rate tailors. Tailors rate customers. Trust on both sides.' },
+  { icon: '⭐', title: 'Mutual Ratings', desc: 'Customers rate creatives. Creatives rate customers. Trust on both sides.' },
 ]
 
 const stats = [
-  { value: '2,400+', label: 'Verified Tailors' },
+  { value: '2,400+', label: 'Verified Creatives' },
   { value: '18,000+', label: 'Orders Completed' },
   { value: '4.8★', label: 'Average Rating' },
   { value: '24hrs', label: 'Avg Response Time' },
@@ -25,10 +25,10 @@ const SERVICE_ICONS: Record<string, string> = {
 }
 
 const steps = [
-  { step: '01', icon: '🔍', title: 'Browse Tailors', desc: 'Filter by service, location, rating, and price range. View portfolios and reviews.' },
+  { step: '01', icon: '🔍', title: 'Browse Creatives', desc: 'Filter by service, location, rating, and price range. View portfolios and reviews.' },
   { step: '02', icon: '💬', title: 'Book and Chat', desc: 'Send an order request with your measurements and style references. Chat to agree on price.' },
   { step: '03', icon: '📦', title: 'Track Your Order', desc: 'Get real-time updates at every stage — cutting, sewing, ready, out for delivery.' },
-  { step: '04', icon: '⭐', title: 'Rate and Review', desc: 'Receive your outfit. Confirm delivery, pay balance, and leave a review. Tailor rates you too.' },
+  { step: '04', icon: '⭐', title: 'Rate and Review', desc: 'Receive your outfit. Confirm delivery and leave a review. Creative rates you too.' },
 ]
 
 export default function LandingPage() {
@@ -40,8 +40,8 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/"><Logo size="sm" variant="full" /></Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <Link href="/browse" className="hover:text-violet-700 transition-colors font-medium">Find Tailors</Link>
-            <Link href="/login?as=tailor" className="hover:text-violet-700 transition-colors font-medium">Join as Tailor</Link>
+            <Link href="/browse" className="hover:text-violet-700 transition-colors font-medium">Find Creatives</Link>
+            <Link href="/login?as=tailor" className="hover:text-violet-700 transition-colors font-medium">Join as Creative</Link>
             <Link href="#how-it-works" className="hover:text-violet-700 transition-colors font-medium">How it works</Link>
           </div>
           <div className="flex items-center gap-3">
@@ -73,7 +73,7 @@ export default function LandingPage() {
 
           <div className="fade-up-1 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-5 py-2 text-sm mb-8 backdrop-blur-sm">
             <span className="w-2 h-2 bg-green-400 rounded-full pulse-dot" />
-            <span>1,200+ tailors online right now</span>
+            <span>1,200+ creatives online right now</span>
           </div>
 
           <h1 className="fade-up-2 text-5xl md:text-7xl font-black leading-tight mb-6 tracking-tight">
@@ -82,7 +82,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="fade-up-3 text-xl text-violet-200 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Book verified tailors for custom outfits, alterations, bridal wear, uniforms and more.
+            Book verified creatives for custom outfits, alterations, bridal wear, uniforms and more.
             Fast. Reliable. Professional.
           </p>
 
@@ -91,13 +91,13 @@ export default function LandingPage() {
               href="/browse"
               className="gold-shimmer btn-press text-amber-950 font-black text-lg px-10 py-4 rounded-2xl shadow-xl shadow-amber-500/30 transition-transform hover:scale-105"
             >
-              Find a Tailor Now →
+              Find a Creative Now →
             </Link>
             <Link
               href="/signup?as=tailor"
               className="btn-press bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold text-lg px-10 py-4 rounded-2xl transition-all backdrop-blur-sm"
             >
-              Join as a Tailor
+              Join as a Creative
             </Link>
           </div>
 
@@ -147,7 +147,7 @@ export default function LandingPage() {
                   {SERVICE_ICONS[key]}
                 </div>
                 <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors text-base">{label}</h3>
-                <p className="text-xs text-gray-400 mt-1 group-hover:text-violet-400 transition-colors">Explore tailors →</p>
+                <p className="text-xs text-gray-400 mt-1 group-hover:text-violet-400 transition-colors">Explore creatives →</p>
               </Link>
             ))}
           </div>
@@ -216,10 +216,10 @@ export default function LandingPage() {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #92400E 1px, transparent 0)', backgroundSize: '24px 24px' }} />
         <TailoringBg />
         <div className="relative max-w-4xl mx-auto px-4 text-center">
-          <span className="text-xs font-bold tracking-widest text-amber-900/70 uppercase mb-4 block">For Tailors</span>
-          <h2 className="text-4xl font-black text-amber-950 mb-4">Are you a tailor?</h2>
+          <span className="text-xs font-bold tracking-widest text-amber-900/70 uppercase mb-4 block">For Creatives</span>
+          <h2 className="text-4xl font-black text-amber-950 mb-4">Are you a creative?</h2>
           <p className="text-amber-900 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of tailors already earning on TailorNow. Get verified, build your portfolio, and reach customers who are ready to order today.
+            Join thousands of creatives already earning on TailorNow. Get verified, build your portfolio, and reach customers who are ready to order today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/signup?as=tailor" className="btn-press bg-violet-700 hover:bg-violet-800 text-white font-black text-lg px-10 py-4 rounded-2xl transition-all shadow-lg shadow-violet-900/30 hover:scale-105">
@@ -239,15 +239,15 @@ export default function LandingPage() {
             <div className="md:col-span-2">
               <div className="mb-4"><Logo size="md" variant="full" dark /></div>
               <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
-                Nigeria&apos;s premier tailoring marketplace. Connecting skilled tailors with customers who deserve a perfect fit.
+                Nigeria&apos;s premier fashion marketplace. Connecting skilled creatives with customers who deserve a perfect fit.
               </p>
             </div>
             <div>
               <h4 className="text-white font-bold text-sm mb-4 tracking-wide">Platform</h4>
               <ul className="space-y-3 text-sm">
-                <li><Link href="/browse" className="hover:text-violet-400 transition-colors">Find Tailors</Link></li>
+                <li><Link href="/browse" className="hover:text-violet-400 transition-colors">Find Creatives</Link></li>
                 <li><Link href="/orders/asoebi" className="hover:text-violet-400 transition-colors">Asoebi Group Orders</Link></li>
-                <li><Link href="/signup?as=tailor" className="hover:text-violet-400 transition-colors">Join as Tailor</Link></li>
+                <li><Link href="/signup?as=tailor" className="hover:text-violet-400 transition-colors">Join as Creative</Link></li>
                 <li><Link href="/referral" className="hover:text-amber-400 transition-colors">Refer and Earn</Link></li>
                 <li><Link href="#how-it-works" className="hover:text-violet-400 transition-colors">How it works</Link></li>
               </ul>
