@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/navbar'
 import { BrowseClient } from './browse-client'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,6 +12,9 @@ export default async function BrowsePage({
 }) {
   const { service, city, q } = await searchParams
   const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   let query = supabase
     .from('tailor_profiles')
