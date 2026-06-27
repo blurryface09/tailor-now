@@ -1,13 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { StarRating } from '@/components/ui/star-rating'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, formatRelativeTime } from '@/lib/utils'
-import { MessageSquare, CheckCircle, AlertCircle, MapPin, Clock, AlertTriangle } from 'lucide-react'
+import { MessageSquare, CheckCircle, AlertCircle, Clock, AlertTriangle, Images } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Order, Rating } from '@/types'
 import Link from 'next/link'
@@ -23,9 +22,10 @@ const TRACKING_STEPS = [
   { status: 'completed', label: 'Completed', icon: '⭐' },
 ]
 
-export default function OrderDetailPage() {
+function OrderDetailContent() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
   const [order, setOrder] = useState<Order | null>(null)
   const [myRating, setMyRating] = useState<Rating | null>(null)
@@ -36,6 +36,10 @@ export default function OrderDetailPage() {
   const [confirmingDelivery, setConfirmingDelivery] = useState(false)
 
   useEffect(() => {
+    const payment = searchParams.get('payment')
+    if (payment === 'success') toast.success('Payment successful!')
+    else if (payment === 'failed') toast.error('Payment failed. Please try again.')
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id)
     })
@@ -59,7 +63,29 @@ export default function OrderDetailPage() {
   }
 
   const confirmDelivery = async () => {
+    if (!order) return
     setConfirmingDelivery(true)
+
+    // If there's a balance to pay, go through Paystack
+    if (order.balance_amount && order.balance_amount > 0 && !order.balance_paid) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { toast.error('Please log in'); setConfirmingDelivery(false); return }
+      const res = await fetch('/api/payments/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id, amount: order.balance_amount, email: user.email, type: 'balance' }),
+      })
+      const data = await res.json()
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url
+      } else {
+        toast.error(data.error || 'Could not initialize payment')
+        setConfirmingDelivery(false)
+      }
+      return
+    }
+
+    // No balance to pay — mark completed directly
     const { error } = await supabase.from('orders').update({ status: 'completed' }).eq('id', id)
     if (error) { toast.error(error.message); setConfirmingDelivery(false); return }
     toast.success('Delivery confirmed!')
@@ -138,6 +164,21 @@ export default function OrderDetailPage() {
               </div>
             )}
           </div>
+
+          {order.style_reference_urls?.length > 0 && (
+            <div className="mb-4">
+              <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1.5">
+                <Images size={13} /> Style references
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {order.style_reference_urls.map((url, i) => (
+                  <a key={i} href={url} target="_blank" rel="noreferrer">
+                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-gray-100 hover:opacity-90 transition-opacity" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-wrap gap-3">
             <Link href={`/chat?order=${id}&tailor=${order.tailor_id}`}
@@ -234,5 +275,17 @@ export default function OrderDetailPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function OrderDetailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
+      </div>
+    }>
+      <OrderDetailContent />
+    </Suspense>
   )
 }

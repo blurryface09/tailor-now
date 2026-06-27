@@ -5,10 +5,11 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { SERVICE_LABELS, formatCurrency } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import type { TailorProfile, TailorService, Measurements, Profile } from '@/types'
-import { MapPin, Upload, ChevronRight, Ruler } from 'lucide-react'
+import { MapPin, ChevronRight } from 'lucide-react'
 
 type Step = 'service' | 'details' | 'measurements' | 'payment' | 'confirm'
 
@@ -26,6 +27,7 @@ function NewOrderContent() {
   const [measurements, setMeasurements] = useState<Measurements | null>(null)
   const [selectedService, setSelectedService] = useState<TailorService | null>(null)
   const [customPrice, setCustomPrice] = useState('')
+  const [styleRefs, setStyleRefs] = useState<string[]>([])
   const [form, setForm] = useState({
     title: '', description: '', delivery_type: 'pickup_delivery',
     pickup_address: '', delivery_address: '', deadline: '', notes: '',
@@ -71,6 +73,7 @@ function NewOrderContent() {
       balance_amount: agreedPrice ? agreedPrice - deposit : null,
       deadline: form.deadline || null,
       notes: form.notes || null,
+      style_reference_urls: styleRefs,
       status: 'pending',
     }).select().single()
 
@@ -204,6 +207,16 @@ function NewOrderContent() {
                   value={form.delivery_address} onChange={e => setForm(f => ({ ...f, delivery_address: e.target.value }))} />
                 <Input label="Deadline (optional)" type="date" value={form.deadline}
                   onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
+
+                <ImageUpload
+                  bucket="order-refs"
+                  folder={`refs`}
+                  value={styleRefs}
+                  onChange={setStyleRefs}
+                  maxFiles={4}
+                  label="Style reference photos (optional)"
+                  hint="Upload inspiration photos — fabric patterns, style photos, magazine cuts, etc."
+                />
               </div>
               <div className="flex gap-3 mt-6">
                 <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('service')}>Back</Button>
@@ -327,6 +340,16 @@ function NewOrderContent() {
                     <span className="text-gray-900 font-medium">{row.value}</span>
                   </div>
                 ))}
+                {styleRefs.length > 0 && (
+                  <div className="pt-2">
+                    <p className="text-gray-500 mb-2">Style refs</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {styleRefs.map((url, i) => (
+                        <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-gray-100" />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 p-4 bg-violet-50 border border-violet-200 rounded-xl text-sm text-violet-800">
