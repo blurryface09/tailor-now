@@ -90,8 +90,8 @@ export function AdminOrdersClient({ orders, initialStatus }: { orders: OrderWith
           <p className="text-xs text-gray-500">Total value</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
-          <p className="text-lg font-bold text-violet-700">{formatCurrency(totalValue * 0.15)}</p>
-          <p className="text-xs text-gray-500">Platform commission (15%)</p>
+          <p className="text-lg font-bold text-violet-700">{formatCurrency(totalValue * 0.20)}</p>
+          <p className="text-xs text-gray-500">Platform commission (20%)</p>
         </div>
       </div>
 
