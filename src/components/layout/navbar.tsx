@@ -4,9 +4,25 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useState, useEffect } from 'react'
 import type { Profile } from '@/types'
-import { Bell, MessageSquare, User, LogOut, Scissors, LayoutDashboard, ChevronDown, Menu, X } from 'lucide-react'
+import {
+  Bell, MessageSquare, User, LogOut, Scissors, LayoutDashboard,
+  ChevronDown, Menu, X, Shield, Users, Package, Star, TrendingUp,
+  AlertTriangle, Store,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
+
+const ADMIN_LINKS = [
+  { href: '/admin',                 icon: <LayoutDashboard size={14} />, label: 'Dashboard' },
+  { href: '/admin/tailors',         icon: <Scissors size={14} />,        label: 'Tailors' },
+  { href: '/admin/users',           icon: <Users size={14} />,           label: 'Accounts' },
+  { href: '/admin/orders',          icon: <Package size={14} />,         label: 'Orders' },
+  { href: '/admin/reviews',         icon: <Star size={14} />,            label: 'Reviews' },
+  { href: '/admin/disputes',        icon: <AlertTriangle size={14} />,   label: 'Disputes' },
+  { href: '/admin/payouts',         icon: <TrendingUp size={14} />,      label: 'Payouts' },
+  { href: '/admin/marketplace',     icon: <Store size={14} />,           label: 'Marketplace' },
+  { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Tailor' },
+]
 
 export function Navbar() {
   const pathname = usePathname()
@@ -36,7 +52,7 @@ export function Navbar() {
     router.push('/')
   }
 
-  const isActive = (href: string) => pathname.startsWith(href)
+  const isActive = (href: string) => pathname === href || (href !== '/admin' && pathname.startsWith(href))
 
   return (
     <nav className={cn(
@@ -55,16 +71,17 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
-          {profile?.role !== 'tailor' && profile?.role !== 'admin' && (
+          {/* Customer nav */}
+          {profile?.role === 'customer' && (
             <Link href="/browse" className={cn(
               'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
-              isActive('/browse')
-                ? 'bg-violet-100 text-violet-700'
-                : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              isActive('/browse') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
             )}>
               Find Tailors
             </Link>
           )}
+
+          {/* Tailor nav */}
           {profile?.role === 'tailor' && (
             <>
               <Link href="/dashboard" className={cn(
@@ -87,46 +104,85 @@ export function Navbar() {
               </Link>
             </>
           )}
+
+          {/* Admin nav — dropdown */}
           {profile?.role === 'admin' && (
-            <Link href="/admin" className={cn(
-              'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
-              isActive('/admin') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
-            )}>
-              Admin Panel
-            </Link>
+            <div className="relative group">
+              <button className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
+                pathname.startsWith('/admin')
+                  ? 'bg-violet-700 text-white'
+                  : 'bg-violet-50 text-violet-700 hover:bg-violet-100'
+              )}>
+                <Shield size={15} /> Admin
+                <ChevronDown size={13} className="transition-transform duration-200 group-hover:rotate-180" />
+              </button>
+              <div className="absolute left-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-50">
+                <p className="px-4 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Admin Panel</p>
+                {ADMIN_LINKS.map(link => (
+                  <Link key={link.href} href={link.href}
+                    className={cn(
+                      'flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors',
+                      isActive(link.href)
+                        ? 'bg-violet-50 text-violet-700 font-semibold'
+                        : 'text-gray-700 hover:bg-violet-50 hover:text-violet-700'
+                    )}>
+                    {link.icon} {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
         <div className="flex items-center gap-2">
           {profile ? (
             <>
-              <Link href={profile.role === 'tailor' ? '/tailor/chat' : '/chat'}
-                className="relative p-2 text-gray-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all duration-200 hover:scale-110">
-                <MessageSquare size={20} />
-              </Link>
-              <Link href="/notifications"
-                className="relative p-2 text-gray-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all duration-200 hover:scale-110">
-                <Bell size={20} />
-              </Link>
+              {profile.role !== 'admin' && (
+                <Link href={profile.role === 'tailor' ? '/tailor/chat' : '/chat'}
+                  className="relative p-2 text-gray-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all duration-200 hover:scale-110">
+                  <MessageSquare size={20} />
+                </Link>
+              )}
+              {profile.role !== 'admin' && (
+                <Link href="/notifications"
+                  className="relative p-2 text-gray-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all duration-200 hover:scale-110">
+                  <Bell size={20} />
+                </Link>
+              )}
               <div className="relative group">
                 <button className="flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-xl hover:bg-violet-50 transition-all duration-200 border border-transparent hover:border-violet-100">
-                  <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-700 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                    {profile.full_name?.[0]?.toUpperCase() || 'U'}
+                  <div className={cn(
+                    'w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm',
+                    profile.role === 'admin'
+                      ? 'bg-gradient-to-br from-violet-700 to-violet-900'
+                      : 'bg-gradient-to-br from-violet-500 to-violet-700'
+                  )}>
+                    {profile.role === 'admin' ? <Shield size={14} /> : (profile.full_name?.[0]?.toUpperCase() || 'U')}
                   </div>
                   <span className="hidden md:block text-sm font-medium text-gray-700">{profile.full_name?.split(' ')[0]}</span>
                   <ChevronDown size={14} className="hidden md:block text-gray-400 transition-transform duration-200 group-hover:rotate-180" />
                 </button>
-                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+                <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-50">
                   <div className="px-4 py-2 border-b border-gray-50 mb-1">
                     <p className="text-sm font-semibold text-gray-900">{profile.full_name}</p>
-                    <p className="text-xs text-gray-400 capitalize">{profile.role}</p>
+                    <p className={cn('text-xs font-medium capitalize', profile.role === 'admin' ? 'text-violet-600' : 'text-gray-400')}>
+                      {profile.role === 'admin' && '⚡ '}{profile.role}
+                    </p>
                   </div>
-                  <Link href={profile.role === 'tailor' ? '/tailor/profile' : '/profile'} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors">
-                    <User size={15} /> My Profile
-                  </Link>
+                  {profile.role !== 'admin' && (
+                    <Link href={profile.role === 'tailor' ? '/tailor/profile' : '/profile'} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                      <User size={15} /> My Profile
+                    </Link>
+                  )}
                   {profile.role === 'customer' && (
                     <Link href="/orders" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors">
                       <Scissors size={15} /> My Orders
+                    </Link>
+                  )}
+                  {profile.role === 'admin' && (
+                    <Link href="/admin" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                      <Shield size={15} /> Admin Dashboard
                     </Link>
                   )}
                   <div className="border-t border-gray-50 mt-1 pt-1">
@@ -156,15 +212,17 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile menu — slide down */}
+      {/* Mobile menu */}
       <div className={cn(
         'md:hidden overflow-hidden transition-all duration-300',
-        menuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
+        menuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
       )}>
         <div className="bg-white border-t border-gray-100 px-4 py-3 space-y-1">
-          <Link href="/browse" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
-            Find Tailors
-          </Link>
+          {profile?.role === 'customer' && (
+            <Link href="/browse" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+              Find Tailors
+            </Link>
+          )}
           {profile?.role === 'tailor' && (
             <>
               <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
@@ -173,6 +231,18 @@ export function Navbar() {
               <Link href="/tailor/orders" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
                 Orders
               </Link>
+            </>
+          )}
+          {profile?.role === 'admin' && (
+            <>
+              <p className="px-4 pt-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Admin</p>
+              {ADMIN_LINKS.map(link => (
+                <Link key={link.href} href={link.href}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}>
+                  {link.icon} {link.label}
+                </Link>
+              ))}
             </>
           )}
           {!profile && (
