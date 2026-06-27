@@ -121,7 +121,7 @@ export default function AdminPayoutsPage() {
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
             <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Platform Commission</p>
             <p className="text-2xl font-black text-violet-600 mt-1">₦{totalCommission.toLocaleString()}</p>
-            <p className="text-xs text-gray-400 mt-0.5">10% on all completed orders</p>
+            <p className="text-xs text-gray-400 mt-0.5">15% on all completed orders</p>
           </div>
         </div>
 

@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
         tailor_id: order.tailor_id,
         order_id: orderId,
         gross_amount: gross,
-        commission_rate: 0.10,
+        commission_rate: 0.15,
         commission_amount: commission,
         net_amount: net,
         status: 'pending',
