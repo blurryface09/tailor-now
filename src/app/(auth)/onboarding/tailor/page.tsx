@@ -17,6 +17,14 @@ const SERVICE_ICONS: Record<string, string> = {
 
 const STEPS = ['Business Info', 'Services', 'How You Work']
 
+const NIGERIAN_STATES = [
+  'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
+  'Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT (Abuja)','Gombe',
+  'Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos',
+  'Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto',
+  'Taraba','Yobe','Zamfara',
+]
+
 export default function TailorOnboarding() {
   const router = useRouter()
   const supabase = createClient()
@@ -31,7 +39,7 @@ export default function TailorOnboarding() {
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
   const canNext = () => {
-    if (step === 0) return form.business_name.trim().length >= 2 && form.city.trim() && form.state.trim()
+    if (step === 0) return form.business_name.trim().length >= 2 && form.city.trim() && form.state.trim() && form.bio.trim().length >= 20
     if (step === 1) return form.specialties.length > 0
     if (step === 2) return form.delivery_types.length > 0
     return false
@@ -105,19 +113,33 @@ export default function TailorOnboarding() {
               <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style" value={form.business_name}
                 onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))} />
               <div className="grid grid-cols-2 gap-3">
-                <Input label="City *" placeholder="Lagos" value={form.city}
+                <Input label="City *" placeholder="e.g. Ikeja" value={form.city}
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
-                <Input label="State *" placeholder="Lagos State" value={form.state}
-                  onChange={e => setForm(f => ({ ...f, state: e.target.value }))} />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">State *</label>
+                  <select
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    value={form.state}
+                    onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
+                  >
+                    <option value="">— Select state —</option>
+                    {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
               </div>
               <Input label="Shop address (optional)" placeholder="Shop number / street" value={form.address}
                 onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">About your business (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  About your business * <span className="font-normal text-gray-400 text-xs">(min 20 characters)</span>
+                </label>
                 <textarea
                   className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                  rows={3} placeholder="Tell customers about your experience, style, and what makes you special..."
+                  rows={4} placeholder="Tell customers about your experience, style, specialties, and what makes you stand out..."
                   value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
+                <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
+                  {form.bio.trim().length}/20 minimum characters
+                </p>
               </div>
             </div>
           )}

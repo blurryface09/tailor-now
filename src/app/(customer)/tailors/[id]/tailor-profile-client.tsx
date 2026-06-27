@@ -23,10 +23,10 @@ const SERVICE_ICONS: Record<string, string> = {
 }
 
 export function TailorProfileClient({ tailor, services, portfolio, ratings }: Props) {
-  const [tab, setTab] = useState<'portfolio' | 'services' | 'reviews'>('portfolio')
+  const [tab, setTab] = useState<'about' | 'portfolio' | 'services' | 'reviews'>('about')
   const [tabKey, setTabKey] = useState(0)
 
-  function switchTab(t: 'portfolio' | 'services' | 'reviews') {
+  function switchTab(t: 'about' | 'portfolio' | 'services' | 'reviews') {
     setTab(t)
     setTabKey(k => k + 1)
   }
@@ -99,28 +99,82 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings }: Pr
             )}
           </div>
 
-          {tailor.bio && <p className="text-sm text-gray-600 mt-4 leading-relaxed">{tailor.bio}</p>}
-
-          {/* Specialty chips */}
+          {/* Specialty chips — compact preview */}
           <div className="flex flex-wrap gap-2 mt-4">
-            {(tailor.specialties || []).map(s => (
+            {(tailor.specialties || []).slice(0, 4).map(s => (
               <span key={s} className="flex items-center gap-1.5 text-xs bg-violet-50 text-violet-700 px-3 py-1.5 rounded-full font-medium">
                 {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
               </span>
             ))}
+            {(tailor.specialties || []).length > 4 && (
+              <button onClick={() => switchTab('about')} className="text-xs text-violet-600 hover:underline px-2">
+                +{tailor.specialties.length - 4} more
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-white rounded-xl border border-gray-100 p-1 mb-6">
-        {(['portfolio', 'services', 'reviews'] as const).map(t => (
+        {(['about', 'portfolio', 'services', 'reviews'] as const).map(t => (
           <button key={t} onClick={() => switchTab(t)}
             className={cn('flex-1 py-2.5 text-sm font-medium rounded-lg capitalize transition-all duration-200', tab === t ? 'bg-violet-700 text-white shadow-sm scale-[1.02]' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50')}>
-            {t === 'portfolio' ? `Portfolio (${portfolio.length})` : t === 'services' ? `Services (${services.length})` : `Reviews (${ratings.length})`}
+            {t === 'about' ? 'About' : t === 'portfolio' ? `Portfolio (${portfolio.length})` : t === 'services' ? `Services (${services.length})` : `Reviews (${ratings.length})`}
           </button>
         ))}
       </div>
+
+      {/* About tab */}
+      {tab === 'about' && (
+        <div key={tabKey} className="tab-enter space-y-4">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 className="font-bold text-gray-900 mb-3">About</h2>
+            {tailor.bio ? (
+              <p className="text-gray-600 leading-relaxed">{tailor.bio}</p>
+            ) : (
+              <p className="text-gray-400 italic">No bio added yet.</p>
+            )}
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 className="font-bold text-gray-900 mb-4">Details</h2>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-3">
+                <MapPin size={16} className="text-violet-500 flex-shrink-0" />
+                <span className="text-gray-700">{tailor.city}, {tailor.state}</span>
+              </div>
+              {tailor.delivery_types?.includes('pickup_delivery') && (
+                <div className="flex items-center gap-3">
+                  <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+                  <span className="text-gray-700">Offers Pickup &amp; Delivery</span>
+                </div>
+              )}
+              {tailor.delivery_types?.includes('visit_shop') && (
+                <div className="flex items-center gap-3">
+                  <Scissors size={16} className="text-violet-500 flex-shrink-0" />
+                  <span className="text-gray-700">Customers can visit the shop</span>
+                </div>
+              )}
+              {tailor.response_time_hours && (
+                <div className="flex items-center gap-3">
+                  <Clock size={16} className="text-amber-500 flex-shrink-0" />
+                  <span className="text-gray-700">Typically replies within {tailor.response_time_hours}h</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 className="font-bold text-gray-900 mb-4">Specialties</h2>
+            <div className="flex flex-wrap gap-2">
+              {(tailor.specialties || []).map(s => (
+                <span key={s} className="flex items-center gap-1.5 text-sm bg-violet-50 text-violet-700 px-3 py-2 rounded-xl font-medium">
+                  {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Portfolio tab */}
       {tab === 'portfolio' && (
