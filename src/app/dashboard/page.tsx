@@ -3,7 +3,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } from '@/lib/utils'
-import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image } from 'lucide-react'
+import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image, UserCog } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,12 +84,25 @@ export default async function TailorDashboard() {
           </div>
         )}
 
+        {/* Bio missing nudge */}
+        {!tailor.bio && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-800">
+              <UserCog size={18} />
+              <span className="font-medium">Add a bio to your profile so customers know who you are</span>
+            </div>
+            <Link href="/tailor/profile" className="bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors">
+              Edit Profile
+            </Link>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
             { href: '/tailor/orders', icon: <Package size={22} />, label: 'Manage Orders' },
             { href: '/tailor/portfolio', icon: <Image size={22} />, label: 'Portfolio' },
             { href: '/tailor/pricing', icon: <Scissors size={22} />, label: 'Services & Pricing' },
-            { href: '/tailor/chat', icon: <MessageSquare size={22} />, label: 'Messages' },
+            { href: '/tailor/profile', icon: <UserCog size={22} />, label: 'Edit Profile' },
           ].map(a => (
             <Link key={a.href} href={a.href} className="group bg-white rounded-2xl border border-gray-100 hover:border-violet-200 hover:shadow-sm p-5 flex flex-col items-center gap-3 transition-all text-center">
               <div className="w-12 h-12 bg-violet-50 group-hover:bg-violet-100 rounded-xl flex items-center justify-center text-violet-700 transition-colors">{a.icon}</div>
