@@ -32,9 +32,9 @@ export default async function CustomerOrdersPage() {
           <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
             <div className="text-5xl mb-3">✂️</div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-            <p className="text-gray-500 mb-6">Browse tailors and place your first order</p>
+            <p className="text-gray-500 mb-6">Browse creatives and place your first order</p>
             <Link href="/browse" className="bg-violet-700 text-white px-6 py-3 rounded-xl font-medium hover:bg-violet-800 transition-colors">
-              Find a Tailor
+              Find a Creative
             </Link>
           </div>
         ) : (
