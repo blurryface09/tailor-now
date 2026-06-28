@@ -267,6 +267,33 @@ export function Navbar() {
               ))}
             </>
           )}
+          {profile && (
+            <>
+              <div className="border-t border-gray-100 mt-2 pt-2">
+                <div className="px-4 py-2">
+                  <p className="text-sm font-semibold text-gray-900">{profile.full_name}</p>
+                  <p className="text-xs text-gray-400 capitalize">{profile.role === 'tailor' ? 'Creative' : profile.role}</p>
+                </div>
+                <Link href={profile.role === 'tailor' ? '/tailor/profile' : '/profile'}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors"
+                  onClick={() => setMenuOpen(false)}>
+                  <User size={15} /> My Profile
+                </Link>
+                {profile.role === 'customer' && (
+                  <Link href="/orders"
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors"
+                    onClick={() => setMenuOpen(false)}>
+                    <Scissors size={15} /> My Orders
+                  </Link>
+                )}
+                <button
+                  onClick={() => { setMenuOpen(false); handleLogout() }}
+                  className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors">
+                  <LogOut size={15} /> Sign out
+                </button>
+              </div>
+            </>
+          )}
           {!profile && (
             <Link href="/signup" className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-700 text-center mt-2" onClick={() => setMenuOpen(false)}>
               Get Started

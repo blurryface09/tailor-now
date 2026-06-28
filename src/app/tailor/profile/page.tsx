@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { SERVICE_LABELS } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { CheckCircle, ArrowLeft } from 'lucide-react'
+import { CheckCircle, ArrowLeft, Navigation } from 'lucide-react'
 
 const SERVICE_ICONS: Record<string, string> = {
   custom_outfit: '👗', alterations: '✂️', bridal: '💍',
@@ -63,6 +63,37 @@ export default function EditCreativeProfile() {
 
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
+
+  const [detecting, setDetecting] = useState(false)
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) { toast.error('Location not supported'); return }
+    setDetecting(true)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          )
+          const data = await res.json()
+          const city = data.address?.city || data.address?.town || data.address?.county || ''
+          const rawState = data.address?.state || ''
+          // Match to Nigerian state list
+          const matchedState = NIGERIAN_STATES.find(s => rawState.toLowerCase().includes(s.toLowerCase())) || ''
+          if (city || matchedState) {
+            setForm(f => ({ ...f, city: city || f.city, state: matchedState || f.state }))
+            toast.success(`Location detected: ${city}${matchedState ? `, ${matchedState}` : ''}`)
+          } else {
+            toast.error('Could not determine location. Fill it in manually.')
+          }
+        } catch { toast.error('Location lookup failed') }
+        setDetecting(false)
+      },
+      () => { toast.error('Location permission denied'); setDetecting(false) },
+      { timeout: 10000 }
+    )
+  }
 
   const canSave =
     form.business_name.trim().length >= 2 &&
@@ -120,8 +151,18 @@ export default function EditCreativeProfile() {
             <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style"
               value={form.business_name} onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))} />
             <div className="grid grid-cols-2 gap-3">
-              <Input label="City *" placeholder="e.g. Ikeja"
-                value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-medium text-gray-700">City *</label>
+                  <button type="button" onClick={detectLocation} disabled={detecting}
+                    className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 disabled:opacity-50">
+                    <Navigation size={11} className={detecting ? 'animate-spin' : ''} />
+                    {detecting ? 'Detecting…' : 'Detect'}
+                  </button>
+                </div>
+                <Input placeholder="e.g. Ikeja"
+                  value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">State *</label>
                 <select

@@ -2,9 +2,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap } from 'lucide-react'
+import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap, Navigation } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { SERVICE_LABELS, formatCurrency, cn } from '@/lib/utils'
+import { SERVICE_LABELS, cn } from '@/lib/utils'
 import type { TailorProfile, Profile } from '@/types'
 
 type TailorWithProfile = TailorProfile & { profile: Profile }
@@ -47,6 +47,7 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
   const [search, setSearch] = useState('')
   const [selectedService, setSelectedService] = useState(initialService || '')
   const [selectedCity, setSelectedCity] = useState(initialCity || '')
+  const [locating, setLocating] = useState(false)
   const displayTailors = tailors.length > 0 ? tailors : DEMO_TAILORS
   const isDemo = tailors.length === 0
 
@@ -55,6 +56,50 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
     if (selectedService) params.set('service', selectedService)
     if (selectedCity) params.set('city', selectedCity)
     router.push(`/browse?${params.toString()}`)
+  }
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Location not supported on this device')
+      return
+    }
+    setLocating(true)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          )
+          const data = await res.json()
+          const city = data.address?.city || data.address?.town || data.address?.county || ''
+          const state = data.address?.state || ''
+          if (city) {
+            setSelectedCity(city)
+            toast.success(`Location detected: ${city}${state ? `, ${state}` : ''}`)
+            const params = new URLSearchParams()
+            if (selectedService) params.set('service', selectedService)
+            params.set('city', city)
+            router.push(`/browse?${params.toString()}`)
+          } else {
+            toast.error('Could not determine your city. Try typing it manually.')
+          }
+        } catch {
+          toast.error('Could not get location details. Try typing your city.')
+        }
+        setLocating(false)
+      },
+      (err) => {
+        setLocating(false)
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error('Location permission denied. Type your city instead.')
+        } else {
+          toast.error('Could not get your location. Try typing it manually.')
+        }
+      },
+      { timeout: 10000, maximumAge: 300000 }
+    )
   }
 
   const filtered = displayTailors.filter(t =>
@@ -77,20 +122,30 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <div className="relative">
+          <div className="relative flex-1 md:flex-none">
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               className="pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-44"
-              placeholder="City"
+              placeholder="City or state"
               value={selectedCity}
               onChange={e => setSelectedCity(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleFilter()}
             />
           </div>
           <button
-            onClick={handleFilter}
-            className="flex items-center justify-center gap-2 bg-violet-700 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-violet-800 transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] shadow-sm shadow-violet-300"
+            onClick={detectLocation}
+            disabled={locating}
+            title="Detect my location"
+            className="flex items-center justify-center gap-1.5 border border-violet-200 bg-violet-50 text-violet-700 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-violet-100 transition-all duration-200 disabled:opacity-60 flex-shrink-0"
           >
-            <Filter size={16} /> Filter
+            <Navigation size={15} className={locating ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">{locating ? 'Finding...' : 'Near me'}</span>
+          </button>
+          <button
+            onClick={handleFilter}
+            className="flex items-center justify-center gap-2 bg-violet-700 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-violet-800 transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] shadow-sm shadow-violet-300 flex-shrink-0"
+          >
+            <Filter size={16} /> Search
           </button>
         </div>
 
