@@ -87,7 +87,7 @@ export default function EditCreativeProfile() {
     setSaving(false)
     if (error) { toast.error(error.message); return }
     toast.success('Profile updated!')
-    router.push('/dashboard')
+    router.push(`/tailors/${tailorId}`)
   }
 
   if (loading) return (
@@ -104,7 +104,7 @@ export default function EditCreativeProfile() {
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard" className="p-2 rounded-xl hover:bg-gray-200 transition-colors text-gray-500">
+          <Link href={tailorId ? `/tailors/${tailorId}` : '/dashboard'} className="p-2 rounded-xl hover:bg-gray-200 transition-colors text-gray-500">
             <ArrowLeft size={18} />
           </Link>
           <div>

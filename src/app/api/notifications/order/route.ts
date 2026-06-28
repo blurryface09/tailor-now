@@ -34,10 +34,10 @@ export async function POST(req: NextRequest) {
           { id: order.id, title: order.title, tailor_name: tailorProfile?.business_name }
         )
         break
-      case 'deposit_paid':
+      case 'payment_received':
         await WhatsApp.depositPaid(
           { phone: tailorUser?.phone },
-          { id: order.id, title: order.title, deposit: order.deposit_amount || 0 }
+          { id: order.id, title: order.title, deposit: order.agreed_price || 0 }
         )
         break
       case 'status_update':
