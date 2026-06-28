@@ -8,10 +8,9 @@ import { Button } from '@/components/ui/button'
 import type { Order } from '@/types'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { CheckCircle, XCircle, ChevronRight } from 'lucide-react'
+import { CheckCircle, XCircle, ChevronRight, Send } from 'lucide-react'
 
 const STATUS_ACTIONS: Record<string, { next: string; label: string }> = {
-  pending: { next: 'accepted', label: 'Accept Order' },
   accepted: { next: 'measuring', label: 'Start Measuring' },
   measuring: { next: 'in_progress', label: 'Begin Sewing' },
   in_progress: { next: 'ready', label: 'Mark as Ready' },
@@ -19,11 +18,16 @@ const STATUS_ACTIONS: Record<string, { next: string; label: string }> = {
   out_for_delivery: { next: 'delivered', label: 'Mark Delivered' },
 }
 
+interface QuoteModal { orderId: string; currentBudget: number | null }
+
 export default function TailorOrdersPage() {
   const supabase = createClient()
   const [orders, setOrders] = useState<Order[]>([])
   const [filter, setFilter] = useState<string>('active')
   const [updating, setUpdating] = useState<string | null>(null)
+  const [quoteModal, setQuoteModal] = useState<QuoteModal | null>(null)
+  const [quotePrice, setQuotePrice] = useState('')
+  const [sendingQuote, setSendingQuote] = useState(false)
 
   useEffect(() => {
     loadOrders()
@@ -46,6 +50,50 @@ export default function TailorOrdersPage() {
     setOrders(data || [])
   }
 
+  const openQuoteModal = (order: Order) => {
+    setQuoteModal({ orderId: order.id, currentBudget: order.agreed_price || null })
+    setQuotePrice(order.agreed_price ? String(order.agreed_price) : '')
+  }
+
+  const sendQuote = async () => {
+    if (!quoteModal) return
+    const price = Number(quotePrice)
+    if (!price || price <= 0) { toast.error('Enter a valid price'); return }
+    setSendingQuote(true)
+    const { error } = await supabase.from('orders').update({
+      agreed_price: price,
+      status: 'accepted',
+      updated_at: new Date().toISOString(),
+    }).eq('id', quoteModal.orderId)
+    if (error) { toast.error(error.message); setSendingQuote(false); return }
+    fetch('/api/notifications/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: quoteModal.orderId, event: 'order_accepted' }),
+    }).catch(() => {})
+    toast.success('Quote sent! Customer can now pay.')
+    setSendingQuote(false)
+    setQuoteModal(null)
+    setQuotePrice('')
+    loadOrders()
+  }
+
+  const updateQuote = async (orderId: string) => {
+    const price = Number(quotePrice)
+    if (!price || price <= 0) { toast.error('Enter a valid price'); return }
+    setSendingQuote(true)
+    const { error } = await supabase.from('orders').update({
+      agreed_price: price,
+      updated_at: new Date().toISOString(),
+    }).eq('id', orderId)
+    if (error) { toast.error(error.message); setSendingQuote(false); return }
+    toast.success('Price updated!')
+    setSendingQuote(false)
+    setQuoteModal(null)
+    setQuotePrice('')
+    loadOrders()
+  }
+
   const updateStatus = async (orderId: string, newStatus: string) => {
     setUpdating(orderId)
     const { error } = await supabase.from('orders').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', orderId)
@@ -53,12 +101,10 @@ export default function TailorOrdersPage() {
       toast.error(error.message)
     } else {
       toast.success(`Order marked as ${ORDER_STATUS_LABELS[newStatus]}!`)
-      // Fire WhatsApp notification (non-blocking)
-      const event = newStatus === 'accepted' ? 'order_accepted' : 'status_update'
       fetch('/api/notifications/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId, event }),
+        body: JSON.stringify({ orderId, event: 'status_update' }),
       }).catch(() => {})
       loadOrders()
     }
@@ -96,16 +142,18 @@ export default function TailorOrdersPage() {
           <div className="space-y-4">
             {orders.map(order => {
               const action = STATUS_ACTIONS[order.status]
+              const isPending = order.status === 'pending'
+              const hasPrice = !!order.agreed_price
               return (
                 <div key={order.id} className="bg-white rounded-2xl border border-gray-100 p-5">
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold">
-                        {order.customer?.full_name?.[0]?.toUpperCase() || 'C'}
+                        {(order as Order & { customer?: { full_name: string } }).customer?.full_name?.[0]?.toUpperCase() || 'C'}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">{order.title}</p>
-                        <p className="text-sm text-gray-500">{order.customer?.full_name} • {formatDate(order.created_at)}</p>
+                        <p className="text-sm text-gray-500">{(order as Order & { customer?: { full_name: string } }).customer?.full_name} • {formatDate(order.created_at)}</p>
                       </div>
                     </div>
                     <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
@@ -116,8 +164,10 @@ export default function TailorOrdersPage() {
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">{order.description}</p>
 
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
-                    {order.agreed_price && (
-                      <span className="font-semibold text-violet-700">{formatCurrency(order.agreed_price)}</span>
+                    {hasPrice ? (
+                      <span className="font-semibold text-violet-700">{formatCurrency(order.agreed_price!)}</span>
+                    ) : (
+                      <span className="text-amber-600 font-medium text-xs bg-amber-50 px-2 py-0.5 rounded-full">No price set</span>
                     )}
                     <span>• {order.delivery_type === 'pickup_delivery' ? '🚚 Pickup & Delivery' : '🏪 Visit Shop'}</span>
                     {order.deadline && <span>• Deadline: {formatDate(order.deadline)}</span>}
@@ -132,12 +182,35 @@ export default function TailorOrdersPage() {
                       className="text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
                       💬 Chat
                     </Link>
-                    {action && (
+
+                    {/* Pending: Send quote (accepts + sets price) */}
+                    {isPending && (
+                      <Button size="sm" onClick={() => openQuoteModal(order)}>
+                        <Send size={14} /> Send Quote
+                      </Button>
+                    )}
+
+                    {/* Accepted but customer hasn't paid yet: allow resending quote */}
+                    {order.status === 'accepted' && !order.deposit_paid && (
+                      <button onClick={() => openQuoteModal(order)}
+                        className="flex items-center gap-1.5 text-sm text-amber-700 border border-amber-200 bg-amber-50 px-4 py-2 rounded-xl hover:bg-amber-100 transition-colors">
+                        <Send size={14} /> Resend Quote
+                      </button>
+                    )}
+
+                    {/* Other status actions (once paid) */}
+                    {action && order.status !== 'accepted' && (
                       <Button size="sm" onClick={() => updateStatus(order.id, action.next)} loading={updating === order.id}>
                         <CheckCircle size={14} /> {action.label}
                       </Button>
                     )}
-                    {order.status === 'pending' && (
+                    {action && order.status === 'accepted' && order.deposit_paid && (
+                      <Button size="sm" onClick={() => updateStatus(order.id, action.next)} loading={updating === order.id}>
+                        <CheckCircle size={14} /> {action.label}
+                      </Button>
+                    )}
+
+                    {isPending && (
                       <button onClick={() => rejectOrder(order.id)}
                         className="flex items-center gap-1.5 text-sm text-red-600 border border-red-200 px-4 py-2 rounded-xl hover:bg-red-50 transition-colors">
                         <XCircle size={14} /> Reject
@@ -150,6 +223,46 @@ export default function TailorOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Quote modal */}
+      {quoteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setQuoteModal(null)}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="font-bold text-gray-900 text-lg mb-1">Set your price</h2>
+            <p className="text-sm text-gray-500 mb-5">
+              {quoteModal.currentBudget
+                ? `Customer's budget: ${formatCurrency(quoteModal.currentBudget)}`
+                : 'No budget specified by customer'}
+            </p>
+            <div className="relative mb-5">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₦</span>
+              <input
+                type="number"
+                min="0"
+                placeholder="e.g. 45000"
+                className="w-full pl-8 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-violet-500 focus:outline-none text-lg font-semibold"
+                value={quotePrice}
+                onChange={e => setQuotePrice(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setQuoteModal(null)}
+                className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <Button className="flex-1" loading={sendingQuote}
+                onClick={() => orders.find(o => o.id === quoteModal.orderId)?.status === 'pending'
+                  ? sendQuote()
+                  : updateQuote(quoteModal.orderId)
+                }>
+                <Send size={14} />
+                {orders.find(o => o.id === quoteModal.orderId)?.status === 'pending' ? 'Send Quote' : 'Update Price'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
