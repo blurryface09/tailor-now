@@ -12,6 +12,8 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
   const { data: orderIds } = await supabase.from('orders').select('id').eq('tailor_id', id)
   const ids = (orderIds || []).map(o => o.id)
 
+  const { data: { user } } = await supabase.auth.getUser()
+
   const [{ data: tailor }, { data: services }, { data: portfolio }, { data: ratings }] = await Promise.all([
     supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('id', id).single(),
     supabase.from('tailor_services').select('*').eq('tailor_id', id).eq('is_active', true),
@@ -27,6 +29,8 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
 
   if (!tailor) notFound()
 
+  const isOwner = user?.id === tailor.user_id
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -35,6 +39,7 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
         services={services || []}
         portfolio={portfolio || []}
         ratings={ratings || []}
+        isOwner={isOwner}
       />
     </div>
   )

@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { MapPin, Star, CheckCircle, Clock, Scissors, MessageSquare, Calendar, ShoppingBag } from 'lucide-react'
+import { MapPin, Star, CheckCircle, Clock, Scissors, MessageSquare, ShoppingBag, Pencil } from 'lucide-react'
 import { SERVICE_LABELS, formatCurrency, formatDate, cn } from '@/lib/utils'
 import { StarRating } from '@/components/ui/star-rating'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,7 @@ interface Props {
   services: TailorService[]
   portfolio: PortfolioItem[]
   ratings: RatingWithReviewer[]
+  isOwner?: boolean
 }
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -22,7 +23,7 @@ const SERVICE_ICONS: Record<string, string> = {
   ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
 }
 
-export function TailorProfileClient({ tailor, services, portfolio, ratings }: Props) {
+export function TailorProfileClient({ tailor, services, portfolio, ratings, isOwner }: Props) {
   const [tab, setTab] = useState<'about' | 'portfolio' | 'services' | 'reviews'>('about')
   const [tabKey, setTabKey] = useState(0)
 
@@ -53,14 +54,23 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings }: Pr
               <p className="text-gray-500 text-sm mt-0.5">{tailor.profile?.full_name}</p>
             </div>
             <div className="flex gap-3">
-              <Link href={`/chat?tailor=${tailor.id}`}
-                className="flex items-center gap-2 px-4 py-2.5 border-2 border-violet-700 text-violet-700 rounded-xl text-sm font-medium hover:bg-violet-50 transition-colors">
-                <MessageSquare size={16} /> Message
-              </Link>
-              <Link href={`/orders/new?tailor=${tailor.id}`}
-                className="flex items-center gap-2 px-4 py-2.5 bg-violet-700 text-white rounded-xl text-sm font-medium hover:bg-violet-800 transition-colors">
-                <ShoppingBag size={16} /> Book Now
-              </Link>
+              {isOwner ? (
+                <Link href="/tailor/profile"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-violet-700 text-white rounded-xl text-sm font-medium hover:bg-violet-800 transition-colors">
+                  <Pencil size={16} /> Edit Profile
+                </Link>
+              ) : (
+                <>
+                  <Link href={`/chat?tailor=${tailor.id}`}
+                    className="flex items-center gap-2 px-4 py-2.5 border-2 border-violet-700 text-violet-700 rounded-xl text-sm font-medium hover:bg-violet-50 transition-colors">
+                    <MessageSquare size={16} /> Message
+                  </Link>
+                  <Link href={`/orders/new?tailor=${tailor.id}`}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-violet-700 text-white rounded-xl text-sm font-medium hover:bg-violet-800 transition-colors">
+                    <ShoppingBag size={16} /> Book Now
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -129,11 +139,27 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings }: Pr
       {tab === 'about' && (
         <div key={tabKey} className="tab-enter space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-3">About</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-gray-900">About</h2>
+              {isOwner && (
+                <Link href="/tailor/profile" className="text-xs text-violet-600 hover:underline flex items-center gap-1">
+                  <Pencil size={11} /> Edit
+                </Link>
+              )}
+            </div>
             {tailor.bio ? (
               <p className="text-gray-600 leading-relaxed">{tailor.bio}</p>
+            ) : isOwner ? (
+              <Link href="/tailor/profile"
+                className="flex items-center gap-3 p-4 bg-amber-50 border border-dashed border-amber-300 rounded-xl hover:bg-amber-100 transition-colors group">
+                <span className="text-2xl">✍️</span>
+                <div>
+                  <p className="text-sm font-semibold text-amber-900">Add a bio</p>
+                  <p className="text-xs text-amber-700 mt-0.5">Tell customers about your experience and style →</p>
+                </div>
+              </Link>
             ) : (
-              <p className="text-gray-400 italic">No bio added yet.</p>
+              <p className="text-gray-400 text-sm">This creative hasn&apos;t added a bio yet.</p>
             )}
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -181,7 +207,12 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings }: Pr
         portfolio.length === 0 ? (
           <div key={tabKey} className="tab-enter text-center py-16 bg-white rounded-2xl border border-gray-100">
             <div className="text-5xl mb-3">📸</div>
-            <p className="text-gray-500">No portfolio items yet</p>
+            <p className="text-gray-500 mb-3">No portfolio items yet</p>
+            {isOwner && (
+              <Link href="/tailor/portfolio" className="inline-flex items-center gap-2 bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-violet-800 transition-colors">
+                + Add portfolio photos
+              </Link>
+            )}
           </div>
         ) : (
           <div key={tabKey} className="tab-enter grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -213,7 +244,13 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings }: Pr
       {tab === 'services' && (
         services.length === 0 ? (
           <div key={tabKey} className="tab-enter text-center py-16 bg-white rounded-2xl border border-gray-100">
-            <p className="text-gray-500">No services listed yet</p>
+            <div className="text-5xl mb-3">💼</div>
+            <p className="text-gray-500 mb-3">No services listed yet</p>
+            {isOwner && (
+              <Link href="/tailor/pricing" className="inline-flex items-center gap-2 bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-violet-800 transition-colors">
+                + Add services & pricing
+              </Link>
+            )}
           </div>
         ) : (
           <div key={tabKey} className="tab-enter space-y-4">
