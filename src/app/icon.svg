@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Violet rounded-square background -->
+  <rect width="32" height="32" rx="8" fill="#7C3AED"/>
+  <!-- Scissors icon (white) centered -->
+  <!-- Left blade -->
+  <g fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Circle left -->
+    <circle cx="10" cy="22" r="3" fill="none"/>
+    <!-- Circle right -->
+    <circle cx="22" cy="22" r="3" fill="none"/>
+    <!-- Blade top-left to bottom-right -->
+    <line x1="12.5" y1="20.5" x2="22" y2="8"/>
+    <!-- Blade top-right to bottom-left -->
+    <line x1="19.5" y1="20.5" x2="10" y2="8"/>
+  </g>
+</svg>
