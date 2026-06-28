@@ -51,8 +51,26 @@ export default function TailorOrdersPage() {
   }
 
   const openQuoteModal = (order: Order) => {
-    setQuoteModal({ orderId: order.id, currentBudget: order.agreed_price || null })
-    setQuotePrice(order.agreed_price ? String(order.agreed_price) : '')
+    setQuoteModal({ orderId: order.id, currentBudget: (order as Order & { customer_offer?: number }).customer_offer || order.agreed_price || null })
+    setQuotePrice('')
+  }
+
+  const acceptOffer = async (orderId: string, price: number) => {
+    setSendingQuote(true)
+    const { error } = await supabase.from('orders').update({
+      agreed_price: price,
+      status: 'accepted',
+      updated_at: new Date().toISOString(),
+    }).eq('id', orderId)
+    if (error) { toast.error(error.message); setSendingQuote(false); return }
+    fetch('/api/notifications/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, event: 'order_accepted' }),
+    }).catch(() => {})
+    toast.success('Offer accepted! Customer will now pay.')
+    setSendingQuote(false)
+    loadOrders()
   }
 
   const sendQuote = async () => {
@@ -62,7 +80,7 @@ export default function TailorOrdersPage() {
     setSendingQuote(true)
     const { error } = await supabase.from('orders').update({
       agreed_price: price,
-      status: 'accepted',
+      status: 'pending',
       updated_at: new Date().toISOString(),
     }).eq('id', quoteModal.orderId)
     if (error) { toast.error(error.message); setSendingQuote(false); return }
@@ -71,7 +89,7 @@ export default function TailorOrdersPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: quoteModal.orderId, event: 'order_accepted' }),
     }).catch(() => {})
-    toast.success('Quote sent! Customer can now pay.')
+    toast.success('Counter sent! Waiting for customer.')
     setSendingQuote(false)
     setQuoteModal(null)
     setQuotePrice('')
@@ -141,19 +159,22 @@ export default function TailorOrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map(order => {
+              const o = order as Order & { customer?: { full_name: string }; customer_offer?: number }
               const action = STATUS_ACTIONS[order.status]
               const isPending = order.status === 'pending'
-              const hasPrice = !!order.agreed_price
+              const customerOffer = o.customer_offer
+              const myCounter = isPending && order.agreed_price && order.agreed_price !== customerOffer
+              const waitingForCustomer = myCounter
               return (
                 <div key={order.id} className="bg-white rounded-2xl border border-gray-100 p-5">
-                  <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold">
-                        {(order as Order & { customer?: { full_name: string } }).customer?.full_name?.[0]?.toUpperCase() || 'C'}
+                        {o.customer?.full_name?.[0]?.toUpperCase() || 'C'}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900">{order.title}</p>
-                        <p className="text-sm text-gray-500">{(order as Order & { customer?: { full_name: string } }).customer?.full_name} • {formatDate(order.created_at)}</p>
+                        <p className="text-sm text-gray-500">{o.customer?.full_name} • {formatDate(order.created_at)}</p>
                       </div>
                     </div>
                     <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
@@ -161,59 +182,67 @@ export default function TailorOrdersPage() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">{order.description}</p>
+                  <p className="text-sm text-gray-600 mb-3 leading-relaxed">{order.description}</p>
 
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-4">
-                    {hasPrice ? (
-                      <span className="font-semibold text-violet-700">{formatCurrency(order.agreed_price!)}</span>
-                    ) : (
-                      <span className="text-amber-600 font-medium text-xs bg-amber-50 px-2 py-0.5 rounded-full">No price set</span>
-                    )}
-                    <span>• {order.delivery_type === 'pickup_delivery' ? '🚚 Pickup & Delivery' : '🏪 Visit Shop'}</span>
+                  {/* Price negotiation strip */}
+                  {isPending && (
+                    <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl mb-3 text-sm flex-wrap">
+                      {customerOffer ? (
+                        <span className="text-amber-800">Customer offers <strong>{formatCurrency(customerOffer)}</strong></span>
+                      ) : (
+                        <span className="text-amber-700">No price proposed yet</span>
+                      )}
+                      {myCounter && (
+                        <span className="text-gray-500">→ Your counter: <strong>{formatCurrency(order.agreed_price!)}</strong> — waiting for customer</span>
+                      )}
+                    </div>
+                  )}
+                  {order.status === 'accepted' && order.agreed_price && (
+                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl mb-3 text-sm">
+                      <CheckCircle size={14} className="text-green-600" />
+                      <span className="text-green-800">Agreed price: <strong>{formatCurrency(order.agreed_price)}</strong></span>
+                      {!order.deposit_paid && <span className="text-green-600 ml-auto">Waiting for payment</span>}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                    <span>{order.delivery_type === 'pickup_delivery' ? '🚚 Pickup & Delivery' : '🏪 Visit Shop'}</span>
                     {order.deadline && <span>• Deadline: {formatDate(order.deadline)}</span>}
                   </div>
 
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Link href={`/orders/${order.id}`}
-                      className="flex items-center gap-1.5 text-sm text-violet-700 border border-violet-200 px-4 py-2 rounded-xl hover:bg-violet-50 transition-colors">
-                      View Details <ChevronRight size={14} />
+                      className="flex items-center gap-1.5 text-sm text-violet-700 border border-violet-200 px-3 py-2 rounded-xl hover:bg-violet-50 transition-colors">
+                      Details <ChevronRight size={13} />
                     </Link>
                     <Link href={`/tailor/chat?order=${order.id}`}
-                      className="text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+                      className="text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors">
                       💬 Chat
                     </Link>
 
-                    {/* Pending: Send quote (accepts + sets price) */}
-                    {isPending && (
-                      <Button size="sm" onClick={() => openQuoteModal(order)}>
-                        <Send size={14} /> Send Quote
+                    {isPending && !waitingForCustomer && customerOffer && (
+                      <Button size="sm" onClick={() => acceptOffer(order.id, customerOffer)} loading={sendingQuote}>
+                        <CheckCircle size={13} /> Accept {formatCurrency(customerOffer)}
                       </Button>
                     )}
 
-                    {/* Accepted but customer hasn't paid yet: allow resending quote */}
-                    {order.status === 'accepted' && !order.deposit_paid && (
+                    {isPending && !waitingForCustomer && (
                       <button onClick={() => openQuoteModal(order)}
-                        className="flex items-center gap-1.5 text-sm text-amber-700 border border-amber-200 bg-amber-50 px-4 py-2 rounded-xl hover:bg-amber-100 transition-colors">
-                        <Send size={14} /> Resend Quote
+                        className="flex items-center gap-1.5 text-sm text-amber-700 border border-amber-200 bg-amber-50 px-3 py-2 rounded-xl hover:bg-amber-100 transition-colors">
+                        <Send size={13} /> Counter
                       </button>
                     )}
 
-                    {/* Other status actions (once paid) */}
-                    {action && order.status !== 'accepted' && (
+                    {order.status === 'accepted' && order.deposit_paid && action && (
                       <Button size="sm" onClick={() => updateStatus(order.id, action.next)} loading={updating === order.id}>
-                        <CheckCircle size={14} /> {action.label}
-                      </Button>
-                    )}
-                    {action && order.status === 'accepted' && order.deposit_paid && (
-                      <Button size="sm" onClick={() => updateStatus(order.id, action.next)} loading={updating === order.id}>
-                        <CheckCircle size={14} /> {action.label}
+                        <CheckCircle size={13} /> {action.label}
                       </Button>
                     )}
 
                     {isPending && (
                       <button onClick={() => rejectOrder(order.id)}
-                        className="flex items-center gap-1.5 text-sm text-red-600 border border-red-200 px-4 py-2 rounded-xl hover:bg-red-50 transition-colors">
-                        <XCircle size={14} /> Reject
+                        className="flex items-center gap-1.5 text-sm text-red-500 border border-red-100 px-3 py-2 rounded-xl hover:bg-red-50 transition-colors">
+                        <XCircle size={13} /> Reject
                       </button>
                     )}
                   </div>
@@ -228,11 +257,11 @@ export default function TailorOrdersPage() {
       {quoteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setQuoteModal(null)}>
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h2 className="font-bold text-gray-900 text-lg mb-1">Set your price</h2>
+            <h2 className="font-bold text-gray-900 text-lg mb-1">Send a counter offer</h2>
             <p className="text-sm text-gray-500 mb-5">
               {quoteModal.currentBudget
-                ? `Customer's budget: ${formatCurrency(quoteModal.currentBudget)}`
-                : 'No budget specified by customer'}
+                ? `Customer offered: ${formatCurrency(quoteModal.currentBudget)}`
+                : 'No offer from customer yet'}
             </p>
             <div className="relative mb-5">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₦</span>

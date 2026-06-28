@@ -56,7 +56,7 @@ function NewOrderContent() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { toast.error('Please log in first'); router.push('/login'); return }
 
-    const agreedPrice = customPrice ? parseFloat(customPrice) : selectedService?.base_price || 0
+    const offerPrice = customPrice ? parseFloat(customPrice) : selectedService?.base_price || null
 
     const { data: order, error } = await supabase.from('orders').insert({
       customer_id: user.id,
@@ -68,7 +68,8 @@ function NewOrderContent() {
       delivery_type: form.delivery_type,
       pickup_address: form.pickup_address || null,
       delivery_address: form.delivery_address || null,
-      agreed_price: agreedPrice || null,
+      customer_offer: offerPrice || null,
+      agreed_price: null,
       deadline: form.deadline || null,
       notes: form.notes || null,
       style_reference_urls: styleRefs,
@@ -77,29 +78,15 @@ function NewOrderContent() {
 
     if (error) { toast.error(error.message); setLoading(false); return }
 
-    // Fire WhatsApp notification to tailor (non-blocking)
     fetch('/api/notifications/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: order.id, event: 'new_order' }),
     }).catch(() => {})
 
-    if (agreedPrice > 0) {
-      await initPaystack(order.id, agreedPrice, user.email || '')
-    } else {
-      toast.success('Order placed! Creative will confirm and get started.')
-      router.push(`/orders/${order.id}`)
-    }
-  }
-
-  const initPaystack = async (orderId: string, amount: number, email: string) => {
-    const res = await fetch('/api/payments/initialize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, amount, email, type: 'full' }),
-    })
-    const { authorization_url } = await res.json()
-    if (authorization_url) window.location.href = authorization_url
+    toast.success('Order sent! Creative will review and respond with a price.')
+    router.push(`/orders/${order.id}`)
+    setLoading(false)
   }
 
   const steps: Step[] = ['service', 'details', 'measurements', 'payment', 'confirm']
@@ -267,52 +254,39 @@ function NewOrderContent() {
             </div>
           )}
 
-          {/* Step: Price & payment */}
+          {/* Step: Your offer */}
           {step === 'payment' && (
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Price & payment</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-1">Make your offer</h2>
+              <p className="text-sm text-gray-500 mb-5">Propose a price — the creative will accept or counter. You pay only after both agree.</p>
 
-              {selectedService ? (
-                <div className="p-4 bg-violet-50 rounded-xl mb-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-medium text-gray-900">{selectedService.title}</p>
-                      <p className="text-xs text-gray-500">Full price — paid now via Paystack</p>
-                    </div>
-                    <p className="text-lg font-bold text-violet-700">{formatCurrency(selectedService.base_price)}</p>
-                  </div>
-                  {selectedService.price_negotiable && (
-                    <div className="mt-3 pt-3 border-t border-violet-200">
-                      <Input label="Custom agreed price (optional)" type="number" placeholder={`Default: ₦${selectedService.base_price}`}
-                        value={customPrice} onChange={e => setCustomPrice(e.target.value)} />
-                      <p className="text-xs text-gray-400 mt-1">Leave blank to use base price</p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="mb-4">
-                  <Input label="Agreed price (optional)" type="number" placeholder="Leave blank to negotiate via chat"
-                    value={customPrice} onChange={e => setCustomPrice(e.target.value)} />
-                  <p className="text-xs text-gray-500 mt-1">You can send the order and agree on price via chat, then pay</p>
+              {selectedService && (
+                <div className="flex justify-between items-center p-3 bg-violet-50 rounded-xl mb-4 text-sm">
+                  <span className="text-gray-600">Creative&apos;s listed price</span>
+                  <span className="font-bold text-violet-700">{formatCurrency(selectedService.base_price)}</span>
                 </div>
               )}
 
-              {(customPrice || selectedService?.base_price) && parseFloat(customPrice || String(selectedService?.base_price || 0)) > 0 && (
-                <div className="p-4 bg-gray-50 rounded-xl space-y-2 text-sm mb-4">
-                  {(() => {
-                    const total = parseFloat(customPrice || String(selectedService?.base_price || 0))
-                    return (
-                      <>
-                        <div className="flex justify-between"><span className="text-gray-600">Total</span><span className="font-medium">{formatCurrency(total)}</span></div>
-                        <div className="flex justify-between text-violet-700 font-semibold"><span>You pay now (full)</span><span>{formatCurrency(total)}</span></div>
-                        <p className="text-xs text-gray-400">Held securely — released to creative after delivery</p>
-                      </>
-                    )
-                  })()}
-                </div>
-              )}
+              <div className="relative mb-2">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₦</span>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder={selectedService ? String(selectedService.base_price) : 'e.g. 35000'}
+                  className="w-full pl-8 pr-4 py-3.5 rounded-xl border-2 border-gray-200 focus:border-violet-500 focus:outline-none text-lg font-semibold"
+                  value={customPrice}
+                  onChange={e => setCustomPrice(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-gray-400 mb-6">
+                {selectedService?.price_negotiable ? 'Price is negotiable — feel free to make an offer.' : 'Leave blank to accept the listed price.'}
+              </p>
 
-              <div className="flex gap-3 mt-6">
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 mb-4">
+                <strong>How it works:</strong> Your offer is sent to the creative. They'll accept, counter, or decline. Once you both agree — you pay securely via Paystack.
+              </div>
+
+              <div className="flex gap-3 mt-2">
                 <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('measurements')}>Back</Button>
                 <Button size="lg" className="flex-1" onClick={() => setStep('confirm')}>
                   Review Order <ChevronRight size={16} />
@@ -349,10 +323,14 @@ function NewOrderContent() {
                 )}
               </div>
 
-              <div className="mt-6 p-4 bg-violet-50 border border-violet-200 rounded-xl text-sm text-violet-800">
-                {customPrice || selectedService?.base_price
-                  ? `Paystack will securely collect ${formatCurrency(parseFloat(customPrice || String(selectedService?.base_price || 0)))} — released to the creative after you confirm delivery.`
-                  : 'Order will be sent to the creative. Agree on price via chat before payment.'}
+              {customPrice || selectedService?.base_price ? (
+                <div className="mt-4 flex items-center justify-between p-4 bg-violet-50 border border-violet-100 rounded-xl text-sm">
+                  <span className="text-violet-700">Your offer</span>
+                  <span className="font-bold text-violet-700">{formatCurrency(parseFloat(customPrice || String(selectedService?.base_price || 0)))}</span>
+                </div>
+              ) : null}
+              <div className="mt-3 p-4 bg-amber-50 border border-amber-100 rounded-xl text-sm text-amber-800">
+                No payment yet — you&apos;ll pay after the creative accepts your offer.
               </div>
 
               <div className="flex gap-3 mt-6">

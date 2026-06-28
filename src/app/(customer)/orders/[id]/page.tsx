@@ -35,6 +35,9 @@ function OrderDetailContent() {
   const [ratingComment, setRatingComment] = useState('')
   const [submittingRating, setSubmittingRating] = useState(false)
   const [confirmingDelivery, setConfirmingDelivery] = useState(false)
+  const [counterPrice, setCounterPrice] = useState('')
+  const [showCounter, setShowCounter] = useState(false)
+  const [sendingCounter, setSendingCounter] = useState(false)
 
   useEffect(() => {
     const payment = searchParams.get('payment')
@@ -61,6 +64,53 @@ function OrderDetailContent() {
       const { data: rating } = await supabase.from('ratings').select('*').eq('order_id', id).eq('reviewer_id', userId).single()
       setMyRating(rating)
     }
+  }
+
+  const acceptCreativePrice = async () => {
+    if (!order?.agreed_price) return
+    setSendingCounter(true)
+    await supabase.from('orders').update({ status: 'accepted', updated_at: new Date().toISOString() }).eq('id', id)
+    toast.success('Price accepted! Proceeding to payment...')
+    const { data: { user } } = await supabase.auth.getUser()
+    const res = await fetch('/api/payments/initialize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: id, amount: order.agreed_price, email: user?.email || '', type: 'full' }),
+    })
+    const { authorization_url } = await res.json()
+    if (authorization_url) window.location.href = authorization_url
+    setSendingCounter(false)
+  }
+
+  const sendCounter = async () => {
+    const price = Number(counterPrice)
+    if (!price || price <= 0) { toast.error('Enter a valid price'); return }
+    setSendingCounter(true)
+    await supabase.from('orders').update({
+      customer_offer: price,
+      agreed_price: null,
+      status: 'pending',
+      updated_at: new Date().toISOString(),
+    } as Record<string, unknown>).eq('id', id)
+    toast.success('Counter sent! Waiting for creative.')
+    setShowCounter(false)
+    setCounterPrice('')
+    fetchOrder()
+    setSendingCounter(false)
+  }
+
+  const payAgreedPrice = async () => {
+    if (!order?.agreed_price) return
+    setSendingCounter(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    const res = await fetch('/api/payments/initialize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: id, amount: order.agreed_price, email: user?.email || '', type: 'full' }),
+    })
+    const { authorization_url } = await res.json()
+    if (authorization_url) window.location.href = authorization_url
+    setSendingCounter(false)
   }
 
   const confirmDelivery = async () => {
@@ -195,6 +245,75 @@ function OrderDetailContent() {
             )}
           </div>
         </div>
+
+        {/* Price negotiation card — visible while pending (no payment yet) */}
+        {isCustomer && order.status === 'pending' && (
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 className="font-bold text-gray-900 mb-4">Price negotiation</h2>
+
+            {/* Customer's sent offer */}
+            {order.customer_offer && (
+              <div className="flex items-center justify-between py-2 border-b border-gray-100 text-sm mb-3">
+                <span className="text-gray-500">Your offer</span>
+                <span className="font-semibold text-gray-900">{formatCurrency(order.customer_offer)}</span>
+              </div>
+            )}
+
+            {/* Creative has countered */}
+            {order.agreed_price && (
+              <div className="flex items-center justify-between py-2 border-b border-gray-100 text-sm mb-4">
+                <span className="text-gray-500">Creative&apos;s counter</span>
+                <span className="font-bold text-violet-700">{formatCurrency(order.agreed_price)}</span>
+              </div>
+            )}
+
+            {order.agreed_price && !showCounter ? (
+              <div className="space-y-2">
+                <p className="text-xs text-gray-500 mb-3">The creative has proposed a price. Accept to proceed to payment, or counter with your own offer.</p>
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" onClick={acceptCreativePrice} loading={sendingCounter}>
+                    <CheckCircle size={14} /> Accept & Pay {formatCurrency(order.agreed_price)}
+                  </Button>
+                  <button onClick={() => setShowCounter(true)}
+                    className="flex items-center gap-1.5 text-sm text-amber-700 border border-amber-200 bg-amber-50 px-4 py-2 rounded-xl hover:bg-amber-100 transition-colors">
+                    Counter offer
+                  </button>
+                </div>
+              </div>
+            ) : !order.agreed_price ? (
+              <p className="text-sm text-gray-500 italic">Waiting for the creative to respond to your offer...</p>
+            ) : null}
+
+            {showCounter && (
+              <div className="mt-4 space-y-3">
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₦</span>
+                  <input type="number" min="0" placeholder="Your counter price"
+                    className="w-full pl-8 pr-4 py-3 rounded-xl border-2 border-amber-300 focus:border-violet-500 focus:outline-none text-base font-semibold"
+                    value={counterPrice} onChange={e => setCounterPrice(e.target.value)} autoFocus />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowCounter(false)} className="flex-1 py-2.5 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">Cancel</button>
+                  <Button className="flex-1" size="sm" loading={sendingCounter} onClick={sendCounter}>Send counter</Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Pay now card — when accepted but not yet paid */}
+        {isCustomer && order.status === 'accepted' && !order.deposit_paid && order.agreed_price && (
+          <div className="bg-violet-50 border border-violet-200 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-gray-900">Ready to pay</h2>
+              <span className="text-lg font-black text-violet-700">{formatCurrency(order.agreed_price)}</span>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">The creative has accepted your order. Pay now to get started.</p>
+            <Button className="w-full" size="lg" loading={sendingCounter} onClick={payAgreedPrice}>
+              Pay {formatCurrency(order.agreed_price)} via Paystack
+            </Button>
+          </div>
+        )}
 
         {/* Order tracking */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">

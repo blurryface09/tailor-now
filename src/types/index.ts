@@ -119,6 +119,7 @@ export interface Order {
   pickup_address: string | null
   delivery_address: string | null
   status: OrderStatus
+  customer_offer: number | null
   agreed_price: number | null
   deposit_amount: number | null
   balance_amount: number | null
