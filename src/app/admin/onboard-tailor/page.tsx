@@ -109,16 +109,16 @@ export default function AdminOnboardTailorPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Onboard a Tailor</h1>
-            <p className="text-sm text-gray-500">Find a registered user and set them up as a verified tailor</p>
+            <h1 className="text-2xl font-bold text-gray-900">Onboard a Creative</h1>
+            <p className="text-sm text-gray-500">Find a registered user and set them up as a verified creative</p>
           </div>
         </div>
 
         {done ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
             <CheckCircle size={56} className="text-green-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Tailor onboarded!</h2>
-            <p className="text-gray-500 text-sm mb-6">{foundUser?.full_name} is now a verified tailor on TailorNow.</p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Creative onboarded!</h2>
+            <p className="text-gray-500 text-sm mb-6">{foundUser?.full_name} is now a verified creative on TailorNow.</p>
             <div className="flex justify-center gap-3">
               <button onClick={() => { setDone(false); setFoundUser(null); setEmailSearch(''); setForm({ business_name: '', bio: '', city: '', state: '', address: '', specialties: [], delivery_types: [], response_time_hours: '2' }) }}
                 className="px-5 py-2.5 text-sm font-medium border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
@@ -179,10 +179,10 @@ export default function AdminOnboardTailorPage() {
               <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
                 <h2 className="font-bold text-gray-900 flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-violet-700 text-white text-xs flex items-center justify-center font-bold">2</span>
-                  Set up their tailor profile
+                  Set up their creative profile
                 </h2>
                 <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-                  This profile will be auto-verified. The tailor can update their bio, portfolio and pricing after logging in.
+                  This profile will be auto-verified. The creative can update their bio, portfolio and pricing after logging in.
                 </p>
 
                 <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style" value={form.business_name}
@@ -204,7 +204,7 @@ export default function AdminOnboardTailorPage() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio (optional)</label>
                   <textarea className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                    rows={3} placeholder="Short description of the tailor's work and experience..."
+                    rows={3} placeholder="Short description of the creative's work and experience..."
                     value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
                 </div>
 
@@ -245,7 +245,7 @@ export default function AdminOnboardTailorPage() {
                 </div>
 
                 <Button type="submit" size="lg" className="w-full" loading={submitting}>
-                  <UserPlus size={16} /> Onboard & Verify Tailor
+                  <UserPlus size={16} /> Onboard & Verify Creative
                 </Button>
               </form>
             )}

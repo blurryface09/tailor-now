@@ -57,9 +57,8 @@ export default function AseobiOrderPage() {
       title: `Asoebi — ${form.event_name}`,
       description: `Group asoebi order for ${validMembers.length} members.\n\nStyle: ${form.style_description}\nFabric color: ${form.fabric_color}\n\nMembers:\n${validMembers.map((m, i) => `${i + 1}. ${m.name} (${m.phone}) — ${m.measurements}`).join('\n')}`,
       delivery_type: 'pickup_delivery',
-      agreed_price: totalPrice || null,
-      deposit_amount: totalPrice ? Math.round(totalPrice * 0.5) : null,
-      balance_amount: totalPrice ? Math.round(totalPrice * 0.5) : null,
+      customer_offer: totalPrice || null,
+      agreed_price: null,
       deadline: form.deadline || null,
       notes: `${validMembers.length} members, ₦${form.price_per_member} per member`,
       status: 'pending',
@@ -183,8 +182,7 @@ export default function AseobiOrderPage() {
                     <span className="font-bold text-violet-700">{formatCurrency(totalPrice)}</span>
                   </div>
                   <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>50% deposit now</span>
-                    <span className="font-medium">{formatCurrency(Math.round(totalPrice * 0.5))}</span>
+                    <span>No payment until creative confirms</span>
                   </div>
                 </div>
               )}
@@ -224,10 +222,10 @@ export default function AseobiOrderPage() {
               <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 mb-5">
                 <p className="font-semibold mb-1">How group Asoebi orders work</p>
                 <ul className="space-y-1 text-xs list-disc list-inside">
-                  <li>You pay the 50% deposit to secure the tailor</li>
-                  <li>Tailor contacts each member for fittings</li>
-                  <li>Balance paid when all outfits are delivered</li>
-                  <li>Extra 2% platform fee applies to group orders</li>
+                  <li>Your order is sent to the creative for review</li>
+                  <li>Creative contacts each member to arrange fittings</li>
+                  <li>You pay securely after the creative confirms the order</li>
+                  <li>Payment released to creative after delivery</li>
                 </ul>
               </div>
 

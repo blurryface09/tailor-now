@@ -102,9 +102,9 @@ export default function ReferralPage() {
           <h2 className="text-base font-bold text-gray-900 mb-4">How it works</h2>
           <div className="space-y-4">
             {[
-              { step: '1', title: 'Share your link', desc: 'Send your referral link to tailors you know via WhatsApp, Instagram, or anywhere.' },
-              { step: '2', title: 'They sign up', desc: 'When a tailor creates their account using your link, they are linked to you.' },
-              { step: '3', title: 'They complete 3 orders', desc: 'Once your referred tailor completes their first 3 orders on TailorNow, you qualify for the bonus.' },
+              { step: '1', title: 'Share your link', desc: 'Send your referral link to creatives you know via WhatsApp, Instagram, or anywhere.' },
+              { step: '2', title: 'They sign up', desc: 'When a creative creates their account using your link, they are linked to you.' },
+              { step: '3', title: 'They complete 3 orders', desc: 'Once your referred creative completes their first 3 orders on TailorNow, you qualify for the bonus.' },
               { step: '4', title: 'You earn ₦2,000', desc: 'Credit is added to your TailorNow wallet automatically. No limit on how many you refer.' },
             ].map(item => (
               <div key={item.step} className="flex gap-4">

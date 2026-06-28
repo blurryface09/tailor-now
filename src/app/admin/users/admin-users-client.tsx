@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 
 const ROLE_CONFIG = {
   customer: { label: 'Customer', color: 'bg-blue-100 text-blue-700', icon: <ShoppingBag size={11} /> },
-  tailor:   { label: 'Tailor',   color: 'bg-violet-100 text-violet-700', icon: <Scissors size={11} /> },
+  tailor:   { label: 'Creative', color: 'bg-violet-100 text-violet-700', icon: <Scissors size={11} /> },
   admin:    { label: 'Admin',    color: 'bg-red-100 text-red-700', icon: <Shield size={11} /> },
 }
 
@@ -69,7 +69,7 @@ export function AdminUsersClient({ users: initial, orderCounts }: { users: Profi
         {(['all', 'customer', 'tailor', 'admin'] as const).map(r => (
           <button key={r} onClick={() => setRoleFilter(r)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === r ? 'bg-violet-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}>
-            {r.charAt(0).toUpperCase() + r.slice(1)} <span className="ml-1 opacity-70">({counts[r]})</span>
+            {r === 'tailor' ? 'Creative' : r.charAt(0).toUpperCase() + r.slice(1)} <span className="ml-1 opacity-70">({counts[r]})</span>
           </button>
         ))}
       </div>

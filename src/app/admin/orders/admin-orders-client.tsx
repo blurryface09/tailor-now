@@ -100,7 +100,7 @@ export function AdminOrdersClient({ orders, initialStatus }: { orders: OrderWith
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {['Order', 'Customer', 'Tailor', 'Amount', 'Status', 'Date', ''].map(h => (
+                {['Order', 'Customer', 'Creative', 'Amount', 'Status', 'Date', ''].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>

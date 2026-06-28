@@ -25,14 +25,14 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
     const { error } = await supabase.from('tailor_profiles').update({ is_verified: verified }).eq('id', id)
     if (error) { toast.error(error.message); return }
     setTailors(t => t.map(x => x.id === id ? { ...x, is_verified: verified } : x))
-    toast.success(verified ? 'Tailor verified!' : 'Verification removed')
+    toast.success(verified ? 'Creative verified!' : 'Verification removed')
   }
 
   const suspend = async (id: string, active: boolean) => {
     const { error } = await supabase.from('tailor_profiles').update({ is_active: active }).eq('id', id)
     if (error) { toast.error(error.message); return }
     setTailors(t => t.map(x => x.id === id ? { ...x, is_active: active } : x))
-    toast.success(active ? 'Tailor reactivated' : 'Tailor suspended')
+    toast.success(active ? 'Creative reactivated' : 'Creative suspended')
   }
 
   const filtered = tailors.filter(t => {
@@ -84,7 +84,7 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
               <tr>
-                {['', 'Tailor', 'Contact', 'Location', 'Rating', 'Orders', 'Status', 'Joined', 'Actions'].map(h => (
+                {['', 'Creative', 'Contact', 'Location', 'Rating', 'Orders', 'Status', 'Joined', 'Actions'].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>

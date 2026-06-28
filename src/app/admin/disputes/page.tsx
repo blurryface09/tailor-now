@@ -18,7 +18,7 @@ type Dispute = {
     id: string
     title: string
     agreed_price: number | null
-    deposit_amount: number | null
+    deposit_amount?: number | null
     customer: { full_name: string; email: string } | null
     tailor: { business_name: string } | null
   } | null
@@ -35,7 +35,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const RESOLUTIONS = [
   { value: 'resolved_customer', label: 'Resolve in favor of Customer (refund)' },
-  { value: 'resolved_tailor',   label: 'Resolve in favor of Tailor (release funds)' },
+  { value: 'resolved_tailor',   label: 'Resolve in favor of Creative (release funds)' },
   { value: 'refunded',          label: 'Full Refund' },
 ]
 
@@ -54,7 +54,7 @@ export default function AdminDisputesPage() {
       .from('disputes')
       .select(`
         *,
-        order:orders(id, title, agreed_price, deposit_amount,
+        order:orders(id, title, agreed_price,
           customer:profiles!orders_customer_id_fkey(full_name, email),
           tailor:tailor_profiles(business_name)
         ),
@@ -109,7 +109,7 @@ export default function AdminDisputesPage() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <h1 className="text-2xl font-black text-gray-900">Disputes</h1>
-            <p className="text-sm text-gray-500 mt-1">Mediate order disputes between customers and tailors</p>
+            <p className="text-sm text-gray-500 mt-1">Mediate order disputes between customers and creatives</p>
           </div>
           {open > 0 && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full">
@@ -161,16 +161,16 @@ export default function AdminDisputesPage() {
                         <p className="text-xs text-gray-500">{dispute.order?.customer?.email}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Tailor</p>
+                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Creative</p>
                         <p className="font-medium text-gray-900">{dispute.order?.tailor?.business_name}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Order Value</p>
-                        <p className="font-bold text-gray-900">₦{(dispute.order?.agreed_price || 0).toLocaleString()}</p>
+                        <p className="font-bold text-violet-700">₦{(dispute.order?.agreed_price || 0).toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Deposit Held</p>
-                        <p className="font-bold text-amber-600">₦{(dispute.order?.deposit_amount || 0).toLocaleString()}</p>
+                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Amount Paid</p>
+                        <p className="font-bold text-green-700">₦{(dispute.order?.agreed_price || 0).toLocaleString()}</p>
                       </div>
                     </div>
 

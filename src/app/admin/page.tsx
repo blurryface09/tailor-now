@@ -67,7 +67,7 @@ export default async function AdminDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           {[
             { icon: <Users size={20} />, label: 'Total Customers', value: totalUsers || 0, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { icon: <Scissors size={20} />, label: 'Total Tailors', value: totalTailors || 0, color: 'text-violet-600', bg: 'bg-violet-50' },
+            { icon: <Scissors size={20} />, label: 'Total Creatives', value: totalTailors || 0, color: 'text-violet-600', bg: 'bg-violet-50' },
             { icon: <Package size={20} />, label: 'Total Orders', value: totalOrders || 0, color: 'text-green-600', bg: 'bg-green-50' },
             { icon: <Star size={20} />, label: 'Total Reviews', value: totalReviews || 0, color: 'text-amber-600', bg: 'bg-amber-50' },
             { icon: <TrendingUp size={20} />, label: 'Commission Earned', value: formatCurrency(totalCommission), color: 'text-violet-600', bg: 'bg-violet-50' },
@@ -85,7 +85,7 @@ export default async function AdminDashboard() {
           <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2 text-amber-800">
               <Clock size={18} />
-              <span className="font-medium">{pendingVerifications} tailor(s) pending verification</span>
+              <span className="font-medium">{pendingVerifications} creative(s) pending verification</span>
             </div>
             <Link href="/admin/tailors?filter=unverified" className="bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors">
               Review
@@ -121,11 +121,11 @@ export default async function AdminDashboard() {
             <h2 className="font-bold text-gray-900 mb-4">Quick Actions</h2>
             <div className="space-y-3">
               {[
-                { href: '/admin/tailors', icon: <Scissors size={18} />, label: 'Manage Tailors', desc: 'Verify, suspend, view profiles' },
-                { href: '/admin/users', icon: <Users size={18} />, label: 'Manage Accounts', desc: 'Customers, tailors, admins' },
+                { href: '/admin/tailors', icon: <Scissors size={18} />, label: 'Manage Creatives', desc: 'Verify, suspend, view profiles' },
+                { href: '/admin/users', icon: <Users size={18} />, label: 'Manage Accounts', desc: 'Customers, creatives, admins' },
                 { href: '/admin/reviews', icon: <Star size={18} />, label: 'Reviews', desc: 'Moderate ratings & reviews' },
                 { href: '/admin/orders', icon: <Package size={18} />, label: 'All Orders', desc: 'Monitor disputes, view history' },
-                { href: '/admin/payouts', icon: <TrendingUp size={18} />, label: 'Payouts', desc: 'Process tailor payouts' },
+                { href: '/admin/payouts', icon: <TrendingUp size={18} />, label: 'Payouts', desc: 'Process creative payouts' },
               ].map(a => (
                 <Link key={a.href} href={a.href} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
                   <div className="w-9 h-9 bg-violet-50 text-violet-700 rounded-xl flex items-center justify-center flex-shrink-0">{a.icon}</div>

@@ -3,9 +3,9 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
-  title: 'Tailor Now — Find Expert Tailors Near You',
-  description: 'Book skilled tailors for custom outfits, alterations, bridal wear, uniforms and more. Fast, reliable, professional tailoring at your fingertips.',
-  keywords: 'tailor, tailoring, custom outfit, alterations, fashion, Nigeria',
+  title: 'TailorNow — Connect with Nigerian Fashion Creatives',
+  description: 'Book skilled Nigerian fashion creatives for custom outfits, alterations, bridal wear, asoebi and more. Bargain prices, pay securely, track your order.',
+  keywords: 'tailor, fashion, custom outfit, alterations, asoebi, Nigeria, creative',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

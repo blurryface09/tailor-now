@@ -103,8 +103,8 @@ export default function AdminPayoutsPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-8 page-enter">
         <div className="mb-6">
-          <h1 className="text-2xl font-black text-gray-900">Tailor Payouts</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage earnings and approve bank transfers to tailors</p>
+          <h1 className="text-2xl font-black text-gray-900">Creative Payouts</h1>
+          <p className="text-sm text-gray-500 mt-1">Manage earnings and approve bank transfers to creatives</p>
         </div>
 
         {/* Summary cards */}
@@ -133,7 +133,7 @@ export default function AdminPayoutsPage() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search tailor or order..."
+              placeholder="Search creative or order..."
               className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
             />
           </div>
@@ -161,11 +161,11 @@ export default function AdminPayoutsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tailor</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Creative</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
                 <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gross</th>
                 <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Net (Tailor)</th>
+                <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Net (Creative)</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank Details</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-5 py-3.5"></th>
