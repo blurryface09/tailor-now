@@ -103,9 +103,14 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
           <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 mb-5">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 shadow-lg border-4 border-white flex items-center justify-center text-white text-3xl font-bold select-none">
-                {tailor.business_name?.[0]?.toUpperCase() || '✂'}
-              </div>
+              {tailor.profile?.avatar_url ? (
+                <img src={tailor.profile.avatar_url} alt={tailor.business_name}
+                  className="w-20 h-20 rounded-2xl object-cover shadow-lg border-4 border-white" />
+              ) : (
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 shadow-lg border-4 border-white flex items-center justify-center text-white text-3xl font-bold select-none">
+                  {tailor.business_name?.[0]?.toUpperCase() || '✂'}
+                </div>
+              )}
               {isOwner && (
                 <Link href="/tailor/profile"
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center hover:bg-violet-800 transition-colors"

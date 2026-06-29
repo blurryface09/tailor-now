@@ -234,9 +234,14 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
           </div>
         )}
         <div className="absolute bottom-0 left-4 translate-y-1/2">
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
-            {tailor.business_name?.[0]?.toUpperCase() || '✂'}
-          </div>
+          {(tailor as any).profile?.avatar_url ? (
+            <img src={(tailor as any).profile.avatar_url} alt={tailor.business_name}
+              className="w-14 h-14 rounded-2xl object-cover shadow-lg border-2 border-white group-hover:scale-105 transition-transform duration-300" />
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
+              {tailor.business_name?.[0]?.toUpperCase() || '✂'}
+            </div>
+          )}
         </div>
       </div>
       <div className="px-4 pt-10 pb-4">

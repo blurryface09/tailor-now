@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { SERVICE_LABELS } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { CheckCircle, ArrowLeft, Navigation } from 'lucide-react'
+import { CheckCircle, ArrowLeft, Navigation, Camera } from 'lucide-react'
 
 const SERVICE_ICONS: Record<string, string> = {
   street_wear: '🧢', custom_outfit: '👗', alterations: '✂️', bridal: '💍',
@@ -28,6 +28,9 @@ export default function EditCreativeProfile() {
   const router = useRouter()
   const supabase = createClient()
   const [tailorId, setTailorId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
@@ -45,6 +48,9 @@ export default function EditCreativeProfile() {
       if (!user) { router.push('/login'); return }
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       if (profile?.role !== 'tailor') { router.push('/home'); return }
+      const { data: fullProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single()
+      setUserId(user.id)
+      setAvatarUrl(fullProfile?.avatar_url || null)
       const { data: tailor } = await supabase.from('tailor_profiles').select('*').eq('user_id', user.id).single()
       if (!tailor) { router.push('/onboarding/tailor'); return }
       setTailorId(tailor.id)
@@ -60,6 +66,23 @@ export default function EditCreativeProfile() {
       setLoading(false)
     })
   }, [])
+
+  const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    setUploadingAvatar(true)
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const path = `avatars/${userId}.${ext}`
+    const { error } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true, contentType: file.type })
+    if (error) { toast.error(error.message); setUploadingAvatar(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
+    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId)
+    setAvatarUrl(publicUrl)
+    toast.success('Profile photo updated!')
+    setUploadingAvatar(false)
+    e.target.value = ''
+  }
 
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
@@ -145,6 +168,33 @@ export default function EditCreativeProfile() {
         </div>
 
         <div className="space-y-5">
+          {/* Profile photo */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 className="font-bold text-gray-900 mb-4">Profile Photo</h2>
+            <div className="flex items-center gap-5">
+              <div className="relative flex-shrink-0">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-gray-100" />
+                ) : (
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
+                    {form.business_name?.[0]?.toUpperCase() || '✂'}
+                  </div>
+                )}
+                <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-violet-800 transition-colors">
+                  {uploadingAvatar
+                    ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    : <Camera size={12} className="text-white" />}
+                  <input type="file" accept="image/*" className="hidden" onChange={uploadAvatar} disabled={uploadingAvatar} />
+                </label>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-700">Upload your photo</p>
+                <p className="text-xs text-gray-400 mt-0.5">Clear face photo — customers trust profiles with real photos</p>
+                <p className="text-xs text-gray-400">JPG or PNG, max 5MB</p>
+              </div>
+            </div>
+          </div>
+
           {/* Basic info */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
             <h2 className="font-bold text-gray-900">Business Info</h2>
