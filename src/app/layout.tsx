@@ -1,15 +1,17 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: 'TailorNow — Connect with Nigerian Fashion Creatives',
   description: 'Book skilled Nigerian fashion creatives for custom outfits, alterations, bridal wear, asoebi and more. Bargain prices, pay securely, track your order.',
   keywords: 'tailor, fashion, custom outfit, alterations, asoebi, Nigeria, creative',
+  manifest: '/manifest.json',
   icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    icon: '/icon-192.png',
+    shortcut: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
   },
   openGraph: {
     title: 'TailorNow — Connect with Nigerian Fashion Creatives',
@@ -29,8 +31,23 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        <meta name="application-name" content="TailorNow" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="TailorNow" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#7C3AED" />
+      </head>
       <body className="min-h-full bg-gray-50 font-sans">
         {children}
+        <Script
+          id="sw-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}`,
+          }}
+        />
         <Toaster
           position="top-center"
           toastOptions={{
