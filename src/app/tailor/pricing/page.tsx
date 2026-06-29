@@ -69,7 +69,7 @@ export default function PricingPage() {
     setEditingId(s.id); setAdding(true)
   }
 
-  const SERVICE_ICONS: Record<string, string> = { custom_outfit: '👗', alterations: '✂️', bridal: '💍', ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔' }
+  const SERVICE_ICONS: Record<string, string> = { street_wear: '🧢', custom_outfit: '👗', alterations: '✂️', bridal: '💍', ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔' }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -36,6 +36,7 @@ export function formatRelativeTime(date: string): string {
 }
 
 export const SERVICE_LABELS: Record<string, string> = {
+  street_wear: 'Street Wear',
   custom_outfit: 'Custom Outfit',
   alterations: 'Alterations and Repairs',
   bridal: 'Bridal and Special Occasion',

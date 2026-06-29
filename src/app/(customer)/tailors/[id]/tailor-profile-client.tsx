@@ -19,7 +19,7 @@ interface Props {
 }
 
 const SERVICE_ICONS: Record<string, string> = {
-  custom_outfit: '👗', alterations: '✂️', bridal: '💍',
+  street_wear: '🧢', custom_outfit: '👗', alterations: '✂️', bridal: '💍',
   ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
 }
 

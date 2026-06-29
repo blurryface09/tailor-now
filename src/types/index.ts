@@ -22,6 +22,7 @@ export type ServiceType =
   | 'fabric_sourcing'
   | 'uniforms'
   | 'asoebi'
+  | 'street_wear'
 
 export interface Profile {
   id: string
