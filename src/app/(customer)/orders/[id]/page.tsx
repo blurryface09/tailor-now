@@ -6,8 +6,9 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { StarRating } from '@/components/ui/star-rating'
-import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, formatRelativeTime, calculateCommission } from '@/lib/utils'
+import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, formatRelativeTime, calculateCommission, calculateServiceCharge } from '@/lib/utils'
 import { MessageSquare, CheckCircle, AlertCircle, Clock, AlertTriangle, Images } from 'lucide-react'
+import { LiveMap } from '@/components/LiveMap'
 import toast from 'react-hot-toast'
 import type { Order, Rating } from '@/types'
 import Link from 'next/link'
@@ -302,18 +303,31 @@ function OrderDetailContent() {
         )}
 
         {/* Pay now card — when accepted but not yet paid */}
-        {isCustomer && order.status === 'accepted' && !order.deposit_paid && order.agreed_price && (
-          <div className="bg-violet-50 border border-violet-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-bold text-gray-900">Ready to pay</h2>
-              <span className="text-lg font-black text-violet-700">{formatCurrency(order.agreed_price)}</span>
+        {isCustomer && order.status === 'accepted' && !order.deposit_paid && order.agreed_price && (() => {
+          const { serviceCharge, totalCharged } = calculateServiceCharge(order.agreed_price)
+          return (
+            <div className="bg-violet-50 border border-violet-200 rounded-2xl p-6">
+              <h2 className="font-bold text-gray-900 mb-4">Ready to pay</h2>
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between text-gray-600">
+                  <span>Order price</span>
+                  <span>{formatCurrency(order.agreed_price)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Service charge (3%)</span>
+                  <span>{formatCurrency(serviceCharge)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-gray-900 border-t border-violet-200 pt-2">
+                  <span>Total</span>
+                  <span className="text-violet-700">{formatCurrency(totalCharged)}</span>
+                </div>
+              </div>
+              <Button className="w-full" size="lg" loading={sendingCounter} onClick={payAgreedPrice}>
+                Pay {formatCurrency(totalCharged)} via Paystack
+              </Button>
             </div>
-            <p className="text-sm text-gray-600 mb-4">The creative has accepted your order. Pay now to get started.</p>
-            <Button className="w-full" size="lg" loading={sendingCounter} onClick={payAgreedPrice}>
-              Pay {formatCurrency(order.agreed_price)} via Paystack
-            </Button>
-          </div>
-        )}
+          )
+        })()}
 
         {/* Order tracking */}
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -340,14 +354,27 @@ function OrderDetailContent() {
           </div>
         </div>
 
+        {/* Live map — when out for delivery */}
+        {order.status === 'out_for_delivery' && (
+          <LiveMap orderId={order.id} />
+        )}
+
         {/* Payment details */}
         {order.agreed_price && (
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <h2 className="font-bold text-gray-900 mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Total price</span>
-                <span className="font-bold text-violet-700">{formatCurrency(order.agreed_price)}</span>
+                <span className="text-gray-500">Order price</span>
+                <span>{formatCurrency(order.agreed_price)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Service charge (3%)</span>
+                <span>{formatCurrency(calculateServiceCharge(order.agreed_price).serviceCharge)}</span>
+              </div>
+              <div className="flex justify-between font-bold border-t pt-2">
+                <span className="text-gray-900">Total charged</span>
+                <span className="text-violet-700">{formatCurrency(calculateServiceCharge(order.agreed_price).totalCharged)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
                 <span className="text-gray-500">Status</span>

@@ -98,6 +98,12 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
 }
 
 export const COMMISSION_RATE = 0.20
+export const SERVICE_CHARGE_RATE = 0.03
+
+export function calculateServiceCharge(agreedPrice: number) {
+  const serviceCharge = Math.round(agreedPrice * SERVICE_CHARGE_RATE)
+  return { serviceCharge, totalCharged: agreedPrice + serviceCharge }
+}
 
 export function calculateCommission(amount: number) {
   const commission = amount * COMMISSION_RATE

@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, cn } from '@/lib/utils'
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import type { Order } from '@/types'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import { CheckCircle, XCircle, ChevronRight, Send } from 'lucide-react'
+import { CheckCircle, XCircle, ChevronRight, Send, Navigation } from 'lucide-react'
 
 const STATUS_ACTIONS: Record<string, { next: string; label: string }> = {
   accepted: { next: 'measuring', label: 'Start Measuring' },
@@ -28,6 +28,8 @@ export default function TailorOrdersPage() {
   const [quoteModal, setQuoteModal] = useState<QuoteModal | null>(null)
   const [quotePrice, setQuotePrice] = useState('')
   const [sendingQuote, setSendingQuote] = useState(false)
+  const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null)
+  const watchIdRef = useRef<number | null>(null)
 
   useEffect(() => {
     loadOrders()
@@ -127,6 +129,37 @@ export default function TailorOrdersPage() {
       loadOrders()
     }
     setUpdating(null)
+  }
+
+  const startDeliveryTracking = async (orderId: string) => {
+    if (!navigator.geolocation) { toast.error('GPS not supported on this device'); return }
+    await supabase.from('orders').update({ is_delivering: true }).eq('id', orderId)
+    setTrackingOrderId(orderId)
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      async (pos) => {
+        await supabase.from('delivery_locations').upsert({
+          order_id: orderId,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'order_id' })
+      },
+      () => toast.error('GPS error — keep app open for tracking'),
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    )
+    toast.success('Live tracking started — keep this page open')
+  }
+
+  const stopDeliveryTracking = async (orderId: string) => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
+    }
+    await supabase.from('orders').update({ is_delivering: false, status: 'delivered' }).eq('id', orderId)
+    await supabase.from('delivery_locations').delete().eq('order_id', orderId)
+    setTrackingOrderId(null)
+    toast.success('Delivery confirmed!')
+    loadOrders()
   }
 
   const rejectOrder = async (orderId: string) => {
@@ -233,9 +266,19 @@ export default function TailorOrdersPage() {
                       </button>
                     )}
 
-                    {order.status === 'accepted' && order.deposit_paid && action && (
+                    {order.status === 'accepted' && order.deposit_paid && action && action.next !== 'out_for_delivery' && action.next !== 'delivered' && (
                       <Button size="sm" onClick={() => updateStatus(order.id, action.next)} loading={updating === order.id}>
                         <CheckCircle size={13} /> {action.label}
+                      </Button>
+                    )}
+                    {order.status === 'ready' && order.deposit_paid && (
+                      <Button size="sm" onClick={() => { updateStatus(order.id, 'out_for_delivery'); startDeliveryTracking(order.id) }} loading={updating === order.id}>
+                        <Navigation size={13} /> Start Delivery + Track
+                      </Button>
+                    )}
+                    {order.status === 'out_for_delivery' && (
+                      <Button size="sm" onClick={() => stopDeliveryTracking(order.id)} loading={updating === order.id}>
+                        <CheckCircle size={13} /> Confirm Delivered
                       </Button>
                     )}
 

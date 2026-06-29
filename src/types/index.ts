@@ -125,6 +125,7 @@ export interface Order {
   balance_amount: number | null
   deposit_paid: boolean
   balance_paid: boolean
+  is_delivering: boolean
   paystack_ref: string | null
   deadline: string | null
   actual_delivery: string | null
