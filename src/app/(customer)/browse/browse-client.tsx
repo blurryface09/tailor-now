@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap, Navigation } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { SERVICE_LABELS, cn } from '@/lib/utils'
+import { NIGERIAN_STATES, citiesForState, matchState, matchCity } from '@/lib/nigeria-locations'
 import type { TailorProfile, Profile } from '@/types'
 
 type TailorWithProfile = TailorProfile & { profile: Profile }
@@ -13,6 +14,9 @@ interface BrowseClientProps {
   tailors: TailorWithProfile[]
   initialService?: string
   initialCity?: string
+  initialState?: string
+  initialQuery?: string
+  isFiltered?: boolean
 }
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -35,26 +39,31 @@ const COVER_GRADIENTS = [
 
 const DEMO_TAILORS: TailorWithProfile[] = [
   { id: 'demo-1', user_id: 'demo-1', business_name: "Adaeze Couture", bio: "Lagos-based fashion house specialising in Aso-Oke, Ankara, and custom bridal gowns. 10+ years experience.", city: "Lagos", state: "Lagos", specialties: ["bridal", "custom_outfit", "alterations"], is_verified: true, avg_rating: 4.9, total_reviews: 134, total_orders: 312, response_time_hours: 2, profile: { id: 'demo-1', full_name: "Adaeze Okonkwo", role: "tailor" } as Profile } as TailorWithProfile,
-  { id: 'demo-2', user_id: 'demo-2', business_name: "Kemi Stitch & Style", bio: "Your go-to for office wear, casual fits, and alterations. Fast turnaround guaranteed.", city: "Abuja", state: "FCT", specialties: ["custom_outfit", "alterations", "ready_to_wear"], is_verified: true, avg_rating: 4.7, total_reviews: 88, total_orders: 201, response_time_hours: 4, profile: { id: 'demo-2', full_name: "Kemi Adeyemi", role: "tailor" } as Profile } as TailorWithProfile,
+  { id: 'demo-2', user_id: 'demo-2', business_name: "Kemi Stitch & Style", bio: "Your go-to for office wear, casual fits, and alterations. Fast turnaround guaranteed.", city: "Abuja", state: "FCT (Abuja)", specialties: ["custom_outfit", "alterations", "ready_to_wear"], is_verified: true, avg_rating: 4.7, total_reviews: 88, total_orders: 201, response_time_hours: 4, profile: { id: 'demo-2', full_name: "Kemi Adeyemi", role: "tailor" } as Profile } as TailorWithProfile,
   { id: 'demo-3', user_id: 'demo-3', business_name: "Emeka Fashion House", bio: "Men's agbada, suits, and senator wear. We deliver quality traditional and western wear across Nigeria.", city: "Enugu", state: "Enugu", specialties: ["custom_outfit", "uniforms"], is_verified: false, avg_rating: 4.5, total_reviews: 52, total_orders: 120, response_time_hours: 6, profile: { id: 'demo-3', full_name: "Emeka Nwosu", role: "tailor" } as Profile } as TailorWithProfile,
   { id: 'demo-4', user_id: 'demo-4', business_name: "Zara Fabrics & Sewing", bio: "Fabric sourcing, school uniforms, and custom designs. Serving Port Harcourt since 2015.", city: "Port Harcourt", state: "Rivers", specialties: ["fabric_sourcing", "uniforms", "alterations"], is_verified: true, avg_rating: 4.8, total_reviews: 76, total_orders: 185, response_time_hours: 3, profile: { id: 'demo-4', full_name: "Zara Williams", role: "tailor" } as Profile } as TailorWithProfile,
   { id: 'demo-5', user_id: 'demo-5', business_name: "Adeola Bridal Studio", bio: "Luxury bridal couture and asoebi coordination. We make your big day unforgettable.", city: "Ibadan", state: "Oyo", specialties: ["bridal", "custom_outfit"], is_verified: true, avg_rating: 5.0, total_reviews: 41, total_orders: 89, response_time_hours: 1, profile: { id: 'demo-5', full_name: "Adeola Fashola", role: "tailor" } as Profile } as TailorWithProfile,
   { id: 'demo-6', user_id: 'demo-6', business_name: "TrendWear by Chidi", bio: "Ready-to-wear and quick alterations. Same-day service available in Kano.", city: "Kano", state: "Kano", specialties: ["ready_to_wear", "alterations"], is_verified: false, avg_rating: 4.3, total_reviews: 29, total_orders: 67, response_time_hours: 8, profile: { id: 'demo-6', full_name: "Chidi Okafor", role: "tailor" } as Profile } as TailorWithProfile,
 ]
 
-export function BrowseClient({ tailors, initialService, initialCity }: BrowseClientProps) {
+export function BrowseClient({ tailors, initialService, initialCity, initialState, initialQuery, isFiltered }: BrowseClientProps) {
   const router = useRouter()
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(initialQuery || '')
   const [selectedService, setSelectedService] = useState(initialService || '')
+  const [selectedState, setSelectedState] = useState(initialState || '')
   const [selectedCity, setSelectedCity] = useState(initialCity || '')
   const [locating, setLocating] = useState(false)
-  const displayTailors = tailors.length > 0 ? tailors : DEMO_TAILORS
-  const isDemo = tailors.length === 0
+  // Only show demo profiles when the platform genuinely has no real tailors yet (no filter applied).
+  // If a search/filter legitimately finds zero matches, show a real empty state instead.
+  const isDemo = tailors.length === 0 && !isFiltered
+  const displayTailors = isDemo ? DEMO_TAILORS : tailors
 
   const handleFilter = () => {
     const params = new URLSearchParams()
     if (selectedService) params.set('service', selectedService)
+    if (selectedState) params.set('state', selectedState)
     if (selectedCity) params.set('city', selectedCity)
+    if (search.trim()) params.set('q', search.trim())
     router.push(`/browse?${params.toString()}`)
   }
 
@@ -73,29 +82,35 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
             { headers: { 'Accept-Language': 'en' } }
           )
           const data = await res.json()
-          const city = data.address?.city || data.address?.town || data.address?.county || ''
-          const state = data.address?.state || ''
-          if (city) {
-            setSelectedCity(city)
-            toast.success(`Location detected: ${city}${state ? `, ${state}` : ''}`)
+          const rawCity = data.address?.city || data.address?.town || data.address?.county || ''
+          const rawState = data.address?.state || ''
+          const matchedState = matchState(rawState) || ''
+          const matchedCity = matchCity(rawCity, matchedState) || matchCity(rawCity) || ''
+          if (matchedCity || matchedState) {
+            setSelectedState(matchedState)
+            setSelectedCity(matchedCity)
+            toast.success(`Location detected: ${matchedCity}${matchedState ? `, ${matchedState}` : ''}`)
             const params = new URLSearchParams()
             if (selectedService) params.set('service', selectedService)
-            params.set('city', city)
+            if (matchedState) params.set('state', matchedState)
+            if (matchedCity) params.set('city', matchedCity)
             router.push(`/browse?${params.toString()}`)
           } else {
-            toast.error('Could not determine your city. Try typing it manually.')
+            toast.error('Could not match your location to a known city. Select manually below.')
           }
         } catch {
-          toast.error('Could not get location details. Try typing your city.')
+          toast.error('Could not get location details. Select your city manually.')
         }
         setLocating(false)
       },
       (err) => {
         setLocating(false)
         if (err.code === err.PERMISSION_DENIED) {
-          toast.error('Location permission denied. Type your city instead.')
+          toast.error('Location permission denied. Select your state and city manually.')
+        } else if (err.code === err.TIMEOUT) {
+          toast.error('Location request timed out. Select manually below.')
         } else {
-          toast.error('Could not get your location. Try typing it manually.')
+          toast.error('Could not get your location. Select manually below.')
         }
       },
       { timeout: 10000, maximumAge: 300000 }
@@ -105,7 +120,9 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
   const filtered = displayTailors.filter(t =>
     !search ||
     t.business_name.toLowerCase().includes(search.toLowerCase()) ||
-    t.profile?.full_name?.toLowerCase().includes(search.toLowerCase())
+    t.profile?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+    (t.specialties || []).some(s => SERVICE_LABELS[s]?.toLowerCase().includes(search.toLowerCase())) ||
+    t.bio?.toLowerCase().includes(search.toLowerCase())
   )
 
   return (
@@ -117,20 +134,33 @@ export function BrowseClient({ tailors, initialService, initialCity }: BrowseCli
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
-              placeholder="Search creatives by name..."
+              placeholder="Search creatives, styles, or looks (e.g. Ankara, bridal, agbada)..."
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleFilter()}
             />
           </div>
           <div className="relative flex-1 md:flex-none">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              className="pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-44"
-              placeholder="City or state"
+            <select
+              className="appearance-none pl-3 pr-8 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-36 bg-white"
+              value={selectedState}
+              onChange={e => { setSelectedState(e.target.value); setSelectedCity('') }}
+            >
+              <option value="">Any state</option>
+              {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="relative flex-1 md:flex-none">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+            <select
+              className="appearance-none pl-10 pr-8 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-40 bg-white disabled:bg-gray-50 disabled:text-gray-400"
               value={selectedCity}
+              disabled={!selectedState}
               onChange={e => setSelectedCity(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleFilter()}
-            />
+            >
+              <option value="">{selectedState ? 'Any city' : 'Pick a state first'}</option>
+              {citiesForState(selectedState).map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
           <button
             onClick={detectLocation}

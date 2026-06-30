@@ -151,17 +151,27 @@ function ChatContent() {
   const submitMessage = async (content: string) => {
     if (!content.trim() || !activeRoom || !userId) return
     setSending(true)
-    await supabase.from('chat_messages').insert({ room_id: activeRoom.id, sender_id: userId, content: content.trim() })
-    await supabase.from('chat_rooms').update({ last_message: content.trim(), last_message_at: new Date().toISOString() }).eq('id', activeRoom.id)
+    const room = activeRoom
+    const { data: inserted } = await supabase
+      .from('chat_messages')
+      .insert({ room_id: room.id, sender_id: userId, content: content.trim() })
+      .select('*, sender:profiles(*)')
+      .single()
+    // Append immediately — don't rely solely on the realtime subscription, which
+    // requires chat_messages to be in the supabase_realtime publication (see
+    // supabase/realtime-chat-fix.sql). Without this, the sender's own message
+    // would only appear after a manual refresh.
+    if (inserted) setMessages(m => [...m, inserted as MessageWithSender])
+    await supabase.from('chat_rooms').update({ last_message: content.trim(), last_message_at: new Date().toISOString() }).eq('id', room.id)
     // Notify the other party
-    const recipientId = userId === activeRoom.customer_id ? activeRoom.tailor_id : activeRoom.customer_id
-    const senderName = (userId === activeRoom.customer_id ? activeRoom.customer : activeRoom.tailor)?.full_name || 'Someone'
+    const recipientId = userId === room.customer_id ? room.tailor_id : room.customer_id
+    const senderName = (userId === room.customer_id ? room.customer : room.tailor)?.full_name || 'Someone'
     await supabase.from('notifications').insert({
       user_id: recipientId,
       type: 'new_message',
       title: `New message from ${senderName}`,
       body: content.trim().slice(0, 80),
-      data: { room_tailor_id: activeRoom.tailor_id },
+      data: { room_tailor_id: room.tailor_id },
     })
     setText('')
     setSending(false)
@@ -188,7 +198,12 @@ function ChatContent() {
     if (!activeRoom || !userId) return
     const { data: profile } = await supabase.from('profiles').select('phone, full_name').eq('id', userId).single()
     const msg = `📞 Contact shared: ${profile?.full_name} — ${profile?.phone || 'Phone not set'}`
-    await supabase.from('chat_messages').insert({ room_id: activeRoom.id, sender_id: userId, content: msg, message_type: 'contact' })
+    const { data: inserted } = await supabase
+      .from('chat_messages')
+      .insert({ room_id: activeRoom.id, sender_id: userId, content: msg, message_type: 'contact' })
+      .select('*, sender:profiles(*)')
+      .single()
+    if (inserted) setMessages(m => [...m, inserted as MessageWithSender])
     await supabase.from('chat_rooms').update({ last_message: 'Contact shared', last_message_at: new Date().toISOString() }).eq('id', activeRoom.id)
     toast.success('Contact shared')
   }

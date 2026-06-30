@@ -7,6 +7,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { SERVICE_LABELS } from '@/lib/utils'
+import { NIGERIAN_STATES, citiesForState, matchState, matchCity } from '@/lib/nigeria-locations'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { CheckCircle, ArrowLeft, Navigation, Camera, AlertCircle } from 'lucide-react'
@@ -15,14 +16,6 @@ const SERVICE_ICONS: Record<string, string> = {
   street_wear: '🧢', custom_outfit: '👗', alterations: '✂️', bridal: '💍',
   ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
 }
-
-const NIGERIAN_STATES = [
-  'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
-  'Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT (Abuja)','Gombe',
-  'Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos',
-  'Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto',
-  'Taraba','Yobe','Zamfara',
-]
 
 export default function EditCreativeProfile() {
   const router = useRouter()
@@ -130,19 +123,29 @@ export default function EditCreativeProfile() {
             { headers: { 'Accept-Language': 'en' } }
           )
           const data = await res.json()
-          const city = data.address?.city || data.address?.town || data.address?.county || ''
+          const rawCity = data.address?.city || data.address?.town || data.address?.county || ''
           const rawState = data.address?.state || ''
-          const matchedState = NIGERIAN_STATES.find(s => rawState.toLowerCase().includes(s.toLowerCase())) || ''
-          if (city || matchedState) {
-            setForm(f => ({ ...f, city: city || f.city, state: matchedState || f.state }))
-            toast.success(`Location detected: ${city}${matchedState ? `, ${matchedState}` : ''}`)
+          const matchedState = matchState(rawState) || ''
+          const matchedCity = matchCity(rawCity, matchedState) || matchCity(rawCity) || ''
+          if (matchedCity || matchedState) {
+            setForm(f => ({ ...f, city: matchedCity || f.city, state: matchedState || f.state }))
+            toast.success(`Location detected: ${matchedCity}${matchedState ? `, ${matchedState}` : ''}`)
           } else {
-            toast.error('Could not determine location. Fill in manually.')
+            toast.error('Could not match your location to a known city. Select manually below.')
           }
-        } catch { toast.error('Location lookup failed') }
+        } catch { toast.error('Location lookup failed. Select manually below.') }
         setDetecting(false)
       },
-      () => { toast.error('Location permission denied'); setDetecting(false) },
+      (err) => {
+        setDetecting(false)
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error('Location permission denied. Select your state and city manually.')
+        } else if (err.code === err.TIMEOUT) {
+          toast.error('Location request timed out. Select manually below.')
+        } else {
+          toast.error('Could not get your location. Select manually below.')
+        }
+      },
       { timeout: 10000 }
     )
   }
@@ -326,25 +329,32 @@ export default function EditCreativeProfile() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-sm font-medium text-gray-700">City *</label>
+                  <label className="text-sm font-medium text-gray-700">State *</label>
                   <button type="button" onClick={detectLocation} disabled={detecting}
                     className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 disabled:opacity-50">
                     <Navigation size={11} className={detecting ? 'animate-spin' : ''} />
                     {detecting ? 'Detecting…' : 'Detect'}
                   </button>
                 </div>
-                <Input placeholder="e.g. Ikeja"
-                  value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">State *</label>
                 <select
                   className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   value={form.state}
-                  onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
+                  onChange={e => setForm(f => ({ ...f, state: e.target.value, city: citiesForState(e.target.value).includes(f.city) ? f.city : '' }))}
                 >
                   <option value="">— Select state —</option>
                   {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">City *</label>
+                <select
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
+                  value={form.city}
+                  disabled={!form.state}
+                  onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                >
+                  <option value="">{form.state ? '— Select city —' : 'Select a state first'}</option>
+                  {citiesForState(form.state).map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </div>

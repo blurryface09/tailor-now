@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Logo } from '@/components/ui/logo'
 import { SERVICE_LABELS } from '@/lib/utils'
+import { NIGERIAN_STATES, citiesForState } from '@/lib/nigeria-locations'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
@@ -17,14 +18,6 @@ const SERVICE_ICONS: Record<string, string> = {
 }
 
 const STEPS = ['Business Info', 'Services', 'How You Work']
-
-const NIGERIAN_STATES = [
-  'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
-  'Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT (Abuja)','Gombe',
-  'Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos',
-  'Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto',
-  'Taraba','Yobe','Zamfara',
-]
 
 export default function TailorOnboarding() {
   const router = useRouter()
@@ -116,17 +109,27 @@ export default function TailorOnboarding() {
               <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style" value={form.business_name}
                 onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))} />
               <div className="grid grid-cols-2 gap-3">
-                <Input label="City *" placeholder="e.g. Ikeja" value={form.city}
-                  onChange={e => setForm(f => ({ ...f, city: e.target.value }))} />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1.5">State *</label>
                   <select
                     className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     value={form.state}
-                    onChange={e => setForm(f => ({ ...f, state: e.target.value }))}
+                    onChange={e => setForm(f => ({ ...f, state: e.target.value, city: '' }))}
                   >
                     <option value="">— Select state —</option>
                     {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">City *</label>
+                  <select
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
+                    value={form.city}
+                    disabled={!form.state}
+                    onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                  >
+                    <option value="">{form.state ? '— Select city —' : 'Select a state first'}</option>
+                    {citiesForState(form.state).map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
               </div>
