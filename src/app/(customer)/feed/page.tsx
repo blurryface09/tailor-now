@@ -30,10 +30,7 @@ const COVER_GRADIENTS = [
 const DEMO_POSTS = [
   {
     id: 'demo-1',
-    gradient: 'from-violet-500 to-purple-700',
-    emoji: '👗',
-    pattern: 'radial-gradient(circle at 20px 20px, rgba(255,255,255,0.08) 2px, transparent 0)',
-    patternSize: '40px 40px',
+    imageUrl: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&h=600&fit=crop&q=80&auto=format',
     business_name: 'Adaeze Couture',
     city: 'Lagos',
     service: 'custom_outfit',
@@ -42,10 +39,7 @@ const DEMO_POSTS = [
   },
   {
     id: 'demo-2',
-    gradient: 'from-amber-500 to-orange-600',
-    emoji: '👔',
-    pattern: 'linear-gradient(45deg, rgba(255,255,255,0.06) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.06) 75%)',
-    patternSize: '30px 30px',
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&q=80&auto=format',
     business_name: 'Emeka Fashion House',
     city: 'Enugu',
     service: 'custom_outfit',
@@ -54,10 +48,7 @@ const DEMO_POSTS = [
   },
   {
     id: 'demo-3',
-    gradient: 'from-pink-500 to-rose-600',
-    emoji: '💍',
-    pattern: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)',
-    patternSize: '60px 60px',
+    imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&h=600&fit=crop&q=80&auto=format',
     business_name: 'Adeola Bridal Studio',
     city: 'Ibadan',
     service: 'bridal',
@@ -66,10 +57,7 @@ const DEMO_POSTS = [
   },
   {
     id: 'demo-4',
-    gradient: 'from-teal-500 to-emerald-600',
-    emoji: '✂️',
-    pattern: 'repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 11px)',
-    patternSize: 'auto',
+    imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&h=600&fit=crop&q=80&auto=format',
     business_name: 'Kemi Stitch & Style',
     city: 'Abuja',
     service: 'alterations',
@@ -82,21 +70,20 @@ function DemoPostCard({ post }: { post: typeof DEMO_POSTS[number] }) {
   const initial = post.business_name[0].toUpperCase()
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-      {/* Demo image area */}
-      <div className={`relative h-64 bg-gradient-to-br ${post.gradient} flex items-center justify-center overflow-hidden`}>
-        <div className="absolute inset-0" style={{ backgroundImage: post.pattern, backgroundSize: post.patternSize }} />
-        <span className="text-8xl select-none drop-shadow-lg">{post.emoji}</span>
-        <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full">
+      {/* Image */}
+      <div className="relative h-72 bg-gray-100 overflow-hidden">
+        <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" loading="lazy" />
+        <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full">
           Sample post
         </div>
-        <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
+        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
           {SERVICE_LABELS[post.service] ?? post.service}
         </div>
       </div>
       {/* Author row */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="flex items-center gap-2.5">
-          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${post.gradient} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
             {initial}
           </div>
           <div>
