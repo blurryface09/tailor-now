@@ -186,8 +186,8 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
       t.profile?.email?.toLowerCase().includes(search.toLowerCase()) ||
       t.city?.toLowerCase().includes(search.toLowerCase())
     const matchesFilter =
-      filter === 'all' ? true :
-      filter === 'verified' ? t.is_verified :
+      filter === 'all' ? t.is_active :
+      filter === 'verified' ? (t.is_verified && t.is_active) :
       filter === 'unverified' ? (!t.is_verified && t.is_active) :
       !t.is_active
     return matchesSearch && matchesFilter
