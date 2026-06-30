@@ -48,7 +48,11 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
         body: JSON.stringify({ tailorUserId: target.tailorUserId, content: body }),
       })
       setSending(false)
-      if (!res.ok) { toast.error('Failed to send message'); return }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        toast.error(data.error || `Error ${res.status}`)
+        return
+      }
       toast.success('In-app message sent!')
     } else {
       if (!target.email) { toast.error('No email on file'); setSending(false); return }
@@ -150,8 +154,8 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
       body: JSON.stringify({ id, field, value }),
     })
     if (!res.ok) {
-      const { error } = await res.json()
-      toast.error(error || 'Action failed')
+      const data = await res.json().catch(() => ({}))
+      toast.error(data.error || `Error ${res.status}`)
       return false
     }
     return true
