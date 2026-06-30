@@ -5,24 +5,35 @@ import { AdminTailorsClient } from './admin-tailors-client'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminTailorsPage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
-  const { filter } = await searchParams
+export default async function AdminTailorsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/browse')
 
-  let query = supabase.from('tailor_profiles').select('*, profile:profiles(full_name, email, phone, created_at)')
+  const { data: tailors } = await supabase
+    .from('tailor_profiles')
+    .select('*, profile:profiles(full_name, email, phone, avatar_url, created_at)')
     .order('created_at', { ascending: false })
-  if (filter === 'unverified') query = query.eq('is_verified', false)
 
-  const { data: tailors } = await query
+  // Fetch portfolio item counts per tailor
+  const ids = (tailors || []).map(t => t.id)
+  const { data: portfolioRows } = ids.length
+    ? await supabase.from('portfolio_items').select('tailor_id').in('tailor_id', ids)
+    : { data: [] }
+
+  const countMap: Record<string, number> = {}
+  for (const row of (portfolioRows || [])) {
+    countMap[row.tailor_id] = (countMap[row.tailor_id] || 0) + 1
+  }
+
+  const enriched = (tailors || []).map(t => ({ ...t, portfolio_count: countMap[t.id] || 0 }))
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <AdminTailorsClient tailors={tailors || []} />
+      <AdminTailorsClient tailors={enriched} />
     </div>
   )
 }

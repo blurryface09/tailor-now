@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { SERVICE_LABELS } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { CheckCircle, ArrowLeft, Navigation, Camera } from 'lucide-react'
+import { CheckCircle, ArrowLeft, Navigation, Camera, AlertCircle } from 'lucide-react'
 
 const SERVICE_ICONS: Record<string, string> = {
   street_wear: '🧢', custom_outfit: '👗', alterations: '✂️', bridal: '💍',
@@ -30,9 +30,14 @@ export default function EditCreativeProfile() {
   const [tailorId, setTailorId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [facePhotoUrl, setFacePhotoUrl] = useState<string | null>(null)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [uploadingFace, setUploadingFace] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [detecting, setDetecting] = useState(false)
+  const [phone, setPhone] = useState('')
+
   const [form, setForm] = useState({
     business_name: '',
     bio: '',
@@ -41,19 +46,22 @@ export default function EditCreativeProfile() {
     address: '',
     specialties: [] as string[],
     delivery_types: [] as string[],
+    min_price: '',
+    max_price: '',
   })
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/login'); return }
-      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (profile?.role !== 'tailor') { router.push('/home'); return }
-      const { data: fullProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single()
+      const { data: profileData } = await supabase.from('profiles').select('role, avatar_url, phone').eq('id', user.id).single()
+      if (profileData?.role !== 'tailor') { router.push('/home'); return }
       setUserId(user.id)
-      setAvatarUrl(fullProfile?.avatar_url || null)
+      setAvatarUrl(profileData?.avatar_url || null)
+      setPhone(profileData?.phone || '')
       const { data: tailor } = await supabase.from('tailor_profiles').select('*').eq('user_id', user.id).single()
       if (!tailor) { router.push('/onboarding/tailor'); return }
       setTailorId(tailor.id)
+      setFacePhotoUrl(tailor.face_photo_url || null)
       setForm({
         business_name: tailor.business_name || '',
         bio: tailor.bio || '',
@@ -62,32 +70,54 @@ export default function EditCreativeProfile() {
         address: tailor.address || '',
         specialties: tailor.specialties || [],
         delivery_types: tailor.delivery_types || [],
+        min_price: tailor.min_price ? String(tailor.min_price) : '',
+        max_price: tailor.max_price ? String(tailor.max_price) : '',
       })
       setLoading(false)
     })
   }, [])
 
+  const uploadImage = async (
+    file: File,
+    path: string,
+    onSuccess: (url: string) => void,
+    setUploading: (v: boolean) => void
+  ) => {
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    setUploading(true)
+    const { error } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true, contentType: file.type })
+    if (error) { toast.error(error.message); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
+    onSuccess(publicUrl)
+    setUploading(false)
+  }
+
   const uploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !userId) return
-    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
-    setUploadingAvatar(true)
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const path = `avatars/${userId}.${ext}`
-    const { error } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true, contentType: file.type })
-    if (error) { toast.error(error.message); setUploadingAvatar(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
-    await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', userId)
-    setAvatarUrl(publicUrl)
-    toast.success('Profile photo updated!')
-    setUploadingAvatar(false)
+    await uploadImage(file, `avatars/${userId}.${ext}`, async (url) => {
+      await supabase.from('profiles').update({ avatar_url: url }).eq('id', userId)
+      setAvatarUrl(url)
+      toast.success('Profile photo updated!')
+    }, setUploadingAvatar)
+    e.target.value = ''
+  }
+
+  const uploadFace = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !userId || !tailorId) return
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    await uploadImage(file, `faces/${userId}.${ext}`, async (url) => {
+      await supabase.from('tailor_profiles').update({ face_photo_url: url }).eq('id', tailorId)
+      setFacePhotoUrl(url)
+      toast.success('Face photo uploaded!')
+    }, setUploadingFace)
     e.target.value = ''
   }
 
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
-
-  const [detecting, setDetecting] = useState(false)
 
   const detectLocation = () => {
     if (!navigator.geolocation) { toast.error('Location not supported'); return }
@@ -102,13 +132,12 @@ export default function EditCreativeProfile() {
           const data = await res.json()
           const city = data.address?.city || data.address?.town || data.address?.county || ''
           const rawState = data.address?.state || ''
-          // Match to Nigerian state list
           const matchedState = NIGERIAN_STATES.find(s => rawState.toLowerCase().includes(s.toLowerCase())) || ''
           if (city || matchedState) {
             setForm(f => ({ ...f, city: city || f.city, state: matchedState || f.state }))
             toast.success(`Location detected: ${city}${matchedState ? `, ${matchedState}` : ''}`)
           } else {
-            toast.error('Could not determine location. Fill it in manually.')
+            toast.error('Could not determine location. Fill in manually.')
           }
         } catch { toast.error('Location lookup failed') }
         setDetecting(false)
@@ -127,22 +156,40 @@ export default function EditCreativeProfile() {
     form.delivery_types.length > 0
 
   const handleSave = async () => {
-    if (!tailorId) return
+    if (!tailorId || !userId) return
     setSaving(true)
-    const { error } = await supabase.from('tailor_profiles').update({
-      business_name: form.business_name.trim(),
-      bio: form.bio.trim(),
-      city: form.city.trim(),
-      state: form.state.trim(),
-      address: form.address.trim() || null,
-      specialties: form.specialties,
-      delivery_types: form.delivery_types,
-    }).eq('id', tailorId)
+    const [tailorRes, profileRes] = await Promise.all([
+      supabase.from('tailor_profiles').update({
+        business_name: form.business_name.trim(),
+        bio: form.bio.trim(),
+        city: form.city.trim(),
+        state: form.state.trim(),
+        address: form.address.trim() || null,
+        specialties: form.specialties,
+        delivery_types: form.delivery_types,
+        min_price: form.min_price ? parseInt(form.min_price) : null,
+        max_price: form.max_price ? parseInt(form.max_price) : null,
+      }).eq('id', tailorId),
+      phone.trim()
+        ? supabase.from('profiles').update({ phone: phone.trim() }).eq('id', userId)
+        : Promise.resolve({ error: null }),
+    ])
     setSaving(false)
-    if (error) { toast.error(error.message); return }
+    if (tailorRes.error) { toast.error(tailorRes.error.message); return }
+    if (profileRes.error) { toast.error(profileRes.error.message); return }
     toast.success('Profile updated!')
     router.push(`/tailors/${tailorId}`)
   }
+
+  // Completeness checklist
+  const checks = [
+    { label: 'Profile photo', done: !!avatarUrl },
+    { label: 'Phone number', done: !!phone.trim() },
+    { label: 'Shop address', done: !!form.address.trim() },
+    { label: 'Face photo', done: !!facePhotoUrl },
+    { label: 'Price range', done: !!(form.min_price && form.max_price) },
+  ]
+  const doneCount = checks.filter(c => c.done).length
 
   if (loading) return (
     <div className="min-h-screen bg-gray-50">
@@ -163,14 +210,39 @@ export default function EditCreativeProfile() {
           </Link>
           <div>
             <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
-            <p className="text-sm text-gray-500">This is what customers see on your public page</p>
+            <p className="text-sm text-gray-500">This is what customers and admin see</p>
+          </div>
+        </div>
+
+        {/* Verification checklist banner */}
+        <div className={`rounded-2xl border p-4 mb-5 ${doneCount === checks.length ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+          <div className="flex items-center justify-between mb-2">
+            <p className={`text-sm font-semibold ${doneCount === checks.length ? 'text-green-700' : 'text-amber-700'}`}>
+              {doneCount === checks.length ? 'Profile complete — ready for verification!' : `Complete your profile to get verified (${doneCount}/${checks.length})`}
+            </p>
+            <div className="flex gap-0.5">
+              {checks.map((c, i) => (
+                <div key={i} className={`w-5 h-1.5 rounded-full ${c.done ? 'bg-green-500' : 'bg-gray-200'}`} />
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
+            {checks.map(c => (
+              <div key={c.label} className={`flex items-center gap-1.5 text-xs ${c.done ? 'text-green-700' : 'text-amber-700'}`}>
+                {c.done ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
+                {c.label}
+              </div>
+            ))}
           </div>
         </div>
 
         <div className="space-y-5">
           {/* Profile photo */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Profile Photo</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-gray-900">Profile Photo <span className="text-red-500 text-sm">*</span></h2>
+              {avatarUrl && <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle size={12} /> Uploaded</span>}
+            </div>
             <div className="flex items-center gap-5">
               <div className="relative flex-shrink-0">
                 {avatarUrl ? (
@@ -188,10 +260,43 @@ export default function EditCreativeProfile() {
                 </label>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Upload your photo</p>
-                <p className="text-xs text-gray-400 mt-0.5">Clear face photo — customers trust profiles with real photos</p>
+                <p className="text-sm font-medium text-gray-700">Your profile picture</p>
+                <p className="text-xs text-gray-400 mt-0.5">Clear photo of your face — builds customer trust</p>
                 <p className="text-xs text-gray-400">JPG or PNG, max 5MB</p>
               </div>
+            </div>
+          </div>
+
+          {/* Face / identity photo */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="font-bold text-gray-900">Face Verification Photo <span className="text-red-500 text-sm">*</span></h2>
+              {facePhotoUrl && <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle size={12} /> Uploaded</span>}
+            </div>
+            <p className="text-sm text-gray-500 mb-4">A clear selfie holding a piece of paper with today's date. Used only for admin identity verification — not shown publicly.</p>
+            <div className="flex items-start gap-4">
+              {facePhotoUrl ? (
+                <div className="relative flex-shrink-0">
+                  <img src={facePhotoUrl} alt="Face verification" className="w-24 h-24 rounded-xl object-cover border-2 border-green-200" />
+                  <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-violet-800 transition-colors">
+                    {uploadingFace ? <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera size={10} className="text-white" />}
+                    <input type="file" accept="image/*" className="hidden" onChange={uploadFace} disabled={uploadingFace} />
+                  </label>
+                </div>
+              ) : (
+                <label className={`flex flex-col items-center justify-center w-24 h-24 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploadingFace ? 'border-violet-300 bg-violet-50' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50'}`}>
+                  {uploadingFace
+                    ? <div className="w-5 h-5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                    : <><Camera size={20} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Upload</span></>}
+                  <input type="file" accept="image/*" className="hidden" onChange={uploadFace} disabled={uploadingFace} />
+                </label>
+              )}
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li>• Clear, well-lit selfie</li>
+                <li>• Hold a paper with today's date</li>
+                <li>• Face clearly visible</li>
+                <li>• Kept private by admin</li>
+              </ul>
             </div>
           </div>
 
@@ -200,6 +305,24 @@ export default function EditCreativeProfile() {
             <h2 className="font-bold text-gray-900">Business Info</h2>
             <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style"
               value={form.business_name} onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))} />
+
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Phone number * <span className="font-normal text-gray-400 text-xs">(customers can call/WhatsApp you)</span>
+              </label>
+              <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">+234</span>
+                <input
+                  type="tel"
+                  placeholder="08012345678"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
+                />
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
@@ -225,7 +348,7 @@ export default function EditCreativeProfile() {
                 </select>
               </div>
             </div>
-            <Input label="Shop address (optional)" placeholder="Shop number / street"
+            <Input label="Shop address * (street / shop number)" placeholder="e.g. 12 Balogun Market, Shop B4"
               value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -241,6 +364,32 @@ export default function EditCreativeProfile() {
               <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
                 {form.bio.trim().length} / 20 minimum characters
               </p>
+            </div>
+          </div>
+
+          {/* Price range */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+            <h2 className="font-bold text-gray-900 mb-1">Price Range *</h2>
+            <p className="text-sm text-gray-500 mb-4">Your typical price range for outfits (₦). Customers use this to find creatives in their budget.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Minimum (₦)</label>
+                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                  <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                  <input type="number" min="0" placeholder="5000"
+                    className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
+                    value={form.min_price} onChange={e => setForm(f => ({ ...f, min_price: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum (₦)</label>
+                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                  <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                  <input type="number" min="0" placeholder="150000"
+                    className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
+                    value={form.max_price} onChange={e => setForm(f => ({ ...f, max_price: e.target.value }))} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -291,11 +440,17 @@ export default function EditCreativeProfile() {
             </div>
           </div>
 
+          {/* Portfolio reminder */}
+          <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4">
+            <p className="text-sm font-semibold text-violet-800 mb-1">Don't forget your portfolio</p>
+            <p className="text-xs text-violet-700">Upload at least 2 photos of your work to complete your profile. Go to <strong>My Portfolio</strong> in your dashboard.</p>
+          </div>
+
           <Button size="lg" className="w-full" loading={saving} disabled={!canSave} onClick={handleSave}>
             Save Changes
           </Button>
           {!canSave && (
-            <p className="text-xs text-center text-amber-600">Fill in all required fields to save (bio needs at least 20 characters)</p>
+            <p className="text-xs text-center text-amber-600">Fill in all required fields (bio needs at least 20 characters)</p>
           )}
         </div>
       </div>
