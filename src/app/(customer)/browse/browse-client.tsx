@@ -6,6 +6,7 @@ import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap, Navigation } fro
 import toast from 'react-hot-toast'
 import { SERVICE_LABELS, cn } from '@/lib/utils'
 import { NIGERIAN_STATES, citiesForState, matchState, matchCity } from '@/lib/nigeria-locations'
+import { calcScore, getLevel } from '@/lib/creative-score'
 import type { TailorProfile, Profile } from '@/types'
 
 type TailorWithProfile = TailorProfile & { profile: Profile }
@@ -307,10 +308,14 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
           )}
         </div>
         <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-          <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Clock size={11} />
-            {tailor.response_time_hours ? `Replies in ~${tailor.response_time_hours}h` : 'Quick responder'}
-          </div>
+          {(() => {
+            const lvl = getLevel(calcScore({ profile_likes: tailor.profile_likes, profile_views: tailor.profile_views, total_orders: tailor.total_orders }))
+            return (
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${lvl.bg} ${lvl.color} ${lvl.border}`}>
+                {lvl.emoji} {lvl.level}
+              </span>
+            )
+          })()}
           <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full">
             {tailor.total_orders} orders
           </span>

@@ -14,7 +14,7 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: tailor }, { data: services }, { data: portfolio }, { data: ratings }] = await Promise.all([
+  const [{ data: tailor }, { data: services }, { data: portfolio }, { data: ratings }, { data: likeRow }] = await Promise.all([
     supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('id', id).single(),
     supabase.from('tailor_services').select('*').eq('tailor_id', id).eq('is_active', true),
     supabase.from('portfolio_items').select('*').eq('tailor_id', id).order('created_at', { ascending: false }),
@@ -25,6 +25,9 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
           .order('created_at', { ascending: false })
           .limit(20)
       : Promise.resolve({ data: [] }),
+    user
+      ? supabase.from('creative_likes').select('id').eq('creative_id', id).eq('user_id', user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
   if (!tailor) notFound()
@@ -40,6 +43,8 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
         portfolio={portfolio || []}
         ratings={ratings || []}
         isOwner={isOwner}
+        currentUserId={user?.id ?? null}
+        initialLiked={!!likeRow}
       />
     </div>
   )

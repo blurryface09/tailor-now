@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } from '@/lib/utils'
 import { isCreativeProfileComplete } from '@/lib/creative-completeness'
+import { calcScore, getLevel } from '@/lib/creative-score'
 import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image, UserCog, AlertCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -46,6 +47,11 @@ export default async function TailorDashboard() {
   const pendingEarnings = (payouts || []).filter(p => p.status === 'pending').reduce((s, p) => s + p.net_amount, 0)
   const activeOrders = (orders || []).filter(o => !['completed', 'cancelled'].includes(o.status)).length
   const pendingOrders = (orders || []).filter(o => o.status === 'pending').length
+
+  const score = calcScore({ profile_likes: tailor.profile_likes, profile_views: tailor.profile_views, total_orders: tailor.total_orders })
+  const level = getLevel(score)
+  const nextLevel = level.nextScore !== null ? level.nextScore : null
+  const levelPct = nextLevel !== null ? Math.min(100, Math.round((score / nextLevel) * 100)) : 100
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -91,6 +97,32 @@ export default async function TailorDashboard() {
               <div className="text-sm text-gray-500 mt-0.5">{s.label}</div>
             </div>
           ))}
+        </div>
+
+        {/* Level card */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{level.emoji}</span>
+              <div>
+                <p className="font-bold text-gray-900">{level.level} Level</p>
+                <p className="text-xs text-gray-500">Score: {score} pts</p>
+              </div>
+            </div>
+            {nextLevel !== null && (
+              <p className="text-xs text-gray-400">{nextLevel - score} pts to next level</p>
+            )}
+          </div>
+          <div className="w-full bg-gray-100 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full transition-all ${level.level === 'Platinum' ? 'bg-cyan-400' : level.level === 'Gold' ? 'bg-yellow-400' : level.level === 'Silver' ? 'bg-slate-400' : 'bg-orange-400'}`}
+              style={{ width: `${levelPct}%` }}
+            />
+          </div>
+          <div className="flex justify-between mt-2 text-xs text-gray-400">
+            <span>Likes × 1 · Views × 0.1 · Orders × 10</span>
+            {nextLevel !== null && <span>{levelPct}%</span>}
+          </div>
         </div>
 
         {/* Pending verification notice */}

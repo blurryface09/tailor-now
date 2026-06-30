@@ -71,6 +71,8 @@ export interface TailorProfile {
   is_active: boolean
   is_founder: boolean
   face_photo_url: string | null
+  profile_views: number
+  profile_likes: number
   min_price: number | null
   max_price: number | null
   avg_rating: number

@@ -1,14 +1,16 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   MapPin, Star, CheckCircle, Clock, Scissors, MessageSquare,
-  ShoppingBag, Pencil, Camera, BadgeCheck, ArrowLeft, X,
+  ShoppingBag, Pencil, Camera, BadgeCheck, ArrowLeft, X, Heart,
 } from 'lucide-react'
 import { SERVICE_LABELS, formatCurrency, formatDate, cn } from '@/lib/utils'
 import { StarRating } from '@/components/ui/star-rating'
 import { Badge } from '@/components/ui/badge'
+import { calcScore, getLevel } from '@/lib/creative-score'
 import type { TailorProfile, TailorService, PortfolioItem, Rating, Profile } from '@/types'
+import toast from 'react-hot-toast'
 
 type TailorWithProfile = TailorProfile & { profile: Profile }
 type RatingWithReviewer = Rating & { reviewer: Profile }
@@ -19,6 +21,8 @@ interface Props {
   portfolio: PortfolioItem[]
   ratings: RatingWithReviewer[]
   isOwner?: boolean
+  currentUserId?: string | null
+  initialLiked?: boolean
 }
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -37,12 +41,45 @@ function LightboxModal({ src, onClose }: { src: string; onClose: () => void }) {
   )
 }
 
-export function TailorProfileClient({ tailor, services, portfolio, ratings, isOwner }: Props) {
+export function TailorProfileClient({ tailor, services, portfolio, ratings, isOwner, currentUserId, initialLiked = false }: Props) {
   const [tab, setTab] = useState<'about' | 'portfolio' | 'services' | 'reviews'>('portfolio')
   const [lightbox, setLightbox] = useState<string | null>(null)
+  const [liked, setLiked] = useState(initialLiked)
+  const [likesCount, setLikesCount] = useState(tailor.profile_likes ?? 0)
+  const [liking, setLiking] = useState(false)
 
   const hasOrders = tailor.total_orders > 0
   const hasRating = tailor.avg_rating > 0
+
+  const score = calcScore({ profile_likes: likesCount, profile_views: tailor.profile_views, total_orders: tailor.total_orders })
+  const level = getLevel(score)
+
+  // Increment view count once on mount (fire-and-forget)
+  useEffect(() => {
+    if (!isOwner) {
+      fetch(`/api/creative/${tailor.id}/view`, { method: 'POST' }).catch(() => {})
+    }
+  }, [tailor.id, isOwner])
+
+  const handleLike = async () => {
+    if (!currentUserId) { toast.error('Sign in to like creatives'); return }
+    if (isOwner) return
+    setLiking(true)
+    setLiked(l => !l)
+    setLikesCount(c => liked ? c - 1 : c + 1)
+    const res = await fetch(`/api/creative/${tailor.id}/like`, { method: 'POST' })
+    const data = await res.json()
+    if (res.ok) {
+      setLiked(data.liked)
+      setLikesCount(data.likes)
+    } else {
+      // Revert optimistic update
+      setLiked(l => !l)
+      setLikesCount(c => liked ? c + 1 : c - 1)
+      toast.error(data.error || 'Could not update like')
+    }
+    setLiking(false)
+  }
 
   // Use portfolio images as cover: first 3 for collage, else gradient
   const coverImages = portfolio.filter(p => p.image_url).slice(0, 3)
@@ -130,6 +167,17 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                 </Link>
               ) : (
                 <>
+                  <button
+                    onClick={handleLike}
+                    disabled={liking}
+                    className={`flex items-center gap-1.5 px-3 py-2 border-2 rounded-full text-sm font-semibold transition-all ${
+                      liked
+                        ? 'border-rose-400 bg-rose-50 text-rose-600'
+                        : 'border-gray-200 text-gray-500 hover:border-rose-300 hover:text-rose-500'
+                    }`}>
+                    <Heart size={14} className={liked ? 'fill-rose-500' : ''} />
+                    <span>{likesCount > 0 ? likesCount : ''}</span>
+                  </button>
                   <Link href={`/chat?tailor=${tailor.id}`}
                     className="flex items-center gap-1.5 px-4 py-2 border-2 border-gray-200 text-gray-700 rounded-full text-sm font-semibold hover:border-violet-400 hover:text-violet-700 transition-colors">
                     <MessageSquare size={14} /> Message
@@ -167,7 +215,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
           )}
 
           {/* Meta row */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mb-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-gray-500 mb-3">
             <span className="flex items-center gap-1">
               <MapPin size={13} className="text-gray-400" />
               {tailor.city}, {tailor.state}
@@ -177,6 +225,9 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                 ₦{((tailor as any).min_price / 1000).toFixed(0)}k – ₦{((tailor as any).max_price / 1000).toFixed(0)}k
               </span>
             )}
+            <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full border ${level.bg} ${level.color} ${level.border}`}>
+              {level.emoji} {level.level}
+            </span>
             {tailor.delivery_types?.includes('pickup_delivery') && (
               <span className="flex items-center gap-1 text-green-600">
                 <CheckCircle size={12} /> Delivery
