@@ -18,36 +18,24 @@ export async function PATCH(req: NextRequest) {
 
     const admin = createAdminClient()
 
-    // When verifying a creative, check if they earn the founder badge (first 100)
+    // When verifying a creative, send them a notification
     if (field === 'is_verified' && value === true) {
-      const { count } = await admin
-        .from('tailor_profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_founder', true)
-
-      const earnsBadge = (count ?? 0) < 100
-      const update: Record<string, unknown> = { is_verified: true }
-      if (earnsBadge) update.is_founder = true
-
-      const { error } = await admin.from('tailor_profiles').update(update).eq('id', id)
+      const { error } = await admin.from('tailor_profiles').update({ is_verified: true }).eq('id', id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-      if (earnsBadge) {
-        // Notify the creative they earned the founder badge
-        const { data: tailor } = await admin
-          .from('tailor_profiles').select('user_id').eq('id', id).single()
-        if (tailor) {
-          await admin.from('notifications').insert({
-            user_id: tailor.user_id,
-            type: 'system',
-            title: '🐐 You earned the Founder badge!',
-            body: `You're one of the first 100 verified creatives on TailorNow. This badge is permanent and shows on your public profile.`,
-            data: {},
-          })
-        }
+      const { data: tailor } = await admin
+        .from('tailor_profiles').select('user_id').eq('id', id).single()
+      if (tailor) {
+        await admin.from('notifications').insert({
+          user_id: tailor.user_id,
+          type: 'system',
+          title: '✅ You\'re now a Verified Creative!',
+          body: `Your profile has been approved. You now appear in search results and customers can discover and book you.`,
+          data: {},
+        })
       }
 
-      return NextResponse.json({ ok: true, is_founder: earnsBadge })
+      return NextResponse.json({ ok: true })
     }
 
     const { error } = await admin.from('tailor_profiles').update({ [field]: value }).eq('id', id)

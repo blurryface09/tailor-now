@@ -23,7 +23,7 @@ export default async function HallOfFamePage() {
     .select(`
       id, business_name, city, state, specialties,
       avg_rating, total_reviews, total_orders,
-      profile_likes, profile_views, is_founder,
+      profile_likes, profile_views,
       face_photo_url,
       profile:profiles(full_name, avatar_url)
     `)
@@ -131,11 +131,6 @@ export default async function HallOfFamePage() {
                           <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full border', level.bg, level.color, level.border)}>
                             {level.emoji} {level.level}
                           </span>
-                          {c.is_founder && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                              🐐 Founder
-                            </span>
-                          )}
                         </div>
 
                         {(c.specialties ?? []).slice(0, 2).length > 0 && (
@@ -194,11 +189,6 @@ export default async function HallOfFamePage() {
                             <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-violet-700 transition-colors">
                               {c.business_name}
                             </p>
-                            {c.is_founder && (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
-                                🐐 Founder
-                              </span>
-                            )}
                           </div>
                           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                             {c.city && (
