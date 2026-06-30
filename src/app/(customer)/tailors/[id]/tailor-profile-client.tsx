@@ -198,6 +198,11 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
               {tailor.is_verified && (
                 <BadgeCheck size={20} className="text-violet-600 flex-shrink-0" />
               )}
+              {tailor.is_founder && (
+                <span className="inline-flex items-center gap-1 bg-gradient-to-r from-gray-950 to-slate-800 text-amber-400 text-xs font-bold px-2.5 py-1 rounded-full ring-1 ring-amber-500/30 shadow-sm flex-shrink-0">
+                  ✂ First Cut
+                </span>
+              )}
             </div>
             {tailor.profile?.full_name && (
               <p className="text-sm text-gray-500 font-medium">{tailor.profile.full_name}</p>

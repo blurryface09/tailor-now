@@ -259,6 +259,11 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
       <div className={cn('h-36 bg-gradient-to-br relative overflow-hidden', gradient)}>
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
         <div className="absolute right-4 bottom-2 text-white/20 text-7xl leading-none select-none">✂</div>
+        {(tailor as any).is_founder && (
+          <div className="absolute top-3 left-3 flex items-center gap-1 bg-gradient-to-r from-gray-950 to-slate-800 rounded-full px-2.5 py-1 text-xs font-bold text-amber-400 shadow-md ring-1 ring-amber-500/30">
+            ✂ First Cut
+          </div>
+        )}
         {tailor.is_verified && (
           <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-sm">
             <CheckCircle size={11} className="text-violet-600" /> Verified

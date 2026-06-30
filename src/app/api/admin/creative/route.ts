@@ -18,9 +18,18 @@ export async function PATCH(req: NextRequest) {
 
     const admin = createAdminClient()
 
-    // When verifying a creative, send them a notification
+    // When verifying a creative, check if they earn the First Cut badge (first 50)
     if (field === 'is_verified' && value === true) {
-      const { error } = await admin.from('tailor_profiles').update({ is_verified: true }).eq('id', id)
+      const { count } = await admin
+        .from('tailor_profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_founder', true)
+
+      const isFirstCut = (count ?? 0) < 50
+      const update: Record<string, unknown> = { is_verified: true }
+      if (isFirstCut) update.is_founder = true
+
+      const { error } = await admin.from('tailor_profiles').update(update).eq('id', id)
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
       const { data: tailor } = await admin
@@ -29,13 +38,15 @@ export async function PATCH(req: NextRequest) {
         await admin.from('notifications').insert({
           user_id: tailor.user_id,
           type: 'system',
-          title: '✅ You\'re now a Verified Creative!',
-          body: `Your profile has been approved. You now appear in search results and customers can discover and book you.`,
+          title: isFirstCut ? '✂️ You earned the First Cut badge!' : '✅ You\'re now a Verified Creative!',
+          body: isFirstCut
+            ? `You're one of the first 50 verified creatives on TailorNow. The First Cut badge is permanent and shows on your public profile for life.`
+            : `Your profile has been approved. You now appear in search results and customers can discover and book you.`,
           data: {},
         })
       }
 
-      return NextResponse.json({ ok: true })
+      return NextResponse.json({ ok: true, is_first_cut: isFirstCut })
     }
 
     const { error } = await admin.from('tailor_profiles').update({ [field]: value }).eq('id', id)
