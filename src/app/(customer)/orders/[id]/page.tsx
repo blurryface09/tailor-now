@@ -192,7 +192,7 @@ function OrderDetailContent() {
 
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div>
-              <p className="text-gray-500">Tailor</p>
+              <p className="text-gray-500">Creative</p>
               <p className="font-medium text-gray-900">{order.tailor?.business_name}</p>
             </div>
             <div>

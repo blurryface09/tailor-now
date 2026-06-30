@@ -50,9 +50,9 @@ function ContactGateModal({ onClose }: { onClose: () => void }) {
         <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Lock size={24} className="text-amber-600" />
         </div>
-        <h3 className="font-bold text-gray-900 mb-2">Pay deposit to unlock contact</h3>
+        <h3 className="font-bold text-gray-900 mb-2">Place an order to chat directly</h3>
         <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-          Contact sharing unlocks after the deposit is paid on an order. This protects both you and the tailor.
+          Contact details unlock once payment is confirmed on an order. This keeps both you and the creative protected.
         </p>
         <div className="space-y-2">
           <Link href="/orders/new" className="block w-full py-3 bg-violet-700 text-white text-sm font-bold rounded-xl hover:bg-violet-800 transition-colors">

@@ -95,7 +95,7 @@ export default function AdminOnboardTailorPage() {
     if (error) { toast.error(error.message); setSubmitting(false); return }
 
     await supabase.from('profiles').update({ role: 'tailor' }).eq('id', foundUser.id)
-    toast.success('Tailor onboarded and verified!')
+    toast.success('Creative onboarded and verified!')
     setDone(true)
     setSubmitting(false)
   }

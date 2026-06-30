@@ -220,10 +220,17 @@ export default function FeedPage() {
       const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', user.id)
       setFollowing(new Set((follows || []).map(f => f.following_id)))
     }
+    const { data: verifiedCreatives } = await supabase
+      .from('tailor_profiles').select('user_id').eq('is_verified', true)
+    const verifiedIds = (verifiedCreatives ?? []).map(c => c.user_id)
+
     const [postsResult, creativesResult] = await Promise.all([
-      supabase.from('posts').select('*, author:profiles!posts_user_id_fkey(*), creative:tailor_profiles(*, user_id, business_name, city, state)')
-        .order('created_at', { ascending: false }).limit(40),
-      supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('is_active', true)
+      verifiedIds.length > 0
+        ? supabase.from('posts').select('*, author:profiles!posts_user_id_fkey(*), creative:tailor_profiles(*, user_id, business_name, city, state)')
+            .in('user_id', verifiedIds)
+            .order('created_at', { ascending: false }).limit(40)
+        : Promise.resolve({ data: [] }),
+      supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('is_active', true).eq('is_verified', true)
         .order('avg_rating', { ascending: false }).limit(12),
     ])
     if (postsResult.data && user) {

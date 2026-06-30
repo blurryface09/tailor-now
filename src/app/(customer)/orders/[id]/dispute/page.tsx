@@ -8,12 +8,12 @@ import { AlertTriangle, ChevronLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const DISPUTE_REASONS = [
-  'Tailor did not deliver my order',
+  'Creative did not deliver my order',
   'Order quality is unacceptable',
   'Measurements were wrong',
-  'Tailor is unresponsive',
+  'Creative is unresponsive',
   'Delivered item is different from what was agreed',
-  'Tailor is requesting off-platform payment',
+  'Creative is requesting off-platform payment',
   'Other',
 ]
 
