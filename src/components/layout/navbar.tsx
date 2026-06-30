@@ -142,6 +142,12 @@ export function Navbar() {
               )}>
                 Find Creatives
               </Link>
+              <Link href="/hall-of-fame" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/hall-of-fame') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              )}>
+                🏆 Hall of Fame
+              </Link>
             </>
           )}
 
@@ -171,6 +177,12 @@ export function Navbar() {
                 isActive('/tailor/portfolio') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
               )}>
                 Portfolio
+              </Link>
+              <Link href="/hall-of-fame" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/hall-of-fame') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              )}>
+                🏆 Hall of Fame
               </Link>
             </>
           )}
@@ -275,6 +287,12 @@ export function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/hall-of-fame" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/hall-of-fame') ? 'bg-violet-100 text-violet-700' : 'text-gray-600 hover:text-violet-700 hover:bg-violet-50'
+              )}>
+                🏆 Hall of Fame
+              </Link>
               <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-violet-700 px-3 py-2 rounded-xl hover:bg-violet-50 transition-all duration-200">
                 Sign in
               </Link>
@@ -306,6 +324,9 @@ export function Navbar() {
               <Link href="/browse" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
                 Find Creatives
               </Link>
+              <Link href="/hall-of-fame" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+                🏆 Hall of Fame
+              </Link>
             </>
           )}
           {profile?.role === 'tailor' && (
@@ -318,6 +339,9 @@ export function Navbar() {
               </Link>
               <Link href="/tailor/posts" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
                 Posts
+              </Link>
+              <Link href="/hall-of-fame" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+                🏆 Hall of Fame
               </Link>
             </>
           )}
@@ -361,9 +385,14 @@ export function Navbar() {
             </>
           )}
           {!profile && (
-            <Link href="/signup" className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-700 text-center mt-2" onClick={() => setMenuOpen(false)}>
-              Get Started
-            </Link>
+            <>
+              <Link href="/hall-of-fame" className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-violet-50 hover:text-violet-700 transition-colors" onClick={() => setMenuOpen(false)}>
+                🏆 Hall of Fame
+              </Link>
+              <Link href="/signup" className="block px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-violet-700 text-center mt-2" onClick={() => setMenuOpen(false)}>
+                Get Started
+              </Link>
+            </>
           )}
         </div>
       </div>
