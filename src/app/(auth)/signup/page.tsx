@@ -8,7 +8,7 @@ import { Logo } from '@/components/ui/logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import toast from 'react-hot-toast'
-import { Mail, Lock, User, Scissors, ShoppingBag } from 'lucide-react'
+import { Mail, Lock, User, Scissors, ShoppingBag, CheckCircle } from 'lucide-react'
 
 function SignupContent() {
   const router = useRouter()
@@ -18,6 +18,8 @@ function SignupContent() {
 
   const [role, setRole] = useState<'customer' | 'tailor'>(defaultRole as 'customer' | 'tailor')
   const [loading, setLoading] = useState(false)
+  const [checkEmail, setCheckEmail] = useState(false)
+  const [signedUpEmail, setSignedUpEmail] = useState('')
   const [form, setForm] = useState({ full_name: '', email: '', password: '', confirm_password: '' })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -37,23 +39,76 @@ function SignupContent() {
     e.preventDefault()
     if (!validate()) return
     setLoading(true)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://tailornow.shop'
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { full_name: form.full_name.trim(), role } },
+      options: {
+        data: { full_name: form.full_name.trim(), role },
+        emailRedirectTo: `${siteUrl}/auth/callback`,
+      },
     })
     if (error) {
       toast.error(error.message)
       setLoading(false)
       return
     }
-    // Send welcome message for customers (tailors get it after onboarding)
+    // If session is null, Supabase requires email confirmation first
+    if (!data.session) {
+      setSignedUpEmail(form.email)
+      setCheckEmail(true)
+      setLoading(false)
+      // Fire welcome email (non-blocking)
+      if (data.user?.id) {
+        fetch('/api/welcome', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: data.user.id, role }),
+        }).catch(() => {})
+      }
+      return
+    }
+    // Email confirmation disabled — session available immediately
     if (role === 'customer' && data.user?.id) {
-      fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: data.user.id, role: 'customer' }) }).catch(() => {})
+      fetch('/api/welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: data.user.id, role: 'customer' }),
+      }).catch(() => {})
     }
     toast.success('Account created! Welcome to TailorNow.')
     router.push(role === 'tailor' ? '/onboarding/tailor' : '/home')
   }
+
+  if (checkEmail) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md text-center page-enter">
+        <Link href="/" className="inline-flex mb-8 justify-center">
+          <Logo size="md" variant="full" animated />
+        </Link>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div className="w-14 h-14 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Mail size={28} className="text-violet-700" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Check your email</h1>
+          <p className="text-sm text-gray-500 mb-1">We sent a verification link to</p>
+          <p className="font-semibold text-gray-900 mb-4">{signedUpEmail}</p>
+          <p className="text-sm text-gray-500 mb-6">
+            Click the link in the email to verify your account and continue.
+            The link expires in 24 hours.
+          </p>
+          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-left mb-4">
+            <CheckCircle size={16} className="text-amber-600 flex-shrink-0" />
+            <p className="text-xs text-amber-700">Don't forget to check your spam/junk folder if you don't see it.</p>
+          </div>
+          <Link href="/login"
+            className="block text-center text-sm text-violet-700 font-semibold hover:underline">
+            Back to sign in
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
