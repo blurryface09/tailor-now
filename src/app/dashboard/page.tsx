@@ -67,6 +67,11 @@ export default async function TailorDashboard() {
                 <CheckCircle size={16} /> Verified creative
               </div>
             )}
+            {tailor.is_founder && (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm text-amber-700 font-semibold">
+                🐐 Founder
+              </div>
+            )}
             <Link href={`/tailors/${tailor.id}`} className="text-sm border border-violet-700 text-violet-700 px-4 py-2 rounded-xl hover:bg-violet-50 transition-colors">
               View public profile
             </Link>

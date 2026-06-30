@@ -69,6 +69,7 @@ export interface TailorProfile {
   longitude: number | null
   is_verified: boolean
   is_active: boolean
+  is_founder: boolean
   face_photo_url: string | null
   min_price: number | null
   max_price: number | null
