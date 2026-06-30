@@ -7,7 +7,7 @@ import type { Profile } from '@/types'
 import {
   Bell, MessageSquare, User, LogOut, Scissors, LayoutDashboard,
   ChevronDown, Menu, X, Shield, Users, Package, Star, TrendingUp,
-  AlertTriangle, Store,
+  AlertTriangle, Store, Radio,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
@@ -22,6 +22,7 @@ const ADMIN_LINKS = [
   { href: '/admin/payouts',         icon: <TrendingUp size={14} />,      label: 'Payouts' },
   { href: '/admin/marketplace',     icon: <Store size={14} />,           label: 'Marketplace' },
   { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Creative' },
+  { href: '/admin/broadcast',       icon: <Radio size={14} />,           label: 'Broadcast' },
 ]
 
 export function Navbar() {
