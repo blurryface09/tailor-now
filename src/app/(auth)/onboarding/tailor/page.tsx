@@ -1,121 +1,302 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Logo } from '@/components/ui/logo'
 import { SERVICE_LABELS } from '@/lib/utils'
-import { NIGERIAN_STATES, citiesForState } from '@/lib/nigeria-locations'
+import { NIGERIAN_STATES, citiesForState, matchState, matchCity } from '@/lib/nigeria-locations'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Camera, Upload, X, Navigation } from 'lucide-react'
 
 const SERVICE_ICONS: Record<string, string> = {
   custom_outfit: '👗', alterations: '✂️', bridal: '💍',
   ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
 }
 
-const STEPS = ['Business Info', 'Services', 'How You Work']
+const STEPS = [
+  'Business Info',
+  'Services',
+  'How You Work',
+  'Profile & Phone',
+  'Face Verification',
+  'Pricing',
+  'Portfolio',
+]
 
 export default function TailorOnboarding() {
   const router = useRouter()
   const supabase = createClient()
+
   const [step, setStep] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false)
+  const [detecting, setDetecting] = useState(false)
+
+  const [userId, setUserId] = useState<string | null>(null)
+  const [tailorId, setTailorId] = useState<string | null>(null)
+
   const [form, setForm] = useState({
     business_name: '', bio: '', city: '', state: '', address: '',
     specialties: [] as string[], delivery_types: [] as string[],
   })
+  const [phone, setPhone] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [facePhotoUrl, setFacePhotoUrl] = useState<string | null>(null)
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [portfolioItems, setPortfolioItems] = useState<Array<{ id: string; image_url: string; title: string }>>([])
+  const [portfolioForm, setPortfolioForm] = useState({ title: '', image_url: '' })
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { router.push('/login'); return }
+      setUserId(user.id)
+
+      const { data: profile } = await supabase.from('profiles').select('avatar_url, phone').eq('id', user.id).single()
+      if (profile?.avatar_url) setAvatarUrl(profile.avatar_url)
+      if (profile?.phone) setPhone(profile.phone)
+
+      const { data: tailor } = await supabase.from('tailor_profiles').select('*').eq('user_id', user.id).single()
+      if (tailor) {
+        setTailorId(tailor.id)
+        setForm({
+          business_name: tailor.business_name || '',
+          bio: tailor.bio || '',
+          city: tailor.city || '',
+          state: tailor.state || '',
+          address: tailor.address || '',
+          specialties: tailor.specialties || [],
+          delivery_types: tailor.delivery_types || [],
+        })
+        if (tailor.face_photo_url) setFacePhotoUrl(tailor.face_photo_url)
+        if (tailor.min_price) setMinPrice(String(tailor.min_price))
+        if (tailor.max_price) setMaxPrice(String(tailor.max_price))
+
+        const { data: portfolio } = await supabase
+          .from('portfolio_items').select('id, image_url, title')
+          .eq('tailor_id', tailor.id).order('created_at', { ascending: false })
+        if (portfolio) setPortfolioItems(portfolio)
+
+        // Resume: jump to first incomplete step
+        if (!profile?.avatar_url || !profile?.phone) setStep(3)
+        else if (!tailor.face_photo_url) setStep(4)
+        else if (!tailor.min_price || !tailor.max_price) setStep(5)
+        else setStep(6)
+      }
+
+      setLoading(false)
+    })
+  }, [])
 
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
-  const canNext = () => {
-    if (step === 0) return form.business_name.trim().length >= 2 && form.city.trim() && form.state.trim() && form.bio.trim().length >= 20
+  const canNext = (): boolean => {
+    if (step === 0) return (
+      form.business_name.trim().length >= 2 &&
+      !!form.state && !!form.city &&
+      form.address.trim().length > 0 &&
+      form.bio.trim().length >= 20
+    )
     if (step === 1) return form.specialties.length > 0
     if (step === 2) return form.delivery_types.length > 0
+    if (step === 3) return !!avatarUrl && phone.trim().length >= 7
+    if (step === 4) return !!facePhotoUrl
+    if (step === 5) return !!(
+      minPrice && maxPrice &&
+      parseInt(minPrice) > 0 &&
+      parseInt(maxPrice) >= parseInt(minPrice)
+    )
+    if (step === 6) return portfolioItems.length >= 2
     return false
   }
 
-  const handleSubmit = async () => {
-    setLoading(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
+  const uploadImage = async (
+    file: File,
+    path: string,
+    onSuccess: (url: string) => void,
+    setUploadFn: (v: boolean) => void
+  ) => {
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5MB'); return }
+    setUploadFn(true)
+    const { error } = await supabase.storage.from('portfolio').upload(path, file, { upsert: true, contentType: file.type })
+    if (error) { toast.error(error.message); setUploadFn(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
+    onSuccess(publicUrl)
+    setUploadFn(false)
+  }
 
-    const { error } = await supabase.from('tailor_profiles').insert({
-      user_id: user.id,
+  const detectLocation = () => {
+    if (!navigator.geolocation) { toast.error('Location not supported'); return }
+    setDetecting(true)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&addressdetails=1`,
+            { headers: { 'Accept-Language': 'en' } }
+          )
+          const data = await res.json()
+          const rawCity = data.address?.city || data.address?.town || data.address?.county || ''
+          const rawState = data.address?.state || ''
+          const matchedState = matchState(rawState) || ''
+          const matchedCity = matchCity(rawCity, matchedState) || matchCity(rawCity) || ''
+          if (matchedCity || matchedState) {
+            setForm(f => ({ ...f, city: matchedCity || f.city, state: matchedState || f.state }))
+            toast.success(`Location detected: ${matchedCity}${matchedState ? `, ${matchedState}` : ''}`)
+          } else {
+            toast.error('Could not match your location. Select manually.')
+          }
+        } catch { toast.error('Location lookup failed. Select manually.') }
+        setDetecting(false)
+      },
+      (err) => {
+        setDetecting(false)
+        if (err.code === err.PERMISSION_DENIED) toast.error('Location permission denied. Select manually.')
+        else if (err.code === err.TIMEOUT) toast.error('Location request timed out. Select manually.')
+        else toast.error('Could not get your location. Select manually.')
+      },
+      { timeout: 10000 }
+    )
+  }
+
+  const saveCore = async (): Promise<string | null> => {
+    if (!userId) return null
+    setSaving(true)
+    const payload = {
       business_name: form.business_name.trim(),
-      bio: form.bio.trim() || null,
+      bio: form.bio.trim(),
       city: form.city.trim(),
       state: form.state.trim(),
-      address: form.address.trim() || null,
+      address: form.address.trim(),
       specialties: form.specialties,
       delivery_types: form.delivery_types,
-    })
+    }
+    if (tailorId) {
+      const { error } = await supabase.from('tailor_profiles').update(payload).eq('id', tailorId)
+      setSaving(false)
+      if (error) { toast.error(error.message); return null }
+      return tailorId
+    }
+    const { data, error } = await supabase.from('tailor_profiles')
+      .insert({ user_id: userId, ...payload }).select('id').single()
+    setSaving(false)
+    if (error) { toast.error(error.message); return null }
+    await supabase.from('profiles').update({ role: 'tailor' }).eq('id', userId)
+    setTailorId(data.id)
+    return data.id
+  }
 
-    if (error) { toast.error(error.message); setLoading(false); return }
-    await supabase.from('profiles').update({ role: 'tailor' }).eq('id', user.id)
-    // Fire welcome message (non-blocking)
-    fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, role: 'tailor' }) }).catch(() => {})
-    toast.success('Profile created! Welcome to TailorNow.')
+  const handleNext = async () => {
+    if (step === 2) {
+      const id = await saveCore()
+      if (!id) return
+      setStep(3)
+      return
+    }
+    if (step === 3 && userId) {
+      setSaving(true)
+      await supabase.from('profiles').update({ phone: phone.trim() }).eq('id', userId)
+      setSaving(false)
+    }
+    if (step === 5 && tailorId) {
+      setSaving(true)
+      const { error } = await supabase.from('tailor_profiles').update({
+        min_price: parseInt(minPrice),
+        max_price: parseInt(maxPrice),
+      }).eq('id', tailorId)
+      setSaving(false)
+      if (error) { toast.error(error.message); return }
+    }
+    setStep(s => s + 1)
+  }
+
+  const handleFinish = () => {
+    fetch('/api/welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, role: 'tailor' }),
+    }).catch(() => {})
+    toast.success("Profile submitted for review! You'll be notified once approved.")
     router.push('/dashboard')
   }
+
+  const addPortfolioItem = async () => {
+    if (!tailorId || !portfolioForm.title || !portfolioForm.image_url) return
+    setSaving(true)
+    const { data, error } = await supabase.from('portfolio_items').insert({
+      tailor_id: tailorId,
+      title: portfolioForm.title,
+      image_url: portfolioForm.image_url,
+    }).select('id, image_url, title').single()
+    setSaving(false)
+    if (error) { toast.error(error.message); return }
+    setPortfolioItems(p => [...p, data])
+    setPortfolioForm({ title: '', image_url: '' })
+  }
+
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="max-w-lg mx-auto">
 
-        {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex mb-6 justify-center">
             <Logo size="md" variant="full" animated />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Set up your creative profile</h1>
-          <p className="text-gray-500 mt-1 text-sm">This is what customers see when they find you</p>
+          <p className="text-gray-500 mt-1 text-sm">Complete all steps to be listed and found by customers</p>
         </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-2 mb-8">
-          {STEPS.map((label, i) => (
-            <div key={i} className="flex items-center gap-2 flex-1">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all duration-300 ${
-                  i < step ? 'bg-green-500 text-white' : i === step ? 'bg-violet-700 text-white' : 'bg-gray-200 text-gray-400'
-                }`}>
-                  {i < step ? <CheckCircle size={14} /> : i + 1}
-                </div>
-                <span className={`text-xs font-medium hidden sm:block truncate transition-colors ${i === step ? 'text-violet-700' : i < step ? 'text-green-600' : 'text-gray-400'}`}>
-                  {label}
-                </span>
-              </div>
-              {i < STEPS.length - 1 && (
-                <div className={`h-px flex-1 transition-all duration-300 ${i < step ? 'bg-green-400' : 'bg-gray-200'}`} />
-              )}
-            </div>
+        {/* Progress bar */}
+        <div className="flex gap-1 mb-3">
+          {STEPS.map((_, i) => (
+            <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
+              i < step ? 'bg-green-400' : i === step ? 'bg-violet-600' : 'bg-gray-200'
+            }`} />
           ))}
         </div>
+        <p className="text-center text-xs text-gray-500 mb-6">
+          Step {step + 1} of {STEPS.length} — <span className="font-medium text-gray-700">{STEPS[step]}</span>
+        </p>
 
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
 
-          {/* Step 0 — Business info */}
+          {/* Step 0 — Business Info */}
           {step === 0 && (
             <div className="space-y-4">
               <div>
                 <h2 className="font-bold text-gray-900 mb-1">Tell us about your business</h2>
-                <p className="text-sm text-gray-500 mb-4">Customers will see your business name, location, and bio.</p>
+                <p className="text-sm text-gray-500 mb-4">Customers will see your name, location, and bio.</p>
               </div>
-              <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style" value={form.business_name}
+              <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style"
+                value={form.business_name}
                 onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))} />
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">State *</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-sm font-medium text-gray-700">State *</label>
+                    <button type="button" onClick={detectLocation} disabled={detecting}
+                      className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 disabled:opacity-50">
+                      <Navigation size={11} className={detecting ? 'animate-spin' : ''} />
+                      {detecting ? 'Detecting…' : 'Detect'}
+                    </button>
+                  </div>
                   <select
                     className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     value={form.state}
-                    onChange={e => setForm(f => ({ ...f, state: e.target.value, city: '' }))}
-                  >
+                    onChange={e => setForm(f => ({ ...f, state: e.target.value, city: '' }))}>
                     <option value="">— Select state —</option>
                     {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -126,23 +307,25 @@ export default function TailorOnboarding() {
                     className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
                     value={form.city}
                     disabled={!form.state}
-                    onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  >
+                    onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
                     <option value="">{form.state ? '— Select city —' : 'Select a state first'}</option>
                     {citiesForState(form.state).map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
               </div>
-              <Input label="Shop address (optional)" placeholder="Shop number / street" value={form.address}
+              <Input label="Shop address *" placeholder="e.g. 12 Balogun Market, Shop B4"
+                value={form.address}
                 onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  About your business * <span className="font-normal text-gray-400 text-xs">(min 20 characters)</span>
+                  About your business * <span className="font-normal text-gray-400 text-xs">(min 20 chars)</span>
                 </label>
                 <textarea
                   className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-                  rows={4} placeholder="Tell customers about your experience, style, specialties, and what makes you stand out..."
-                  value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
+                  rows={4}
+                  placeholder="Tell customers about your experience, style, and what makes you stand out..."
+                  value={form.bio}
+                  onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
                 <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
                   {form.bio.trim().length}/20 minimum characters
                 </p>
@@ -154,7 +337,7 @@ export default function TailorOnboarding() {
           {step === 1 && (
             <div>
               <h2 className="font-bold text-gray-900 mb-1">What services do you offer?</h2>
-              <p className="text-sm text-gray-500 mb-4">Select all that apply — customers will filter by these.</p>
+              <p className="text-sm text-gray-500 mb-4">Select all that apply — customers filter by these.</p>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(SERVICE_LABELS).map(([k, v]) => (
                   <button key={k} type="button"
@@ -169,28 +352,23 @@ export default function TailorOnboarding() {
                   </button>
                 ))}
               </div>
-              {form.specialties.length === 0 && (
-                <p className="text-xs text-amber-600 mt-3">Please select at least one service</p>
-              )}
             </div>
           )}
 
-          {/* Step 2 — Delivery */}
+          {/* Step 2 — How You Work */}
           {step === 2 && (
             <div>
               <h2 className="font-bold text-gray-900 mb-1">How do you work with customers?</h2>
               <p className="text-sm text-gray-500 mb-4">You can offer both options.</p>
               <div className="space-y-3">
                 {[
-                  { val: 'pickup_delivery', icon: '🚚', label: 'Pickup & Delivery', sub: 'You collect fabric from customer and deliver the finished item' },
+                  { val: 'pickup_delivery', icon: '🚚', label: 'Pickup & Delivery', sub: 'You collect fabric from the customer and deliver the finished item' },
                   { val: 'visit_shop',      icon: '🏪', label: 'Visit My Shop',      sub: 'Customers come to your workshop or shop' },
                 ].map(opt => (
                   <button key={opt.val} type="button"
                     onClick={() => setForm(f => ({ ...f, delivery_types: toggle(f.delivery_types, opt.val) }))}
                     className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                      form.delivery_types.includes(opt.val)
-                        ? 'border-violet-600 bg-violet-50'
-                        : 'border-gray-200 hover:border-violet-300'
+                      form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-violet-300'
                     }`}>
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">{opt.icon}</span>
@@ -205,9 +383,250 @@ export default function TailorOnboarding() {
                   </button>
                 ))}
               </div>
-              {form.delivery_types.length === 0 && (
-                <p className="text-xs text-amber-600 mt-3">Please select at least one option</p>
+            </div>
+          )}
+
+          {/* Step 3 — Profile Photo + Phone */}
+          {step === 3 && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="font-bold text-gray-900 mb-1">Profile photo & phone number</h2>
+                <p className="text-sm text-gray-500 mb-4">Your photo builds trust. Customers may call or WhatsApp your number.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Profile photo *</label>
+                <div className="flex items-center gap-5">
+                  <div className="relative flex-shrink-0">
+                    {avatarUrl
+                      ? <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-gray-100" />
+                      : <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
+                          {form.business_name?.[0]?.toUpperCase() || '✂'}
+                        </div>
+                    }
+                    <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-violet-800 transition-colors">
+                      {uploading
+                        ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <Camera size={12} className="text-white" />}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file || !userId) return
+                          const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+                          await uploadImage(file, `avatars/${userId}.${ext}`, async (url) => {
+                            await supabase.from('profiles').update({ avatar_url: url }).eq('id', userId)
+                            setAvatarUrl(url)
+                            toast.success('Profile photo uploaded!')
+                          }, setUploading)
+                          e.target.value = ''
+                        }} />
+                    </label>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">Clear photo of your face</p>
+                    <p className="text-xs text-gray-400 mt-0.5">JPG or PNG, max 5MB</p>
+                    {avatarUrl && (
+                      <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                        <CheckCircle size={10} /> Uploaded
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Phone number * <span className="font-normal text-gray-400 text-xs">(customers can call/WhatsApp)</span>
+                </label>
+                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                  <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">+234</span>
+                  <input type="tel" placeholder="08012345678" value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    className="flex-1 px-3 py-2.5 text-sm focus:outline-none" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4 — Face Verification */}
+          {step === 4 && (
+            <div>
+              <h2 className="font-bold text-gray-900 mb-1">Face verification photo</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                A clear selfie holding a piece of paper with today's date.
+                Used only by admin for identity verification — never shown publicly.
+              </p>
+              <div className="flex items-start gap-4 mb-4">
+                {facePhotoUrl ? (
+                  <div className="relative flex-shrink-0">
+                    <img src={facePhotoUrl} alt="Face verification" className="w-28 h-28 rounded-xl object-cover border-2 border-green-200" />
+                    <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer">
+                      {uploading
+                        ? <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        : <Camera size={10} className="text-white" />}
+                      <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file || !userId || !tailorId) return
+                          const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+                          await uploadImage(file, `faces/${userId}.${ext}`, async (url) => {
+                            await supabase.from('tailor_profiles').update({ face_photo_url: url }).eq('id', tailorId)
+                            setFacePhotoUrl(url)
+                            toast.success('Face photo updated!')
+                          }, setUploading)
+                          e.target.value = ''
+                        }} />
+                    </label>
+                  </div>
+                ) : (
+                  <label className={`flex flex-col items-center justify-center w-28 h-28 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-violet-300 bg-violet-50' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50'}`}>
+                    {uploading
+                      ? <div className="w-5 h-5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                      : <><Camera size={20} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Upload</span></>}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0]
+                        if (!file || !userId || !tailorId) return
+                        const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+                        await uploadImage(file, `faces/${userId}.${ext}`, async (url) => {
+                          await supabase.from('tailor_profiles').update({ face_photo_url: url }).eq('id', tailorId)
+                          setFacePhotoUrl(url)
+                          toast.success('Face photo uploaded!')
+                        }, setUploading)
+                        e.target.value = ''
+                      }} />
+                  </label>
+                )}
+                <ul className="text-xs text-gray-500 space-y-1.5 pt-1">
+                  <li>• Clear, well-lit selfie</li>
+                  <li>• Hold paper with today's date</li>
+                  <li>• Face must be clearly visible</li>
+                  <li>• Kept private — admin eyes only</li>
+                </ul>
+              </div>
+              {facePhotoUrl && (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <CheckCircle size={12} /> Photo uploaded — you can retake it if needed.
+                </p>
               )}
+            </div>
+          )}
+
+          {/* Step 5 — Pricing */}
+          {step === 5 && (
+            <div>
+              <h2 className="font-bold text-gray-900 mb-1">Your price range</h2>
+              <p className="text-sm text-gray-500 mb-4">Typical range for a full outfit (₦). Customers filter by budget.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Minimum (₦) *</label>
+                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                    <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                    <input type="number" min="0" placeholder="5000"
+                      className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
+                      value={minPrice} onChange={e => setMinPrice(e.target.value)} />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum (₦) *</label>
+                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                    <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                    <input type="number" min="0" placeholder="150000"
+                      className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
+                      value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
+                  </div>
+                </div>
+              </div>
+              {minPrice && maxPrice && parseInt(maxPrice) < parseInt(minPrice) && (
+                <p className="text-xs text-red-500 mt-2">Maximum must be at least as large as minimum</p>
+              )}
+            </div>
+          )}
+
+          {/* Step 6 — Portfolio */}
+          {step === 6 && (
+            <div>
+              <h2 className="font-bold text-gray-900 mb-1">Upload your work</h2>
+              <p className="text-sm text-gray-500 mb-4">
+                Add at least 2 photos of outfits you've made. This is the first thing customers see.
+              </p>
+
+              {portfolioItems.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {portfolioItems.map(item => (
+                    <div key={item.id} className="relative aspect-square rounded-xl overflow-hidden group">
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => {
+                          supabase.from('portfolio_items').delete().eq('id', item.id)
+                          setPortfolioItems(p => p.filter(i => i.id !== item.id))
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X size={10} />
+                      </button>
+                      <p className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] px-2 py-1 truncate">
+                        {item.title}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {portfolioItems.length < 6 && (
+                <div className="border border-gray-100 rounded-xl p-4 space-y-3">
+                  <p className="text-xs font-medium text-gray-700">Add a photo</p>
+                  {portfolioForm.image_url ? (
+                    <div className="relative w-24 h-24 rounded-xl overflow-hidden">
+                      <img src={portfolioForm.image_url} alt="" className="w-full h-full object-cover" />
+                      <button type="button"
+                        onClick={() => setPortfolioForm(f => ({ ...f, image_url: '' }))}
+                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-violet-400 transition-colors">
+                      {uploadingPortfolio
+                        ? <div className="animate-spin w-5 h-5 border-2 border-violet-700 border-t-transparent rounded-full" />
+                        : <><Upload size={18} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Upload</span></>}
+                      <input type="file" accept="image/*" className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]
+                          if (!file || !userId) return
+                          const ext = file.name.split('.').pop() || 'jpg'
+                          await uploadImage(
+                            file,
+                            `portfolio/${userId}/${Date.now()}.${ext}`,
+                            (url) => setPortfolioForm(f => ({ ...f, image_url: url })),
+                            setUploadingPortfolio
+                          )
+                          e.target.value = ''
+                        }} />
+                    </label>
+                  )}
+                  <input
+                    type="text"
+                    placeholder="Title (e.g. Custom agbada suit)"
+                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    value={portfolioForm.title}
+                    onChange={e => setPortfolioForm(f => ({ ...f, title: e.target.value }))}
+                  />
+                  <Button type="button" size="md" loading={saving}
+                    disabled={!portfolioForm.title || !portfolioForm.image_url || saving}
+                    onClick={addPortfolioItem}>
+                    Add Photo
+                  </Button>
+                </div>
+              )}
+
+              <div className="mt-3 flex items-center gap-2">
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.max(portfolioItems.length + 1, 2) }, (_, i) => (
+                    <div key={i} className={`w-5 h-1.5 rounded-full ${i < portfolioItems.length ? 'bg-violet-600' : 'bg-gray-200'}`} />
+                  ))}
+                </div>
+                <p className={`text-xs ${portfolioItems.length >= 2 ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+                  {portfolioItems.length}/2 minimum {portfolioItems.length >= 2 ? '✓' : ''}
+                </p>
+              </div>
             </div>
           )}
 
@@ -220,25 +639,14 @@ export default function TailorOnboarding() {
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button
-                type="button"
-                size="lg"
-                className="flex-1"
-                disabled={!canNext()}
-                onClick={() => setStep(s => s + 1)}
-              >
+              <Button type="button" size="lg" className="flex-1" loading={saving}
+                disabled={!canNext() || saving} onClick={handleNext}>
                 Continue →
               </Button>
             ) : (
-              <Button
-                type="button"
-                size="lg"
-                className="flex-1"
-                loading={loading}
-                disabled={!canNext()}
-                onClick={handleSubmit}
-              >
-                Create Profile →
+              <Button type="button" size="lg" className="flex-1" loading={saving}
+                disabled={!canNext() || saving} onClick={handleFinish}>
+                Submit Profile →
               </Button>
             )}
           </div>

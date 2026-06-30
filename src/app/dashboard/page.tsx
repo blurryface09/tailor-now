@@ -3,7 +3,8 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } from '@/lib/utils'
-import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image, UserCog } from 'lucide-react'
+import { isCreativeProfileComplete } from '@/lib/creative-completeness'
+import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image, UserCog, AlertCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,21 @@ export default async function TailorDashboard() {
 
   const { data: tailor } = await supabase.from('tailor_profiles').select('*').eq('user_id', user.id).single()
   if (!tailor) redirect('/onboarding/tailor')
+
+  const { count: portfolioCount } = await supabase
+    .from('portfolio_items').select('*', { count: 'exact', head: true })
+    .eq('tailor_id', tailor.id)
+
+  const profileComplete = isCreativeProfileComplete({
+    avatar_url: profile?.avatar_url,
+    phone: profile?.phone,
+    address: tailor.address,
+    face_photo_url: tailor.face_photo_url,
+    portfolio_count: portfolioCount ?? 0,
+    min_price: tailor.min_price,
+    max_price: tailor.max_price,
+  })
+  if (!profileComplete) redirect('/onboarding/tailor')
 
   const [{ data: orders }, { data: payouts }] = await Promise.all([
     supabase.from('orders').select('*, customer:profiles(full_name, avatar_url)')
@@ -43,7 +59,7 @@ export default async function TailorDashboard() {
           <div className="flex gap-3">
             {!tailor.is_verified && (
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm text-amber-700">
-                <Clock size={16} /> Verification pending
+                <Clock size={16} /> Awaiting admin approval
               </div>
             )}
             {tailor.is_verified && (
@@ -72,6 +88,23 @@ export default async function TailorDashboard() {
           ))}
         </div>
 
+        {/* Pending verification notice */}
+        {!tailor.is_verified && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-amber-800 text-sm">Your profile is under review</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Your profile has been submitted and is awaiting admin verification.
+                  Once approved, you'll appear in search results and customers can book you.
+                  This usually takes 1–2 business days.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {pendingOrders > 0 && (
           <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2 text-violet-800">
@@ -84,20 +117,7 @@ export default async function TailorDashboard() {
           </div>
         )}
 
-        {/* Bio missing nudge */}
-        {!tailor.bio && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-800">
-              <UserCog size={18} />
-              <span className="font-medium">Add a bio to your profile so customers know who you are</span>
-            </div>
-            <Link href="/tailor/profile" className="bg-amber-500 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-amber-600 transition-colors">
-              Edit Profile
-            </Link>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+<div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
             { href: '/tailor/orders', icon: <Package size={22} />, label: 'Manage Orders' },
             { href: '/tailor/portfolio', icon: <Image size={22} />, label: 'Portfolio' },
