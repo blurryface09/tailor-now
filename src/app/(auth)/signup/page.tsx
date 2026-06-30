@@ -37,7 +37,7 @@ function SignupContent() {
     e.preventDefault()
     if (!validate()) return
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: { data: { full_name: form.full_name.trim(), role } },
@@ -46,6 +46,10 @@ function SignupContent() {
       toast.error(error.message)
       setLoading(false)
       return
+    }
+    // Send welcome message for customers (tailors get it after onboarding)
+    if (role === 'customer' && data.user?.id) {
+      fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: data.user.id, role: 'customer' }) }).catch(() => {})
     }
     toast.success('Account created! Welcome to TailorNow.')
     router.push(role === 'tailor' ? '/onboarding/tailor' : '/home')

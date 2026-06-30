@@ -64,6 +64,8 @@ export default function TailorOnboarding() {
 
     if (error) { toast.error(error.message); setLoading(false); return }
     await supabase.from('profiles').update({ role: 'tailor' }).eq('id', user.id)
+    // Fire welcome message (non-blocking)
+    fetch('/api/welcome', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: user.id, role: 'tailor' }) }).catch(() => {})
     toast.success('Profile created! Welcome to TailorNow.')
     router.push('/dashboard')
   }

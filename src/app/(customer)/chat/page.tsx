@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
-import { Send, Phone, ArrowLeft, AlertTriangle, Lock, ShieldCheck } from 'lucide-react'
+import { Send, Phone, ArrowLeft, AlertTriangle, Lock, ShieldCheck, BadgeCheck } from 'lucide-react'
 import { formatRelativeTime, classifyMessage, containsBankDetails, cn } from '@/lib/utils'
 import type { ChatRoom, ChatMessage, Profile } from '@/types'
 import Link from 'next/link'
@@ -186,6 +186,8 @@ function ChatContent() {
   const otherPerson = activeRoom
     ? (userId === activeRoom.customer_id ? activeRoom.tailor : activeRoom.customer)
     : null
+  const otherIsAdmin = (otherPerson as any)?.role === 'admin'
+  const otherDisplayName = otherIsAdmin ? 'TailorNow' : otherPerson?.full_name
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -208,15 +210,20 @@ function ChatContent() {
             )}
             {rooms.map(room => {
               const other = userId === room.customer_id ? room.tailor : room.customer
+              const otherIsAdmin = (other as any)?.role === 'admin'
+              const displayName = otherIsAdmin ? 'TailorNow' : other?.full_name
               return (
                 <button key={room.id} onClick={() => setActiveRoom(room)}
                   className={cn('w-full text-left p-4 hover:bg-gray-50 transition-colors border-b border-gray-50', activeRoom?.id === room.id && 'bg-violet-50 border-l-2 border-l-violet-600')}>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {other?.full_name?.[0]?.toUpperCase() || '?'}
+                    <div className={cn('w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0', otherIsAdmin ? 'bg-violet-700' : 'bg-gradient-to-br from-violet-400 to-violet-600')}>
+                      {otherIsAdmin ? '✂' : other?.full_name?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{other?.full_name}</p>
+                      <div className="flex items-center gap-1">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
+                        {otherIsAdmin && <BadgeCheck size={12} className="text-violet-600 flex-shrink-0" />}
+                      </div>
                       <p className="text-xs text-gray-400 truncate">{room.last_message || 'No messages yet'}</p>
                     </div>
                     {room.last_message_at && (
@@ -244,15 +251,18 @@ function ChatContent() {
                 <button className="md:hidden p-1 hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setActiveRoom(null)}>
                   <ArrowLeft size={20} />
                 </button>
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
-                  {otherPerson?.full_name?.[0]?.toUpperCase() || '?'}
+                <div className={cn('w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm', otherIsAdmin ? 'bg-violet-700' : 'bg-gradient-to-br from-violet-400 to-violet-600')}>
+                  {otherIsAdmin ? '✂' : otherPerson?.full_name?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-gray-900">{otherPerson?.full_name}</p>
-                  <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-400 rounded-full" />
-                    <p className="text-xs text-green-500 font-medium">Online</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-gray-900">{otherDisplayName}</p>
+                    {otherIsAdmin && <BadgeCheck size={14} className="text-violet-600" />}
                   </div>
+                  {otherIsAdmin
+                    ? <p className="text-xs text-violet-600 font-medium">Official TailorNow Support</p>
+                    : <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-400 rounded-full" /><p className="text-xs text-green-500 font-medium">Online</p></div>
+                  }
                 </div>
                 <button
                   onClick={sendContact}
@@ -281,14 +291,25 @@ function ChatContent() {
                 {messages.map(msg => {
                   const isMe = msg.sender_id === userId
                   const hasBankAlert = containsBankDetails(msg.content)
+                  const isAdmin = (msg.sender as any)?.role === 'admin'
+                  const senderName = isAdmin ? 'TailorNow' : (msg.sender?.full_name || '?')
                   return (
                     <div key={msg.id} className={cn('flex gap-2', isMe && 'flex-row-reverse')}>
                       {!isMe && (
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-1">
-                          {msg.sender?.full_name?.[0]?.toUpperCase() || '?'}
+                        <div className={cn(
+                          'w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-1',
+                          isAdmin ? 'bg-violet-700' : 'bg-gradient-to-br from-violet-400 to-violet-600'
+                        )}>
+                          {isAdmin ? '✂' : senderName[0]?.toUpperCase()}
                         </div>
                       )}
                       <div className={cn('max-w-xs lg:max-w-md', isMe ? 'items-end flex flex-col' : '')}>
+                        {!isMe && (
+                          <div className="flex items-center gap-1 mb-0.5 px-1">
+                            <span className="text-xs font-medium text-gray-500">{senderName}</span>
+                            {isAdmin && <BadgeCheck size={11} className="text-violet-600" />}
+                          </div>
+                        )}
                         {hasBankAlert && (
                           <div className="flex items-center gap-1 text-xs text-red-500 mb-1 px-1">
                             <AlertTriangle size={10} /> Contains bank details
@@ -297,6 +318,7 @@ function ChatContent() {
                         <div className={cn(
                           'px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
                           isMe ? 'bg-violet-700 text-white rounded-tr-sm' : 'bg-white text-gray-900 rounded-tl-sm shadow-sm border border-gray-100',
+                          isAdmin && !isMe && 'bg-violet-50 border-violet-200',
                           msg.message_type === 'contact' && 'bg-amber-50 border border-amber-200 text-amber-800 font-medium',
                           hasBankAlert && 'ring-1 ring-red-300'
                         )}>
