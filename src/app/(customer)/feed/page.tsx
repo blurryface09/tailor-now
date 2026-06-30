@@ -27,6 +27,104 @@ const COVER_GRADIENTS = [
   'from-fuchsia-500 to-violet-600',
 ]
 
+const DEMO_POSTS = [
+  {
+    id: 'demo-1',
+    gradient: 'from-violet-500 to-purple-700',
+    emoji: '👗',
+    pattern: 'radial-gradient(circle at 20px 20px, rgba(255,255,255,0.08) 2px, transparent 0)',
+    patternSize: '40px 40px',
+    business_name: 'Adaeze Couture',
+    city: 'Lagos',
+    service: 'custom_outfit',
+    caption: 'Just finished this custom Ankara two-piece for a client\'s introduction ceremony 🎉 The embroidery alone took 3 days but every stitch was worth it. She looked STUNNING ✨ #TailorNow #Ankara #CustomFit',
+    likes: 142, comments: 18,
+  },
+  {
+    id: 'demo-2',
+    gradient: 'from-amber-500 to-orange-600',
+    emoji: '👔',
+    pattern: 'linear-gradient(45deg, rgba(255,255,255,0.06) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.06) 75%)',
+    patternSize: '30px 30px',
+    business_name: 'Emeka Fashion House',
+    city: 'Enugu',
+    service: 'custom_outfit',
+    caption: 'Senator wear for a groom\'s family — 6 pieces, 4 days ⏱️ Matching pocket squares and perfectly fitted agbada for every man in the room 🔥 This is what we do. #MensFashion #SenatorWear #TailorNow',
+    likes: 89, comments: 7,
+  },
+  {
+    id: 'demo-3',
+    gradient: 'from-pink-500 to-rose-600',
+    emoji: '💍',
+    pattern: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)',
+    patternSize: '60px 60px',
+    business_name: 'Adeola Bridal Studio',
+    city: 'Ibadan',
+    service: 'bridal',
+    caption: 'Our bride walked in knowing what she wanted — we gave her what she deserved 👑 A-line silhouette with hand-sewn lace appliqué, cathedral train. She cried happy tears 🤍 #BridalCouture #NigerianBride #TailorNow',
+    likes: 231, comments: 34,
+  },
+  {
+    id: 'demo-4',
+    gradient: 'from-teal-500 to-emerald-600',
+    emoji: '✂️',
+    pattern: 'repeating-linear-gradient(0deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 11px)',
+    patternSize: 'auto',
+    business_name: 'Kemi Stitch & Style',
+    city: 'Abuja',
+    service: 'alterations',
+    caption: 'Before & after alterations 🔄 Sometimes a few strategic tucks is all it takes to make a garment feel brand new. Brought this vintage dress back to life — no one would know ✂️ #Alterations #MadeToFit #TailorNow',
+    likes: 67, comments: 11,
+  },
+]
+
+function DemoPostCard({ post }: { post: typeof DEMO_POSTS[number] }) {
+  const initial = post.business_name[0].toUpperCase()
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      {/* Demo image area */}
+      <div className={`relative h-64 bg-gradient-to-br ${post.gradient} flex items-center justify-center overflow-hidden`}>
+        <div className="absolute inset-0" style={{ backgroundImage: post.pattern, backgroundSize: post.patternSize }} />
+        <span className="text-8xl select-none drop-shadow-lg">{post.emoji}</span>
+        <div className="absolute top-3 left-3 bg-white/20 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full">
+          Sample post
+        </div>
+        <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
+          {SERVICE_LABELS[post.service] ?? post.service}
+        </div>
+      </div>
+      {/* Author row */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
+        <div className="flex items-center gap-2.5">
+          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${post.gradient} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
+            {initial}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900 leading-tight">{post.business_name}</p>
+            <p className="text-xs text-gray-400 flex items-center gap-0.5">
+              <MapPin size={10} /> {post.city}
+            </p>
+          </div>
+        </div>
+        <button className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 border border-violet-200 px-3 py-1.5 rounded-full hover:bg-violet-50 transition-colors">
+          <UserPlus size={12} /> Follow
+        </button>
+      </div>
+      {/* Caption */}
+      <p className="px-4 pb-3 text-sm text-gray-700 leading-relaxed">{post.caption}</p>
+      {/* Engagement */}
+      <div className="flex items-center gap-4 px-4 pb-4 border-t border-gray-50 pt-3">
+        <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition-colors">
+          <Heart size={16} /> <span>{post.likes}</span>
+        </button>
+        <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-violet-600 transition-colors">
+          <MessageSquare size={16} /> <span>{post.comments}</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 type CreativeWithProfile = TailorProfile & { profile: Profile }
 
 function PostCard({ post, userId, onLike, onFollow, following }: {
@@ -220,16 +318,11 @@ export default function FeedPage() {
       const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', user.id)
       setFollowing(new Set((follows || []).map(f => f.following_id)))
     }
-    const { data: verifiedCreatives } = await supabase
-      .from('tailor_profiles').select('user_id').eq('is_verified', true)
-    const verifiedIds = (verifiedCreatives ?? []).map(c => c.user_id)
-
     const [postsResult, creativesResult] = await Promise.all([
-      verifiedIds.length > 0
-        ? supabase.from('posts').select('*, author:profiles!posts_user_id_fkey(*), creative:tailor_profiles(*, user_id, business_name, city, state)')
-            .in('user_id', verifiedIds)
-            .order('created_at', { ascending: false }).limit(40)
-        : Promise.resolve({ data: [] }),
+      // Feed is open discovery — show all creatives' posts regardless of verification
+      supabase.from('posts').select('*, author:profiles!posts_user_id_fkey(*), creative:tailor_profiles(*, user_id, business_name, city, state)')
+        .order('created_at', { ascending: false }).limit(40),
+      // Suggested creatives = verified only (they are bookable)
       supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('is_active', true).eq('is_verified', true)
         .order('avg_rating', { ascending: false }).limit(12),
     ])
@@ -316,31 +409,36 @@ export default function FeedPage() {
             )}
           </div>
         ) : filteredPosts.length === 0 ? (
-          /* ── Empty feed ── */
-          <div>
-            <div className="text-center py-10 bg-white rounded-2xl border border-gray-100 mb-5">
-              <div className="text-4xl mb-3">📸</div>
-              <h3 className="font-bold text-gray-900 mb-1">No posts yet</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                {activeChip ? 'No posts in this category yet.' : 'Creatives haven\'t posted anything yet.'}
-              </p>
-              <button onClick={() => setView('discover')}
-                className="bg-violet-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-800 transition-colors">
-                Discover Creatives
-              </button>
-            </div>
-
-            {/* Show creative cards below empty feed */}
-            {creatives.length > 0 && (
+          /* ── Empty feed — show demo inspiration posts ── */
+          <div className="space-y-5">
+            {activeChip ? (
+              <div className="text-center py-10 bg-white rounded-2xl border border-gray-100">
+                <div className="text-4xl mb-3">📸</div>
+                <p className="text-sm text-gray-500">No posts in this category yet. Check back soon!</p>
+              </div>
+            ) : (
               <>
-                <p className="text-sm font-bold text-gray-900 mb-3">Creatives to follow</p>
+                <div className="flex items-center gap-2.5 bg-violet-50 border border-violet-100 rounded-2xl px-4 py-3 mb-1">
+                  <span className="text-lg">✂️</span>
+                  <div>
+                    <p className="text-sm font-semibold text-violet-900">Style inspiration</p>
+                    <p className="text-xs text-violet-600">Sample posts — real creative work will appear here as creatives join</p>
+                  </div>
+                </div>
+                {DEMO_POSTS.map(p => <DemoPostCard key={p.id} post={p} />)}
+              </>
+            )}
+
+            {creatives.length > 0 && (
+              <div className="mt-2">
+                <p className="text-sm font-bold text-gray-900 mb-3">Verified creatives to follow</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {creatives.slice(0, 6).map((c, i) => <CreativeCard key={c.id} creative={c} index={i} />)}
+                  {creatives.slice(0, 4).map((c, i) => <CreativeCard key={c.id} creative={c} index={i} />)}
                 </div>
                 <Link href="/browse" className="flex items-center justify-center mt-3 text-sm text-violet-700 font-semibold hover:underline">
-                  See all creatives →
+                  Browse all creatives →
                 </Link>
-              </>
+              </div>
             )}
           </div>
         ) : (
