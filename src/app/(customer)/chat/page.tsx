@@ -153,6 +153,16 @@ function ChatContent() {
     setSending(true)
     await supabase.from('chat_messages').insert({ room_id: activeRoom.id, sender_id: userId, content: content.trim() })
     await supabase.from('chat_rooms').update({ last_message: content.trim(), last_message_at: new Date().toISOString() }).eq('id', activeRoom.id)
+    // Notify the other party
+    const recipientId = userId === activeRoom.customer_id ? activeRoom.tailor_id : activeRoom.customer_id
+    const senderName = (userId === activeRoom.customer_id ? activeRoom.customer : activeRoom.tailor)?.full_name || 'Someone'
+    await supabase.from('notifications').insert({
+      user_id: recipientId,
+      type: 'new_message',
+      title: `New message from ${senderName}`,
+      body: content.trim().slice(0, 80),
+      data: { room_tailor_id: activeRoom.tailor_id },
+    })
     setText('')
     setSending(false)
   }

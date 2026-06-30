@@ -1,7 +1,10 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { MapPin, Star, CheckCircle, Clock, Scissors, MessageSquare, ShoppingBag, Pencil, Camera } from 'lucide-react'
+import {
+  MapPin, Star, CheckCircle, Clock, Scissors, MessageSquare,
+  ShoppingBag, Pencil, Camera, BadgeCheck, ArrowLeft, X,
+} from 'lucide-react'
 import { SERVICE_LABELS, formatCurrency, formatDate, cn } from '@/lib/utils'
 import { StarRating } from '@/components/ui/star-rating'
 import { Badge } from '@/components/ui/badge'
@@ -23,439 +26,494 @@ const SERVICE_ICONS: Record<string, string> = {
   ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
 }
 
-function ProfileCompleteness({ tailor, services, portfolio, isOwner }: {
-  tailor: TailorWithProfile; services: TailorService[]; portfolio: PortfolioItem[]; isOwner: boolean
-}) {
-  if (!isOwner) return null
-  const items = [
-    { done: !!tailor.bio, label: 'Add a bio', href: '/tailor/profile' },
-    { done: (tailor.specialties || []).length > 0, label: 'Add specialties', href: '/tailor/profile' },
-    { done: portfolio.length > 0, label: 'Upload portfolio photos', href: '/tailor/portfolio' },
-    { done: services.length > 0, label: 'Create a service listing', href: '/tailor/pricing' },
-  ]
-  const done = items.filter(i => i.done).length
-  const pct = Math.round((done / items.length) * 100)
-  if (pct === 100) return null
-
+function LightboxModal({ src, onClose }: { src: string; onClose: () => void }) {
   return (
-    <div className="bg-white rounded-2xl border border-violet-100 p-5 mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-gray-900 text-sm">Profile completeness</h3>
-        <span className="text-sm font-bold text-violet-700">{pct}%</span>
-      </div>
-      <div className="w-full h-2 bg-gray-100 rounded-full mb-4">
-        <div className="h-2 rounded-full bg-violet-600 transition-all duration-500" style={{ width: `${pct}%` }} />
-      </div>
-      <div className="space-y-2">
-        {items.map(item => (
-          <div key={item.label} className="flex items-center gap-3">
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${item.done ? 'bg-green-100' : 'bg-gray-100'}`}>
-              {item.done ? (
-                <CheckCircle size={13} className="text-green-600" />
-              ) : (
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-              )}
-            </div>
-            {item.done ? (
-              <span className="text-sm text-gray-400 line-through">{item.label}</span>
-            ) : (
-              <Link href={item.href} className="text-sm text-violet-700 hover:underline font-medium">{item.label} →</Link>
-            )}
-          </div>
-        ))}
-      </div>
+    <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <button className="absolute top-4 right-4 text-white/70 hover:text-white p-2 rounded-full bg-black/30">
+        <X size={22} />
+      </button>
+      <img src={src} alt="" className="max-w-full max-h-[90vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
     </div>
   )
 }
 
 export function TailorProfileClient({ tailor, services, portfolio, ratings, isOwner }: Props) {
-  const [tab, setTab] = useState<'about' | 'portfolio' | 'services' | 'reviews'>('about')
-  const [tabKey, setTabKey] = useState(0)
-
-  function switchTab(t: 'about' | 'portfolio' | 'services' | 'reviews') {
-    setTab(t)
-    setTabKey(k => k + 1)
-  }
+  const [tab, setTab] = useState<'about' | 'portfolio' | 'services' | 'reviews'>('portfolio')
+  const [lightbox, setLightbox] = useState<string | null>(null)
 
   const hasOrders = tailor.total_orders > 0
   const hasRating = tailor.avg_rating > 0
 
+  // Use portfolio images as cover: first 3 for collage, else gradient
+  const coverImages = portfolio.filter(p => p.image_url).slice(0, 3)
+  const hasCover = coverImages.length > 0
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Profile completeness nudge (owner only) */}
-      <ProfileCompleteness tailor={tailor} services={services} portfolio={portfolio} isOwner={!!isOwner} />
+    <div className="min-h-screen bg-gray-50">
+      {lightbox && <LightboxModal src={lightbox} onClose={() => setLightbox(null)} />}
 
-      {/* Header card */}
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden mb-6">
-        {/* Cover banner */}
-        <div className="h-36 bg-gradient-to-br from-violet-600 via-violet-700 to-purple-900 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.07]" style={{backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px'}} />
-          <div className="absolute -bottom-6 -right-6 w-40 h-40 rounded-full bg-white/5" />
-          <div className="absolute -top-4 -left-4 w-24 h-24 rounded-full bg-white/5" />
-          {isOwner && (
-            <Link href="/tailor/profile" className="absolute top-3 right-3 flex items-center gap-1.5 text-xs text-white/70 hover:text-white bg-black/20 hover:bg-black/30 px-3 py-1.5 rounded-full transition-colors backdrop-blur-sm">
-              <Pencil size={11} /> Edit profile
-            </Link>
-          )}
-        </div>
+      {/* ── Hero cover ─────────────────────────────────────────── */}
+      <div className="relative w-full h-52 sm:h-64 overflow-hidden bg-violet-900">
+        {hasCover ? (
+          <>
+            {/* Main cover: first portfolio image */}
+            <img
+              src={coverImages[0].image_url!}
+              alt="cover"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            {/* Dark gradient overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
+            {/* Mosaic side strips if more images */}
+            {coverImages.length >= 2 && (
+              <div className="absolute right-0 top-0 bottom-0 w-1/4 flex flex-col gap-0.5 overflow-hidden">
+                {coverImages.slice(1).map((img, i) => (
+                  <img key={i} src={img.image_url!} alt=""
+                    className="flex-1 w-full object-cover opacity-80" />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-violet-800 to-purple-900" />
+            <div className="absolute inset-0 opacity-[0.06]"
+              style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+            <div className="absolute -bottom-10 -right-10 w-56 h-56 rounded-full bg-white/5" />
+            <div className="absolute -top-6 -left-6 w-32 h-32 rounded-full bg-white/5" />
+          </>
+        )}
 
-        <div className="px-6 pb-6">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 -mt-10 mb-5">
-            {/* Avatar */}
+        {/* Back button */}
+        <Link href="/browse"
+          className="absolute top-4 left-4 flex items-center gap-1.5 text-xs text-white/80 hover:text-white bg-black/30 hover:bg-black/50 px-3 py-1.5 rounded-full transition-colors backdrop-blur-sm">
+          <ArrowLeft size={12} /> Browse
+        </Link>
+
+        {isOwner && (
+          <Link href="/tailor/profile"
+            className="absolute top-4 right-4 flex items-center gap-1.5 text-xs text-white/80 hover:text-white bg-black/30 hover:bg-black/50 px-3 py-1.5 rounded-full transition-colors backdrop-blur-sm">
+            <Pencil size={11} /> Edit profile
+          </Link>
+        )}
+      </div>
+
+      {/* ── Profile card ───────────────────────────────────────── */}
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="relative bg-white rounded-b-3xl border border-gray-100 border-t-0 pb-5 px-5 mb-0 shadow-sm">
+          {/* Avatar — overlaps cover */}
+          <div className="relative -mt-14 mb-3 flex items-end justify-between">
             <div className="relative flex-shrink-0">
               {tailor.profile?.avatar_url ? (
                 <img src={tailor.profile.avatar_url} alt={tailor.business_name}
-                  className="w-20 h-20 rounded-2xl object-cover shadow-lg border-4 border-white" />
+                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg" />
               ) : (
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 shadow-lg border-4 border-white flex items-center justify-center text-white text-3xl font-bold select-none">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 border-4 border-white shadow-lg flex items-center justify-center text-white text-4xl font-bold select-none">
                   {tailor.business_name?.[0]?.toUpperCase() || '✂'}
                 </div>
               )}
               {isOwner && (
                 <Link href="/tailor/profile"
-                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center hover:bg-violet-800 transition-colors"
-                  title="Edit profile">
+                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center hover:bg-violet-800 transition-colors shadow"
+                  title="Edit photo">
                   <Camera size={12} className="text-white" />
                 </Link>
               )}
             </div>
 
-            {/* Name + verified */}
-            <div className="flex-1 sm:pb-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-bold text-gray-900 truncate">{tailor.business_name}</h1>
-                {tailor.is_verified && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full font-medium flex-shrink-0">
-                    <CheckCircle size={11} /> Verified
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap text-sm text-gray-500">
-                {tailor.profile?.full_name && <span>{tailor.profile.full_name}</span>}
-                <span className="flex items-center gap-1">
-                  <MapPin size={12} /> {tailor.city}, {tailor.state}
-                </span>
-              </div>
-            </div>
-
             {/* Action buttons */}
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex gap-2 mb-1">
               {isOwner ? (
                 <Link href="/tailor/profile"
-                  className="flex items-center gap-2 px-4 py-2.5 bg-violet-700 text-white rounded-xl text-sm font-medium hover:bg-violet-800 transition-colors">
-                  <Pencil size={15} /> Edit Profile
+                  className="flex items-center gap-1.5 px-4 py-2 border-2 border-gray-200 text-gray-700 rounded-full text-sm font-semibold hover:border-violet-300 hover:text-violet-700 transition-colors">
+                  <Pencil size={14} /> Edit
                 </Link>
               ) : (
                 <>
                   <Link href={`/chat?tailor=${tailor.id}`}
-                    className="flex items-center gap-2 px-4 py-2.5 border-2 border-violet-700 text-violet-700 rounded-xl text-sm font-medium hover:bg-violet-50 transition-colors">
-                    <MessageSquare size={15} /> Message
+                    className="flex items-center gap-1.5 px-4 py-2 border-2 border-gray-200 text-gray-700 rounded-full text-sm font-semibold hover:border-violet-400 hover:text-violet-700 transition-colors">
+                    <MessageSquare size={14} /> Message
                   </Link>
                   <Link href={`/orders/new?tailor=${tailor.id}`}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-violet-700 text-white rounded-xl text-sm font-medium hover:bg-violet-800 transition-colors">
-                    <ShoppingBag size={15} /> Book Now
+                    className="flex items-center gap-1.5 px-5 py-2 bg-violet-700 text-white rounded-full text-sm font-bold hover:bg-violet-800 transition-colors shadow-sm shadow-violet-300">
+                    <ShoppingBag size={14} /> Book
                   </Link>
                 </>
               )}
             </div>
           </div>
 
-          {/* Stats row */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-gray-50 rounded-xl mb-4">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-lg font-bold text-gray-900">
-                <Star size={15} className="text-amber-400 fill-amber-400" />
-                {hasRating ? tailor.avg_rating.toFixed(1) : '—'}
-              </div>
-              <div className="text-xs text-gray-500">{tailor.total_reviews > 0 ? `${tailor.total_reviews} review${tailor.total_reviews !== 1 ? 's' : ''}` : 'No reviews yet'}</div>
+          {/* Name & verification */}
+          <div className="mb-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-xl font-bold text-gray-900">{tailor.business_name}</h1>
+              {tailor.is_verified && (
+                <BadgeCheck size={20} className="text-violet-600 flex-shrink-0" />
+              )}
             </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-900">{hasOrders ? tailor.total_orders : '—'}</div>
-              <div className="text-xs text-gray-500">Orders done</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-900">{hasOrders ? `${Math.round(tailor.completion_rate || 0)}%` : '—'}</div>
-              <div className="text-xs text-gray-500">Completion rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-gray-900">
-                {tailor.response_time_hours ? `~${tailor.response_time_hours}h` : '< 1h'}
-              </div>
-              <div className="text-xs text-gray-500">Response time</div>
-            </div>
+            {tailor.profile?.full_name && (
+              <p className="text-sm text-gray-500 font-medium">{tailor.profile.full_name}</p>
+            )}
           </div>
 
-          {/* Delivery types + new creator badge */}
-          <div className="flex items-center gap-3 text-sm flex-wrap">
-            {!hasOrders && (
-              <span className="inline-flex items-center gap-1 text-xs bg-violet-50 text-violet-700 border border-violet-100 px-2.5 py-1 rounded-full font-medium">
-                ✨ New creative
+          {/* Bio */}
+          {tailor.bio && (
+            <p className="text-sm text-gray-700 leading-relaxed mb-3">{tailor.bio}</p>
+          )}
+
+          {/* Meta row */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 mb-3">
+            <span className="flex items-center gap-1">
+              <MapPin size={13} className="text-gray-400" />
+              {tailor.city}, {tailor.state}
+            </span>
+            {(tailor as any).min_price && (tailor as any).max_price && (
+              <span className="flex items-center gap-1 text-violet-700 font-medium">
+                ₦{((tailor as any).min_price / 1000).toFixed(0)}k – ₦{((tailor as any).max_price / 1000).toFixed(0)}k
               </span>
             )}
             {tailor.delivery_types?.includes('pickup_delivery') && (
-              <span className="flex items-center gap-1 text-green-600 text-xs font-medium">
-                <CheckCircle size={13} /> Pickup &amp; Delivery
+              <span className="flex items-center gap-1 text-green-600">
+                <CheckCircle size={12} /> Delivery
               </span>
             )}
-            {tailor.delivery_types?.includes('visit_shop') && (
-              <span className="flex items-center gap-1 text-gray-500 text-xs">
-                <Scissors size={13} /> Visit Shop
+            {tailor.response_time_hours && (
+              <span className="flex items-center gap-1">
+                <Clock size={12} /> Replies in ~{tailor.response_time_hours}h
               </span>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-white rounded-xl border border-gray-100 p-1 mb-6">
-        {(['about', 'portfolio', 'services', 'reviews'] as const).map(t => (
-          <button key={t} onClick={() => switchTab(t)}
-            className={cn('flex-1 py-2.5 text-sm font-medium rounded-lg capitalize transition-all duration-200',
-              tab === t ? 'bg-violet-700 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50')}>
-            {t === 'about' ? 'About'
-              : t === 'portfolio' ? `Portfolio${portfolio.length > 0 ? ` (${portfolio.length})` : ''}`
-              : t === 'services' ? `Services${services.length > 0 ? ` (${services.length})` : ''}`
-              : `Reviews${ratings.length > 0 ? ` (${ratings.length})` : ''}`}
-          </button>
-        ))}
-      </div>
-
-      {/* ── About tab ─────────────────────────────────────────── */}
-      {tab === 'about' && (
-        <div key={tabKey} className="tab-enter space-y-4">
-          {/* Bio */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-bold text-gray-900">About</h2>
-              {isOwner && tailor.bio && (
-                <Link href="/tailor/profile" className="text-xs text-violet-600 hover:underline flex items-center gap-1">
-                  <Pencil size={11} /> Edit
-                </Link>
-              )}
-            </div>
-            {tailor.bio ? (
-              <p className="text-gray-600 leading-relaxed">{tailor.bio}</p>
-            ) : isOwner ? (
-              <Link href="/tailor/profile"
-                className="flex items-center gap-4 p-5 bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-dashed border-amber-300 rounded-xl hover:border-amber-400 hover:from-amber-100 hover:to-orange-100 transition-all group">
-                <div className="w-12 h-12 rounded-xl bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center text-2xl flex-shrink-0 transition-colors">✍️</div>
-                <div>
-                  <p className="font-semibold text-amber-900">Add a bio to your profile</p>
-                  <p className="text-xs text-amber-700 mt-1">Tell customers about your experience, style, and what makes you special. Profiles with bios get 3× more orders.</p>
-                  <span className="inline-block mt-2 text-xs font-semibold text-amber-800 underline">Write your bio →</span>
-                </div>
-              </Link>
-            ) : (
-              <p className="text-gray-400 text-sm italic">This creative hasn&apos;t added a bio yet.</p>
-            )}
-          </div>
-
-          {/* Details */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Details</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-3">
-                <MapPin size={16} className="text-violet-500 flex-shrink-0" />
-                <span className="text-gray-700">{tailor.city}, {tailor.state}</span>
-              </div>
-              {tailor.delivery_types?.includes('pickup_delivery') && (
-                <div className="flex items-center gap-3">
-                  <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
-                  <span className="text-gray-700">Offers Pickup &amp; Delivery</span>
-                </div>
-              )}
-              {tailor.delivery_types?.includes('visit_shop') && (
-                <div className="flex items-center gap-3">
-                  <Scissors size={16} className="text-violet-500 flex-shrink-0" />
-                  <span className="text-gray-700">Customers can visit the shop</span>
-                </div>
-              )}
-              {tailor.response_time_hours && (
-                <div className="flex items-center gap-3">
-                  <Clock size={16} className="text-amber-500 flex-shrink-0" />
-                  <span className="text-gray-700">Typically replies within {tailor.response_time_hours}h</span>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Specialties */}
           {(tailor.specialties || []).length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-bold text-gray-900 mb-4">Specialties</h2>
-              <div className="flex flex-wrap gap-2">
-                {(tailor.specialties || []).map(s => (
-                  <span key={s} className="flex items-center gap-1.5 text-sm bg-violet-50 text-violet-700 px-3 py-2 rounded-xl font-medium border border-violet-100">
-                    {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
-                  </span>
-                ))}
-              </div>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              {tailor.specialties.map(s => (
+                <span key={s} className="text-xs bg-violet-50 text-violet-700 border border-violet-100 px-2.5 py-1 rounded-full font-medium">
+                  {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
+                </span>
+              ))}
             </div>
           )}
 
-          {isOwner && (tailor.specialties || []).length === 0 && (
-            <Link href="/tailor/profile"
-              className="flex items-center gap-4 p-5 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl hover:border-violet-300 hover:bg-violet-50 transition-all group">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 group-hover:bg-violet-100 flex items-center justify-center text-xl flex-shrink-0">✂️</div>
-              <div>
-                <p className="font-semibold text-gray-700 group-hover:text-violet-800">Add your specialties</p>
-                <p className="text-xs text-gray-500 mt-0.5">Let customers know what you're best at →</p>
+          {/* Stats row — like Twitter */}
+          <div className="flex gap-5 text-sm border-t border-gray-100 pt-4">
+            <div className="text-center">
+              <div className="font-bold text-gray-900">{hasOrders ? tailor.total_orders : 0}</div>
+              <div className="text-xs text-gray-400">Orders</div>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-gray-900 flex items-center gap-1 justify-center">
+                <Star size={13} className="text-amber-400 fill-amber-400" />
+                {hasRating ? tailor.avg_rating.toFixed(1) : '—'}
               </div>
-            </Link>
-          )}
-        </div>
-      )}
-
-      {/* ── Portfolio tab ─────────────────────────────────────── */}
-      {tab === 'portfolio' && (
-        portfolio.length === 0 ? (
-          <div key={tabKey} className="tab-enter">
-            {isOwner ? (
-              <Link href="/tailor/portfolio"
-                className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all group">
-                <div className="text-5xl mb-3">📸</div>
-                <p className="font-semibold text-gray-700 group-hover:text-violet-800 mb-1">Add your portfolio photos</p>
-                <p className="text-sm text-gray-400 mb-4 text-center max-w-xs">Show your best work — outfits, styles, and custom pieces you&apos;ve made</p>
-                <span className="bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl group-hover:bg-violet-800 transition-colors">+ Add photos</span>
-              </Link>
-            ) : (
-              <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-                <div className="text-5xl mb-3">📸</div>
-                <p className="text-gray-500">No portfolio items yet</p>
+              <div className="text-xs text-gray-400">{tailor.total_reviews} reviews</div>
+            </div>
+            <div className="text-center">
+              <div className="font-bold text-gray-900">{portfolio.length}</div>
+              <div className="text-xs text-gray-400">Portfolio</div>
+            </div>
+            {hasOrders && (
+              <div className="text-center">
+                <div className="font-bold text-gray-900">{Math.round(tailor.completion_rate || 0)}%</div>
+                <div className="text-xs text-gray-400">Completion</div>
+              </div>
+            )}
+            {!hasOrders && (
+              <div className="text-center">
+                <div className="text-xs bg-violet-50 text-violet-700 border border-violet-100 px-2 py-1 rounded-full font-medium mt-0.5">✨ New</div>
               </div>
             )}
           </div>
-        ) : (
-          <div key={tabKey} className="tab-enter">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {portfolio.map((item) => (
-                <div key={item.id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md card-lift transition-all">
-                  <div className="aspect-square bg-violet-100 relative overflow-hidden">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">✂️</div>
-                    )}
-                    {item.service_type && (
-                      <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full backdrop-blur-sm">
-                        {SERVICE_LABELS[item.service_type]}
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="text-sm font-medium text-gray-900 truncate">{item.title}</p>
-                    {item.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{item.description}</p>}
-                  </div>
-                </div>
-              ))}
-              {isOwner && (
+        </div>
+
+        {/* ── Tabs ───────────────────────────────────────────────── */}
+        <div className="flex border-b border-gray-200 bg-white sticky top-16 z-10">
+          {(['portfolio', 'about', 'services', 'reviews'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={cn(
+                'flex-1 py-3 text-sm font-medium transition-all border-b-2 -mb-px',
+                tab === t
+                  ? 'border-violet-700 text-violet-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              )}>
+              {t === 'portfolio' ? `Photos${portfolio.length > 0 ? ` (${portfolio.length})` : ''}`
+                : t === 'about' ? 'About'
+                : t === 'services' ? `Services${services.length > 0 ? ` (${services.length})` : ''}`
+                : `Reviews${ratings.length > 0 ? ` (${ratings.length})` : ''}`}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Portfolio / Photos tab ────────────────────────────── */}
+        {tab === 'portfolio' && (
+          <div className="py-4">
+            {portfolio.length === 0 ? (
+              isOwner ? (
                 <Link href="/tailor/portfolio"
-                  className="aspect-square flex flex-col items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all group">
-                  <span className="text-3xl mb-2">+</span>
-                  <span className="text-xs text-gray-500 group-hover:text-violet-700 font-medium">Add more</span>
+                  className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all group mt-1">
+                  <div className="text-5xl mb-3">📸</div>
+                  <p className="font-semibold text-gray-700 group-hover:text-violet-800 mb-1">Add your design photos</p>
+                  <p className="text-sm text-gray-400 mb-4 text-center max-w-xs">Show your work — customers decide who to book based on what they see</p>
+                  <span className="bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-full">+ Upload photos</span>
                 </Link>
+              ) : (
+                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 mt-1">
+                  <div className="text-5xl mb-3">📸</div>
+                  <p className="text-gray-400 font-medium">No portfolio photos yet</p>
+                </div>
+              )
+            ) : (
+              <>
+                {/* Pinterest-style masonry grid */}
+                <div className="columns-2 sm:columns-3 gap-2 space-y-2 mt-1">
+                  {portfolio.map((item, i) => (
+                    <div key={item.id}
+                      className={cn(
+                        'break-inside-avoid group relative overflow-hidden rounded-2xl bg-violet-100 cursor-pointer hover:shadow-lg transition-all duration-300',
+                        i === 0 ? 'col-span-2' : ''
+                      )}
+                      onClick={() => item.image_url && setLightbox(item.image_url)}>
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.title}
+                          className="w-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          style={{ aspectRatio: i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '3/4' }}
+                        />
+                      ) : (
+                        <div className="w-full h-40 flex items-center justify-center text-4xl">✂️</div>
+                      )}
+                      {/* Hover overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                        {item.title && (
+                          <p className="text-white text-xs font-semibold leading-tight">{item.title}</p>
+                        )}
+                      </div>
+                      {item.service_type && (
+                        <div className="absolute top-2 left-2 bg-black/50 text-white text-[10px] px-2 py-0.5 rounded-full backdrop-blur-sm font-medium">
+                          {SERVICE_LABELS[item.service_type]}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {isOwner && (
+                  <Link href="/tailor/portfolio"
+                    className="flex items-center justify-center gap-2 mt-4 py-3 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all text-sm font-semibold text-gray-500 hover:text-violet-700">
+                    + Add more photos
+                  </Link>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── About tab ─────────────────────────────────────────── */}
+        {tab === 'about' && (
+          <div className="py-4 space-y-3">
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <h2 className="font-bold text-gray-900 mb-3">About</h2>
+              {tailor.bio ? (
+                <p className="text-gray-600 leading-relaxed text-sm">{tailor.bio}</p>
+              ) : isOwner ? (
+                <Link href="/tailor/profile"
+                  className="flex items-center gap-3 p-4 bg-amber-50 border border-dashed border-amber-300 rounded-xl hover:bg-amber-100 transition-all group">
+                  <div className="text-2xl">✍️</div>
+                  <div>
+                    <p className="font-semibold text-amber-900 text-sm">Add a bio</p>
+                    <p className="text-xs text-amber-700 mt-0.5">Profiles with bios get 3× more bookings</p>
+                  </div>
+                </Link>
+              ) : (
+                <p className="text-gray-400 text-sm italic">No bio yet</p>
               )}
             </div>
-          </div>
-        )
-      )}
 
-      {/* ── Services tab ──────────────────────────────────────── */}
-      {tab === 'services' && (
-        services.length === 0 ? (
-          <div key={tabKey} className="tab-enter">
-            {isOwner ? (
-              <Link href="/tailor/pricing"
-                className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all group">
-                <div className="text-5xl mb-3">💼</div>
-                <p className="font-semibold text-gray-700 group-hover:text-violet-800 mb-1">List your services</p>
-                <p className="text-sm text-gray-400 mb-4 text-center max-w-xs">Add your services with pricing so customers know what to expect</p>
-                <span className="bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl group-hover:bg-violet-800 transition-colors">+ Add services</span>
-              </Link>
-            ) : (
-              <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
-                <div className="text-5xl mb-3">💼</div>
-                <p className="text-gray-500">No services listed yet</p>
-                <Link href={`/orders/new?tailor=${tailor.id}`}
-                  className="inline-flex items-center gap-2 mt-4 bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-violet-800 transition-colors">
-                  Request a custom order
-                </Link>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div key={tabKey} className="tab-enter space-y-4">
-            {services.map((service) => (
-              <div key={service.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-violet-200 hover:shadow-sm card-lift transition-all">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="text-xl">{SERVICE_ICONS[service.service_type]}</span>
-                      <h3 className="font-semibold text-gray-900">{service.title}</h3>
-                      <Badge variant="default">{SERVICE_LABELS[service.service_type]}</Badge>
-                    </div>
-                    {service.description && <p className="text-sm text-gray-600 mb-3">{service.description}</p>}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1"><Clock size={14} /> {service.min_days}–{service.max_days} days</span>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <div className="text-xl font-bold text-violet-700">{formatCurrency(service.base_price)}</div>
-                    {service.price_negotiable && <div className="text-xs text-amber-600 font-medium mt-0.5">Negotiable</div>}
-                    {!isOwner && (
-                      <Link href={`/orders/new?tailor=${tailor.id}&service=${service.id}`}
-                        className="mt-3 block bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-violet-800 transition-colors text-center">
-                        Book this
-                      </Link>
-                    )}
-                  </div>
+            <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <h2 className="font-bold text-gray-900 mb-3">Details</h2>
+              <div className="space-y-2.5 text-sm">
+                <div className="flex items-center gap-2.5 text-gray-700">
+                  <MapPin size={15} className="text-violet-500 flex-shrink-0" />
+                  {tailor.city}, {tailor.state}
                 </div>
-              </div>
-            ))}
-          </div>
-        )
-      )}
-
-      {/* ── Reviews tab ───────────────────────────────────────── */}
-      {tab === 'reviews' && (
-        ratings.length === 0 ? (
-          <div key={tabKey} className="tab-enter text-center py-16 bg-white rounded-2xl border border-gray-100">
-            <div className="text-5xl mb-3">⭐</div>
-            <p className="font-semibold text-gray-700 mb-1">No reviews yet</p>
-            {!isOwner && (
-              <p className="text-sm text-gray-400">Complete an order to leave a review</p>
-            )}
-          </div>
-        ) : (
-          <div key={tabKey} className="tab-enter space-y-4">
-            {/* Rating summary */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-6">
-              <div className="text-center">
-                <div className="text-4xl font-black text-gray-900">{tailor.avg_rating.toFixed(1)}</div>
-                <StarRating value={Math.round(tailor.avg_rating)} readonly size="sm" />
-                <div className="text-xs text-gray-500 mt-1">{ratings.length} review{ratings.length !== 1 ? 's' : ''}</div>
+                {(tailor as any).address && (
+                  <div className="flex items-start gap-2.5 text-gray-700">
+                    <MapPin size={15} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                    {(tailor as any).address}
+                  </div>
+                )}
+                {(tailor as any).min_price && (tailor as any).max_price && (
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-lg">💰</span>
+                    <span className="text-violet-700 font-semibold">
+                      ₦{formatCurrency((tailor as any).min_price).replace('₦', '')} – ₦{formatCurrency((tailor as any).max_price).replace('₦', '')}
+                    </span>
+                  </div>
+                )}
+                {tailor.delivery_types?.includes('pickup_delivery') && (
+                  <div className="flex items-center gap-2.5 text-green-600">
+                    <CheckCircle size={15} className="flex-shrink-0" />
+                    Pickup & Delivery available
+                  </div>
+                )}
+                {tailor.delivery_types?.includes('visit_shop') && (
+                  <div className="flex items-center gap-2.5 text-gray-600">
+                    <Scissors size={15} className="flex-shrink-0 text-violet-500" />
+                    Customers can visit the shop
+                  </div>
+                )}
+                {tailor.response_time_hours && (
+                  <div className="flex items-center gap-2.5 text-gray-600">
+                    <Clock size={15} className="text-amber-500 flex-shrink-0" />
+                    Typically replies within {tailor.response_time_hours}h
+                  </div>
+                )}
+                <div className="flex items-center gap-2.5 text-gray-400 text-xs pt-1">
+                  <span>Member since {formatDate(tailor.created_at)}</span>
+                </div>
               </div>
             </div>
-            {ratings.map((rating) => (
-              <div key={rating.id} className="bg-white rounded-2xl border border-gray-100 p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-semibold text-sm">
-                      {rating.reviewer?.full_name?.[0]?.toUpperCase() || 'U'}
+
+            {(tailor.specialties || []).length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+                <h2 className="font-bold text-gray-900 mb-3">Specialties</h2>
+                <div className="flex flex-wrap gap-2">
+                  {tailor.specialties.map(s => (
+                    <span key={s} className="flex items-center gap-1.5 text-sm bg-violet-50 text-violet-700 px-3 py-2 rounded-xl font-medium border border-violet-100">
+                      {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Profile completeness nudge (owner only) */}
+            {isOwner && (() => {
+              const items = [
+                { done: !!tailor.bio, label: 'Add a bio', href: '/tailor/profile' },
+                { done: (tailor.specialties || []).length > 0, label: 'Add specialties', href: '/tailor/profile' },
+                { done: portfolio.length > 0, label: 'Upload portfolio photos', href: '/tailor/portfolio' },
+                { done: services.length > 0, label: 'Create a service listing', href: '/tailor/pricing' },
+              ]
+              const done = items.filter(i => i.done).length
+              if (done === items.length) return null
+              return (
+                <div className="bg-white rounded-2xl border border-violet-100 p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-gray-900 text-sm">Complete your profile</h3>
+                    <span className="text-sm font-bold text-violet-700">{Math.round((done / items.length) * 100)}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-gray-100 rounded-full mb-3">
+                    <div className="h-1.5 rounded-full bg-violet-600 transition-all duration-500" style={{ width: `${(done / items.length) * 100}%` }} />
+                  </div>
+                  <div className="space-y-1.5">
+                    {items.filter(i => !i.done).map(item => (
+                      <Link key={item.label} href={item.href} className="flex items-center gap-2 text-sm text-violet-700 hover:underline font-medium">
+                        <div className="w-4 h-4 rounded-full border-2 border-violet-300 flex-shrink-0" />
+                        {item.label} →
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        )}
+
+        {/* ── Services tab ──────────────────────────────────────── */}
+        {tab === 'services' && (
+          <div className="py-4 space-y-3">
+            {services.length === 0 ? (
+              isOwner ? (
+                <Link href="/tailor/pricing"
+                  className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 hover:bg-violet-50 transition-all group">
+                  <div className="text-5xl mb-3">💼</div>
+                  <p className="font-semibold text-gray-700 group-hover:text-violet-800 mb-1">List your services</p>
+                  <p className="text-sm text-gray-400 mb-4 text-center max-w-xs">Add your services with pricing</p>
+                  <span className="bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-full">+ Add services</span>
+                </Link>
+              ) : (
+                <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                  <div className="text-5xl mb-3">💼</div>
+                  <p className="text-gray-500 font-medium mb-4">No services listed yet</p>
+                  <Link href={`/orders/new?tailor=${tailor.id}`}
+                    className="inline-flex items-center gap-2 bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-violet-800 transition-colors">
+                    Request a custom order
+                  </Link>
+                </div>
+              )
+            ) : (
+              services.map((service) => (
+                <div key={service.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-violet-200 hover:shadow-sm transition-all">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-xl">{SERVICE_ICONS[service.service_type]}</span>
+                        <h3 className="font-semibold text-gray-900">{service.title}</h3>
+                        <Badge variant="default">{SERVICE_LABELS[service.service_type]}</Badge>
+                      </div>
+                      {service.description && <p className="text-sm text-gray-500 mb-2">{service.description}</p>}
+                      <div className="text-xs text-gray-400 flex items-center gap-1">
+                        <Clock size={12} /> {service.min_days}–{service.max_days} days turnaround
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{rating.reviewer?.full_name || 'Customer'}</p>
-                      <p className="text-xs text-gray-400">{formatDate(rating.created_at)}</p>
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-xl font-bold text-violet-700">{formatCurrency(service.base_price)}</div>
+                      {service.price_negotiable && <div className="text-xs text-amber-600 font-medium mt-0.5">Negotiable</div>}
+                      {!isOwner && (
+                        <Link href={`/orders/new?tailor=${tailor.id}&service=${service.id}`}
+                          className="mt-3 block bg-violet-700 text-white text-xs font-semibold px-4 py-2 rounded-full hover:bg-violet-800 transition-colors text-center">
+                          Book this
+                        </Link>
+                      )}
                     </div>
                   </div>
-                  <StarRating value={rating.rating} readonly size="sm" />
                 </div>
-                {rating.comment && <p className="text-sm text-gray-600 leading-relaxed mt-2">{rating.comment}</p>}
-              </div>
-            ))}
+              ))
+            )}
           </div>
-        )
-      )}
+        )}
+
+        {/* ── Reviews tab ───────────────────────────────────────── */}
+        {tab === 'reviews' && (
+          <div className="py-4 space-y-3">
+            {ratings.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+                <div className="text-5xl mb-3">⭐</div>
+                <p className="font-semibold text-gray-700 mb-1">No reviews yet</p>
+                {!isOwner && <p className="text-sm text-gray-400">Complete an order to leave a review</p>}
+              </div>
+            ) : (
+              <>
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-5">
+                  <div className="text-center">
+                    <div className="text-4xl font-black text-gray-900">{tailor.avg_rating.toFixed(1)}</div>
+                    <StarRating value={Math.round(tailor.avg_rating)} readonly size="sm" />
+                    <div className="text-xs text-gray-400 mt-1">{ratings.length} review{ratings.length !== 1 ? 's' : ''}</div>
+                  </div>
+                </div>
+                {ratings.map((rating) => (
+                  <div key={rating.id} className="bg-white rounded-2xl border border-gray-100 p-5">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-semibold text-sm">
+                          {rating.reviewer?.full_name?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{rating.reviewer?.full_name || 'Customer'}</p>
+                          <p className="text-xs text-gray-400">{formatDate(rating.created_at)}</p>
+                        </div>
+                      </div>
+                      <StarRating value={rating.rating} readonly size="sm" />
+                    </div>
+                    {rating.comment && <p className="text-sm text-gray-600 leading-relaxed mt-2">{rating.comment}</p>}
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="h-8" />
+      </div>
     </div>
   )
 }

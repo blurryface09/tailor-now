@@ -222,7 +222,7 @@ export interface Follow {
 export interface Notification {
   id: string
   user_id: string
-  type: 'order_update' | 'new_follower' | 'post_like' | 'post_comment' | 'payment'
+  type: 'order_update' | 'new_follower' | 'post_like' | 'post_comment' | 'payment' | 'new_message'
   title: string
   body: string | null
   data: Record<string, string>

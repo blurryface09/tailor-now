@@ -48,6 +48,16 @@ export async function POST(req: NextRequest) {
       .insert({ room_id: roomId, sender_id: user.id, content: content.trim() })
 
     if (msgErr) return NextResponse.json({ error: `Msg: ${msgErr.message}` }, { status: 500 })
+
+    // Notify the creative
+    await admin.from('notifications').insert({
+      user_id: tailorUserId,
+      type: 'new_message',
+      title: 'Message from TailorNow',
+      body: content.trim().slice(0, 80),
+      data: { room_tailor_id: tailorUserId },
+    })
+
     return NextResponse.json({ ok: true })
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || String(e) }, { status: 500 })

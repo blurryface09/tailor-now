@@ -31,15 +31,71 @@ export function Navbar() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [unreadMessages, setUnreadMessages] = useState(0)
+  const [unreadNotifs, setUnreadNotifs] = useState(0)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) {
+        setUserId(user.id)
         supabase.from('profiles').select('*').eq('id', user.id).single()
           .then(({ data }) => setProfile(data))
       }
     })
   }, [])
+
+  useEffect(() => {
+    if (!userId) return
+
+    const loadCounts = async () => {
+      // Unread messages: messages in rooms I'm in, not sent by me, not read
+      const { data: rooms } = await supabase
+        .from('chat_rooms')
+        .select('id')
+        .or(`customer_id.eq.${userId},tailor_id.eq.${userId}`)
+      const roomIds = (rooms || []).map(r => r.id)
+      if (roomIds.length > 0) {
+        const { count } = await supabase
+          .from('chat_messages')
+          .select('id', { count: 'exact', head: true })
+          .in('room_id', roomIds)
+          .eq('read', false)
+          .neq('sender_id', userId)
+        setUnreadMessages(count || 0)
+      }
+      // Unread notifications
+      const { count: nc } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('read', false)
+      setUnreadNotifs(nc || 0)
+    }
+
+    loadCounts()
+
+    // Realtime: watch new chat messages
+    const msgChannel = supabase.channel('navbar-msgs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+        () => loadCounts())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' },
+        () => loadCounts())
+      .subscribe()
+
+    // Realtime: watch notifications
+    const notifChannel = supabase.channel('navbar-notifs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        () => loadCounts())
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+        () => loadCounts())
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(msgChannel)
+      supabase.removeChannel(notifChannel)
+    }
+  }, [userId])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -156,12 +212,22 @@ export function Navbar() {
                 <Link href={profile.role === 'tailor' ? '/tailor/chat' : '/chat'}
                   className="relative p-2 text-gray-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all duration-200 hover:scale-110">
                   <MessageSquare size={20} />
+                  {unreadMessages > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                      {unreadMessages > 99 ? '99+' : unreadMessages}
+                    </span>
+                  )}
                 </Link>
               )}
               {profile.role !== 'admin' && (
                 <Link href="/notifications"
                   className="relative p-2 text-gray-500 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-all duration-200 hover:scale-110">
                   <Bell size={20} />
+                  {unreadNotifs > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                      {unreadNotifs > 99 ? '99+' : unreadNotifs}
+                    </span>
+                  )}
                 </Link>
               )}
               <div className="relative group">

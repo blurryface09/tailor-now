@@ -1,6 +1,11 @@
 'use client'
 import { useState } from 'react'
-import { CheckCircle, XCircle, Star, MapPin, Eye, Mail, Phone, Search, AlertCircle, MessageSquare, Send, X } from 'lucide-react'
+import {
+  CheckCircle, XCircle, Star, MapPin, Eye, Mail, Phone, Search,
+  AlertCircle, MessageSquare, Send, X, ChevronRight, User,
+  Image as ImageIcon, DollarSign, ShieldCheck, Package, Calendar,
+  BadgeCheck, Info,
+} from 'lucide-react'
 import { formatDate, SERVICE_LABELS } from '@/lib/utils'
 import type { TailorProfile, Profile } from '@/types'
 import toast from 'react-hot-toast'
@@ -19,14 +24,14 @@ const SERVICE_ICONS: Record<string, string> = {
   ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔',
 }
 
-function completeness(t: TailorWithProfile): { label: string; done: boolean }[] {
+function completenessChecks(t: TailorWithProfile) {
   return [
-    { label: 'Profile photo', done: !!t.profile?.avatar_url },
-    { label: 'Phone number', done: !!t.profile?.phone },
-    { label: 'Address', done: !!t.address },
-    { label: 'Face photo', done: !!t.face_photo_url },
-    { label: 'Portfolio pics', done: (t.portfolio_count ?? 0) >= 2 },
-    { label: 'Price range', done: !!(t.min_price && t.max_price) },
+    { key: 'photo',     label: 'Profile photo',    done: !!t.profile?.avatar_url,              icon: <User size={14} /> },
+    { key: 'phone',     label: 'Phone number',     done: !!t.profile?.phone,                   icon: <Phone size={14} /> },
+    { key: 'address',   label: 'Shop address',     done: !!t.address,                          icon: <MapPin size={14} /> },
+    { key: 'face',      label: 'Face / ID photo',  done: !!t.face_photo_url,                   icon: <ShieldCheck size={14} /> },
+    { key: 'portfolio', label: '2+ portfolio pics', done: (t.portfolio_count ?? 0) >= 2,        icon: <ImageIcon size={14} /> },
+    { key: 'price',     label: 'Price range',      done: !!(t.min_price && t.max_price),        icon: <DollarSign size={14} /> },
   ]
 }
 
@@ -53,7 +58,7 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
         toast.error(data.error || `Error ${res.status}`)
         return
       }
-      toast.success('In-app message sent!')
+      toast.success('Message sent!')
     } else {
       if (!target.email) { toast.error('No email on file'); setSending(false); return }
       const res = await fetch('/api/admin/email', {
@@ -78,8 +83,6 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors"><X size={16} /></button>
         </div>
-
-        {/* Tab switcher */}
         <div className="flex gap-2 p-4 pb-0">
           {(['message', 'email'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
@@ -88,7 +91,6 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
             </button>
           ))}
         </div>
-
         <div className="p-4 space-y-3">
           {tab === 'email' && (
             <div>
@@ -98,37 +100,25 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
             </div>
           )}
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">
-              {tab === 'message' ? 'Message' : 'Body'}
-            </label>
-            <textarea
-              rows={6}
+            <label className="block text-xs font-medium text-gray-600 mb-1">{tab === 'message' ? 'Message' : 'Body'}</label>
+            <textarea rows={5}
               className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-              placeholder={tab === 'message'
-                ? 'Hi! Your profile is pending verification. Please add your face photo and price range to complete setup.'
-                : 'Write your message to the creative...'}
-              value={body} onChange={e => setBody(e.target.value)}
-            />
-            <p className="text-xs text-gray-400 mt-1">{body.length} characters</p>
+              placeholder="Write your message..."
+              value={body} onChange={e => setBody(e.target.value)} />
+            <p className="text-xs text-gray-400 mt-0.5">{body.length} chars</p>
           </div>
-
-          {/* Quick templates */}
-          <div>
-            <p className="text-xs text-gray-400 mb-1.5">Quick templates:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                { label: 'Complete profile', text: 'Hi! Your profile is pending verification. Please complete your profile by adding a face photo, phone number, shop address, price range, and at least 2 portfolio photos. Once done, we will review and verify you.' },
-                { label: 'Verified!', text: 'Great news! Your TailorNow profile has been verified. You are now visible to customers as a verified creative. Keep your profile updated and respond promptly to orders.' },
-                { label: 'Suspended', text: 'Your TailorNow account has been temporarily suspended. Please contact us at hello@tailornow.shop if you believe this is an error or to resolve any outstanding issues.' },
-              ].map(t => (
-                <button key={t.label} onClick={() => setBody(t.text)}
-                  className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-violet-50 hover:text-violet-700 transition-colors">
-                  {t.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { label: 'Complete profile', text: 'Hi! Your profile is pending verification. Please add a face photo, phone number, shop address, price range, and at least 2 portfolio photos. Once complete we will review and verify you within 24 hours.' },
+              { label: 'Verified ✓', text: 'Great news! Your TailorNow profile has been verified. You are now visible to customers as a verified creative. Keep your profile updated and respond promptly to enquiries.' },
+              { label: 'Suspended', text: 'Your TailorNow account has been temporarily suspended. Contact us at hello@tailornow.shop to resolve any outstanding issues.' },
+            ].map(t => (
+              <button key={t.label} onClick={() => setBody(t.text)}
+                className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                {t.label}
+              </button>
+            ))}
           </div>
-
           <button onClick={send} disabled={!body.trim() || sending}
             className="w-full flex items-center justify-center gap-2 bg-violet-700 text-white py-3 rounded-xl font-semibold text-sm hover:bg-violet-800 transition-colors disabled:opacity-50">
             <Send size={14} /> {sending ? 'Sending…' : tab === 'message' ? 'Send message' : 'Send email'}
@@ -139,18 +129,219 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
   )
 }
 
+function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading }:
+  {
+    tailor: TailorWithProfile
+    onClose: () => void
+    onVerify: (id: string, verified: boolean) => void
+    onSuspend: (id: string, active: boolean) => void
+    onCompose: (t: ComposeTarget) => void
+    loading: string | null
+  }) {
+  const checks = completenessChecks(tailor)
+  const done = checks.filter(c => c.done).length
+  const pct = Math.round((done / checks.length) * 100)
+
+  return (
+    <div className="fixed inset-0 z-40 flex">
+      {/* Backdrop */}
+      <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      {/* Drawer */}
+      <div className="w-full max-w-md bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between z-10">
+          <h2 className="font-bold text-gray-900">Creative Profile</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="flex-1 p-5 space-y-5">
+          {/* Identity */}
+          <div className="flex items-start gap-4">
+            {tailor.profile?.avatar_url ? (
+              <img src={tailor.profile.avatar_url} alt={tailor.business_name}
+                className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border border-gray-200" />
+            ) : (
+              <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-2xl flex-shrink-0">
+                {tailor.business_name?.[0]?.toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-gray-900">{tailor.business_name}</h3>
+                {tailor.is_verified && <BadgeCheck size={16} className="text-violet-600 flex-shrink-0" />}
+              </div>
+              <p className="text-sm text-gray-500">{tailor.profile?.full_name}</p>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {tailor.is_verified
+                  ? <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Verified</span>
+                  : <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Pending</span>}
+                {!tailor.is_active && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Suspended</span>}
+              </div>
+            </div>
+          </div>
+
+          {/* Profile completeness */}
+          <div className="bg-gray-50 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-gray-700">Profile completeness</span>
+              <span className={`text-sm font-bold ${pct === 100 ? 'text-green-600' : 'text-amber-600'}`}>{pct}%</span>
+            </div>
+            <div className="w-full h-2 bg-gray-200 rounded-full mb-3 overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${pct}%`, background: pct === 100 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626' }} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {checks.map(c => (
+                <div key={c.key}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium ${c.done ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                  <span className={c.done ? 'text-green-500' : 'text-red-400'}>{c.icon}</span>
+                  <span className="truncate">{c.label}</span>
+                  {c.done ? <CheckCircle size={12} className="ml-auto flex-shrink-0" /> : <AlertCircle size={12} className="ml-auto flex-shrink-0" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact information */}
+          <div>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact Info</h4>
+            <div className="space-y-2">
+              <InfoRow icon={<Mail size={14} />} label="Email" value={tailor.profile?.email} missing="Not provided" />
+              <InfoRow icon={<Phone size={14} />} label="Phone" value={tailor.profile?.phone} missing="Not added" />
+              <InfoRow icon={<MapPin size={14} />} label="Location" value={tailor.city ? `${tailor.city}, ${tailor.state}` : null} missing="Not set" />
+              <InfoRow icon={<MapPin size={14} />} label="Address" value={tailor.address} missing="Not added" />
+            </div>
+          </div>
+
+          {/* Business info */}
+          <div>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Business Info</h4>
+            <div className="space-y-2">
+              <InfoRow icon={<DollarSign size={14} />} label="Price range"
+                value={(tailor.min_price && tailor.max_price) ? `₦${(tailor.min_price / 1000).toFixed(0)}k – ₦${(tailor.max_price / 1000).toFixed(0)}k` : null}
+                missing="Not set" />
+              <InfoRow icon={<Package size={14} />} label="Portfolio photos"
+                value={tailor.portfolio_count != null ? `${tailor.portfolio_count} photo${tailor.portfolio_count !== 1 ? 's' : ''}` : null}
+                missing="None uploaded"
+                warn={(tailor.portfolio_count ?? 0) < 2} />
+              <InfoRow icon={<Calendar size={14} />} label="Joined" value={formatDate(tailor.created_at)} />
+              <InfoRow icon={<Star size={14} />} label="Rating"
+                value={tailor.avg_rating > 0 ? `${tailor.avg_rating.toFixed(1)} ★ (${tailor.total_reviews} reviews)` : null}
+                missing="No reviews yet" />
+              <InfoRow icon={<Package size={14} />} label="Orders" value={tailor.total_orders > 0 ? `${tailor.total_orders} completed` : null} missing="No orders yet" />
+            </div>
+          </div>
+
+          {/* Bio */}
+          <div>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Bio</h4>
+            {tailor.bio ? (
+              <p className="text-sm text-gray-700 bg-gray-50 rounded-xl p-3 leading-relaxed">{tailor.bio}</p>
+            ) : (
+              <p className="text-sm text-gray-400 italic bg-gray-50 rounded-xl p-3">No bio added</p>
+            )}
+          </div>
+
+          {/* Specialties */}
+          {(tailor.specialties || []).length > 0 && (
+            <div>
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Specialties</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {tailor.specialties.map(s => (
+                  <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2.5 py-1 rounded-full border border-violet-100 font-medium">
+                    {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Face photo */}
+          <div>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Face / ID Photo</h4>
+            {tailor.face_photo_url ? (
+              <img src={tailor.face_photo_url} alt="Face verification"
+                className="w-28 h-28 rounded-2xl object-cover border border-gray-200 shadow-sm" />
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-red-500 bg-red-50 rounded-xl px-3 py-2.5">
+                <AlertCircle size={14} /> Not uploaded — required for verification
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Action bar */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 space-y-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => onCompose({ tailorUserId: tailor.user_id, name: tailor.profile?.full_name || tailor.business_name, email: tailor.profile?.email || null })}
+              className="flex-1 flex items-center justify-center gap-1.5 text-sm text-violet-700 bg-violet-50 border border-violet-200 px-3 py-2.5 rounded-xl hover:bg-violet-100 transition-colors font-medium">
+              <MessageSquare size={14} /> Message
+            </button>
+            <Link href={`/tailors/${tailor.id}`} target="_blank"
+              className="flex-1 flex items-center justify-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors font-medium">
+              <Eye size={14} /> View public
+            </Link>
+          </div>
+          <div className="flex gap-2">
+            {!tailor.is_verified ? (
+              <button onClick={() => onVerify(tailor.id, true)} disabled={loading === tailor.id}
+                className="flex-1 flex items-center justify-center gap-1.5 text-sm text-green-700 bg-green-50 border border-green-200 px-3 py-2.5 rounded-xl hover:bg-green-100 transition-colors font-semibold disabled:opacity-50">
+                <CheckCircle size={14} /> {loading === tailor.id ? 'Verifying…' : 'Verify creative'}
+              </button>
+            ) : (
+              <button onClick={() => onVerify(tailor.id, false)} disabled={loading === tailor.id}
+                className="flex-1 flex items-center justify-center gap-1.5 text-sm text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2.5 rounded-xl hover:bg-amber-100 transition-colors font-semibold disabled:opacity-50">
+                <XCircle size={14} /> Remove verification
+              </button>
+            )}
+            {tailor.is_active ? (
+              <button onClick={() => onSuspend(tailor.id, false)} disabled={loading === tailor.id}
+                className="flex-1 flex items-center justify-center gap-1.5 text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2.5 rounded-xl hover:bg-red-100 transition-colors font-semibold disabled:opacity-50">
+                <XCircle size={14} /> Suspend
+              </button>
+            ) : (
+              <button onClick={() => onSuspend(tailor.id, true)} disabled={loading === tailor.id}
+                className="flex-1 flex items-center justify-center gap-1.5 text-sm text-green-700 bg-green-50 border border-green-200 px-3 py-2.5 rounded-xl hover:bg-green-100 transition-colors font-semibold disabled:opacity-50">
+                <CheckCircle size={14} /> Reactivate
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function InfoRow({ icon, label, value, missing, warn }: {
+  icon: React.ReactNode; label: string; value?: string | null; missing?: string; warn?: boolean
+}) {
+  return (
+    <div className="flex items-center gap-2.5 py-2 border-b border-gray-50 last:border-0">
+      <span className="text-gray-400 flex-shrink-0">{icon}</span>
+      <span className="text-xs text-gray-400 w-24 flex-shrink-0">{label}</span>
+      {value ? (
+        <span className={`text-sm font-medium truncate ${warn ? 'text-amber-600' : 'text-gray-800'}`}>{value}</span>
+      ) : (
+        <span className="text-sm text-red-400 italic">{missing || 'Missing'}</span>
+      )}
+    </div>
+  )
+}
+
 export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithProfile[] }) {
   const [tailors, setTailors] = useState(initial)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified' | 'suspended'>('all')
   const [loading, setLoading] = useState<string | null>(null)
-  const [expanded, setExpanded] = useState<string | null>(null)
+  const [detail, setDetail] = useState<TailorWithProfile | null>(null)
   const [compose, setCompose] = useState<ComposeTarget | null>(null)
 
   const adminPatch = async (id: string, field: string, value: unknown) => {
     const res = await fetch('/api/admin/creative', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, field, value }),
     })
     if (!res.ok) {
@@ -167,6 +358,7 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
     setLoading(null)
     if (!ok) return
     setTailors(t => t.map(x => x.id === id ? { ...x, is_verified: verified } : x))
+    if (detail?.id === id) setDetail(d => d ? { ...d, is_verified: verified } : d)
     toast.success(verified ? 'Creative verified!' : 'Verification removed')
   }
 
@@ -176,6 +368,7 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
     setLoading(null)
     if (!ok) return
     setTailors(t => t.map(x => x.id === id ? { ...x, is_active: active } : x))
+    if (detail?.id === id) setDetail(d => d ? { ...d, is_active: active } : d)
     toast.success(active ? 'Creative reactivated' : 'Creative suspended')
   }
 
@@ -194,17 +387,17 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
   })
 
   const counts = {
-    all: tailors.length,
-    verified: tailors.filter(t => t.is_verified).length,
+    all: tailors.filter(t => t.is_active).length,
+    verified: tailors.filter(t => t.is_verified && t.is_active).length,
     unverified: tailors.filter(t => !t.is_verified && t.is_active).length,
     suspended: tailors.filter(t => !t.is_active).length,
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
+    <div className="max-w-3xl mx-auto px-4 py-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Manage Creatives</h1>
-        <p className="text-sm text-gray-500 mt-0.5">{tailors.length} registered</p>
+        <p className="text-sm text-gray-500 mt-0.5">{tailors.length} registered · {counts.unverified} pending review</p>
       </div>
 
       <div className="relative mb-4">
@@ -212,15 +405,14 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
         <input
           className="w-full rounded-xl border border-gray-200 pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
           placeholder="Search by name, email, city..."
-          value={search} onChange={e => setSearch(e.target.value)}
-        />
+          value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
         {(['all', 'unverified', 'verified', 'suspended'] as const).map(f => (
           <button key={f} onClick={() => setFilter(f)}
             className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${filter === f ? 'bg-violet-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}>
-            {f.charAt(0).toUpperCase() + f.slice(1)} ({counts[f]})
+            {f.charAt(0).toUpperCase() + f.slice(1)} <span className={`${filter === f ? 'text-white/70' : 'text-gray-400'}`}>({counts[f]})</span>
           </button>
         ))}
       </div>
@@ -233,145 +425,111 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
 
       <div className="space-y-3">
         {filtered.map(tailor => {
-          const checks = completeness(tailor)
+          const checks = completenessChecks(tailor)
           const doneCount = checks.filter(c => c.done).length
+          const pct = Math.round((doneCount / checks.length) * 100)
           const allDone = doneCount === checks.length
-          const isExpanded = expanded === tailor.id
 
           return (
-            <div key={tailor.id} className="bg-white rounded-2xl border border-gray-100 p-4">
-              <div className="flex items-start gap-3">
+            <div key={tailor.id}
+              className="bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all cursor-pointer"
+              onClick={() => setDetail(tailor)}>
+              <div className="p-4 flex items-start gap-3">
                 {/* Avatar */}
-                {tailor.profile?.avatar_url ? (
-                  <img src={tailor.profile.avatar_url} alt={tailor.business_name}
-                    className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
-                ) : (
-                  <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-lg flex-shrink-0">
-                    {tailor.business_name?.[0]?.toUpperCase()}
-                  </div>
-                )}
+                <div className="relative flex-shrink-0">
+                  {tailor.profile?.avatar_url ? (
+                    <img src={tailor.profile.avatar_url} alt={tailor.business_name}
+                      className="w-12 h-12 rounded-xl object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-lg">
+                      {tailor.business_name?.[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  {/* Completeness dot */}
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${allDone ? 'bg-green-500' : pct >= 50 ? 'bg-amber-400' : 'bg-red-400'}`} />
+                </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{tailor.business_name}</p>
-                      <p className="text-xs text-gray-500">{tailor.profile?.full_name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-semibold text-gray-900 truncate">{tailor.business_name}</p>
+                        {tailor.is_verified && <BadgeCheck size={14} className="text-violet-600 flex-shrink-0" />}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{tailor.profile?.full_name}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 flex-shrink-0">
                       {tailor.is_verified
-                        ? <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium"><CheckCircle size={10} /> Verified</span>
+                        ? <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Verified</span>
                         : <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Pending</span>}
-                      {!tailor.is_active && <span className="inline-flex items-center gap-1 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium"><XCircle size={10} /> Suspended</span>}
+                      {!tailor.is_active && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Suspended</span>}
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
+                  {/* Contact + location */}
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
                     {tailor.profile?.email && (
                       <span className="flex items-center gap-1 text-xs text-gray-400"><Mail size={10} /> {tailor.profile.email}</span>
                     )}
                     {tailor.profile?.phone && (
                       <span className="flex items-center gap-1 text-xs text-gray-400"><Phone size={10} /> {tailor.profile.phone}</span>
                     )}
-                    <span className="flex items-center gap-1 text-xs text-gray-400"><MapPin size={10} /> {tailor.city}, {tailor.state}</span>
+                    {tailor.city && (
+                      <span className="flex items-center gap-1 text-xs text-gray-400"><MapPin size={10} /> {tailor.city}</span>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-500">
+                  {/* Stats + date */}
+                  <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                     <span className="flex items-center gap-0.5">
-                      <Star size={11} className="text-amber-400 fill-amber-400" />
+                      <Star size={10} className="text-amber-400 fill-amber-400" />
                       {tailor.avg_rating?.toFixed(1) || '—'} ({tailor.total_reviews})
                     </span>
                     <span>{tailor.total_orders} orders</span>
                     <span>{formatDate(tailor.created_at)}</span>
+                    <span>{tailor.portfolio_count || 0} photos</span>
                   </div>
 
-                  {/* Profile completeness bar */}
-                  <button onClick={() => setExpanded(isExpanded ? null : tailor.id)}
-                    className="flex items-center gap-2 mt-2 w-full text-left">
+                  {/* Completeness bar */}
+                  <div className="flex items-center gap-2 mt-2">
                     <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-violet-500 rounded-full transition-all"
-                        style={{ width: `${(doneCount / checks.length) * 100}%` }} />
+                      <div className="h-full rounded-full transition-all"
+                        style={{ width: `${pct}%`, background: allDone ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626' }} />
                     </div>
-                    <span className={`text-xs font-medium flex-shrink-0 ${allDone ? 'text-green-600' : 'text-amber-600'}`}>
-                      {doneCount}/{checks.length} {allDone ? '✓' : ''}
+                    <span className={`text-xs font-semibold flex-shrink-0 ${allDone ? 'text-green-600' : 'text-amber-600'}`}>
+                      {doneCount}/{checks.length}
                     </span>
-                  </button>
+                    <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />
+                  </div>
 
-                  {/* Expandable checklist */}
-                  {isExpanded && (
-                    <div className="mt-2 grid grid-cols-2 gap-1">
-                      {checks.map(c => (
-                        <div key={c.label} className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-lg ${c.done ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-                          {c.done ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
+                  {/* Missing fields inline hint */}
+                  {!allDone && (
+                    <div className="flex flex-wrap gap-1 mt-1.5">
+                      {checks.filter(c => !c.done).map(c => (
+                        <span key={c.key} className="text-[10px] text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">
                           {c.label}
-                        </div>
-                      ))}
-                      {tailor.face_photo_url && (
-                        <div className="col-span-2 mt-1">
-                          <img src={tailor.face_photo_url} alt="Face" className="w-16 h-16 rounded-xl object-cover border border-gray-200" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {(tailor.specialties || []).length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {tailor.specialties.map(s => (
-                        <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full">
-                          {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
                         </span>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
-                <Link href={`/tailors/${tailor.id}`}
-                  className="flex items-center gap-1.5 text-xs text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl hover:bg-gray-50 transition-colors">
-                  <Eye size={12} /> View
-                </Link>
-
-                <button
-                  onClick={() => setCompose({ tailorUserId: tailor.user_id, name: tailor.profile?.full_name || tailor.business_name, email: tailor.profile?.email || null })}
-                  className="flex items-center gap-1.5 text-xs text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-xl hover:bg-violet-100 transition-colors">
-                  <MessageSquare size={12} /> Message
-                </button>
-
-                {!allDone && !tailor.is_verified && (
-                  <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
-                    <AlertCircle size={12} /> Profile incomplete
-                  </span>
-                )}
-
-                {!tailor.is_verified ? (
-                  <button onClick={() => verify(tailor.id, true)} disabled={loading === tailor.id}
-                    className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-xl hover:bg-green-100 transition-colors disabled:opacity-50">
-                    <CheckCircle size={12} /> {loading === tailor.id ? 'Verifying…' : 'Verify'}
-                  </button>
-                ) : (
-                  <button onClick={() => verify(tailor.id, false)} disabled={loading === tailor.id}
-                    className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl hover:bg-amber-100 transition-colors disabled:opacity-50">
-                    <XCircle size={12} /> Remove verification
-                  </button>
-                )}
-
-                {tailor.is_active ? (
-                  <button onClick={() => suspend(tailor.id, false)} disabled={loading === tailor.id}
-                    className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-xl hover:bg-red-100 transition-colors disabled:opacity-50 ml-auto">
-                    <XCircle size={12} /> Suspend
-                  </button>
-                ) : (
-                  <button onClick={() => suspend(tailor.id, true)} disabled={loading === tailor.id}
-                    className="flex items-center gap-1.5 text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-xl hover:bg-green-100 transition-colors disabled:opacity-50 ml-auto">
-                    <CheckCircle size={12} /> Reactivate
-                  </button>
-                )}
-              </div>
             </div>
           )
         })}
       </div>
+
+      {/* Detail drawer */}
+      {detail && (
+        <DetailDrawer
+          tailor={detail}
+          onClose={() => setDetail(null)}
+          onVerify={verify}
+          onSuspend={suspend}
+          onCompose={(t) => { setCompose(t) }}
+          loading={loading}
+        />
+      )}
 
       {compose && <ComposeModal target={compose} onClose={() => setCompose(null)} />}
     </div>
