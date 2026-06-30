@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { CheckCircle, XCircle, Star, MapPin, Eye, Mail, Phone, Search, AlertCircle } from 'lucide-react'
+import { CheckCircle, XCircle, Star, MapPin, Eye, Mail, Phone, Search, AlertCircle, MessageSquare, Send, X } from 'lucide-react'
 import { formatDate, SERVICE_LABELS } from '@/lib/utils'
 import type { TailorProfile, Profile } from '@/types'
 import toast from 'react-hot-toast'
@@ -30,12 +30,118 @@ function completeness(t: TailorWithProfile): { label: string; done: boolean }[] 
   ]
 }
 
+type ComposeTarget = { tailorUserId: string; name: string; email: string | null }
+
+function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () => void }) {
+  const [tab, setTab] = useState<'message' | 'email'>('message')
+  const [subject, setSubject] = useState('Update on your TailorNow profile')
+  const [body, setBody] = useState('')
+  const [sending, setSending] = useState(false)
+
+  const send = async () => {
+    if (!body.trim()) return
+    setSending(true)
+    if (tab === 'message') {
+      const res = await fetch('/api/admin/message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tailorUserId: target.tailorUserId, content: body }),
+      })
+      setSending(false)
+      if (!res.ok) { toast.error('Failed to send message'); return }
+      toast.success('In-app message sent!')
+    } else {
+      if (!target.email) { toast.error('No email on file'); setSending(false); return }
+      const res = await fetch('/api/admin/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: target.email, toName: target.name, subject, body }),
+      })
+      setSending(false)
+      if (!res.ok) { const { error } = await res.json(); toast.error(error || 'Failed'); return }
+      toast.success('Email sent!')
+    }
+    onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl w-full max-w-lg">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+          <div>
+            <h3 className="font-bold text-gray-900">Contact {target.name}</h3>
+            <p className="text-xs text-gray-400">{target.email || 'No email on file'}</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors"><X size={16} /></button>
+        </div>
+
+        {/* Tab switcher */}
+        <div className="flex gap-2 p-4 pb-0">
+          {(['message', 'email'] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${tab === t ? 'bg-violet-700 text-white' : 'border border-gray-200 text-gray-600 hover:border-violet-300'}`}>
+              {t === 'message' ? '💬 In-app message' : '✉️ Email'}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-4 space-y-3">
+          {tab === 'email' && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Subject</label>
+              <input className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                value={subject} onChange={e => setSubject(e.target.value)} />
+            </div>
+          )}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              {tab === 'message' ? 'Message' : 'Body'}
+            </label>
+            <textarea
+              rows={6}
+              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+              placeholder={tab === 'message'
+                ? 'Hi! Your profile is pending verification. Please add your face photo and price range to complete setup.'
+                : 'Write your message to the creative...'}
+              value={body} onChange={e => setBody(e.target.value)}
+            />
+            <p className="text-xs text-gray-400 mt-1">{body.length} characters</p>
+          </div>
+
+          {/* Quick templates */}
+          <div>
+            <p className="text-xs text-gray-400 mb-1.5">Quick templates:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { label: 'Complete profile', text: 'Hi! Your profile is pending verification. Please complete your profile by adding a face photo, phone number, shop address, price range, and at least 2 portfolio photos. Once done, we will review and verify you.' },
+                { label: 'Verified!', text: 'Great news! Your TailorNow profile has been verified. You are now visible to customers as a verified creative. Keep your profile updated and respond promptly to orders.' },
+                { label: 'Suspended', text: 'Your TailorNow account has been temporarily suspended. Please contact us at hello@tailornow.shop if you believe this is an error or to resolve any outstanding issues.' },
+              ].map(t => (
+                <button key={t.label} onClick={() => setBody(t.text)}
+                  className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-violet-50 hover:text-violet-700 transition-colors">
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={send} disabled={!body.trim() || sending}
+            className="w-full flex items-center justify-center gap-2 bg-violet-700 text-white py-3 rounded-xl font-semibold text-sm hover:bg-violet-800 transition-colors disabled:opacity-50">
+            <Send size={14} /> {sending ? 'Sending…' : tab === 'message' ? 'Send message' : 'Send email'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithProfile[] }) {
   const [tailors, setTailors] = useState(initial)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<'all' | 'verified' | 'unverified' | 'suspended'>('all')
   const [loading, setLoading] = useState<string | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [compose, setCompose] = useState<ComposeTarget | null>(null)
 
   const adminPatch = async (id: string, field: string, value: unknown) => {
     const res = await fetch('/api/admin/creative', {
@@ -216,11 +322,17 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50">
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-50 flex-wrap">
                 <Link href={`/tailors/${tailor.id}`}
                   className="flex items-center gap-1.5 text-xs text-gray-600 border border-gray-200 px-3 py-1.5 rounded-xl hover:bg-gray-50 transition-colors">
                   <Eye size={12} /> View
                 </Link>
+
+                <button
+                  onClick={() => setCompose({ tailorUserId: tailor.user_id, name: tailor.profile?.full_name || tailor.business_name, email: tailor.profile?.email || null })}
+                  className="flex items-center gap-1.5 text-xs text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-xl hover:bg-violet-100 transition-colors">
+                  <MessageSquare size={12} /> Message
+                </button>
 
                 {!allDone && !tailor.is_verified && (
                   <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
@@ -256,6 +368,8 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
           )
         })}
       </div>
+
+      {compose && <ComposeModal target={compose} onClose={() => setCompose(null)} />}
     </div>
   )
 }

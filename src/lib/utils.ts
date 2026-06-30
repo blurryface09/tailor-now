@@ -46,24 +46,53 @@ export const SERVICE_LABELS: Record<string, string> = {
   asoebi: 'Asoebi Group Orders',
 }
 
-// Nigerian bank account pattern — 10 consecutive digits
-// Used in chat to detect potential off-platform payment attempts
 export const BANK_ACCOUNT_PATTERN = /\b\d{10}\b/g
 
-export const NIGERIAN_BANKS = [
+const NIGERIAN_BANKS = [
   'access', 'gtb', 'gtbank', 'zenith', 'uba', 'first bank', 'fbn', 'union bank',
   'sterling', 'stanbic', 'fcmb', 'wema', 'opay', 'kuda', 'moniepoint', 'palmpay',
   'providus', 'jaiz', 'polaris', 'keystone', 'ecobank', 'citibank',
 ]
 
-export function containsBankDetails(text: string): boolean {
+// Nigerian phone: 07xxx/08xxx/09xxx (11 digits) or +234 format
+const PHONE_PATTERN = /(\+?234|0)[789][01]\d{8}/g
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g
+const EXTERNAL_URL_PATTERN = /https?:\/\/[^\s]+/gi
+const WHATSAPP_PATTERN = /(wa\.me|whatsapp\.com|api\.whatsapp)/i
+const SOCIAL_HANDLE_PATTERN = /@[a-zA-Z0-9_.]{3,}/g
+
+type MessageFlag = { blocked: true; reason: string } | { blocked: false; warned: true; reason: string } | { blocked: false; warned: false }
+
+export function classifyMessage(text: string): MessageFlag {
+  PHONE_PATTERN.lastIndex = 0
+  EMAIL_PATTERN.lastIndex = 0
+  EXTERNAL_URL_PATTERN.lastIndex = 0
+  SOCIAL_HANDLE_PATTERN.lastIndex = 0
+
+  if (PHONE_PATTERN.test(text)) return { blocked: true, reason: 'Phone numbers cannot be shared in chat — use in-app contact sharing only.' }
+  if (EMAIL_PATTERN.test(text)) return { blocked: true, reason: 'Email addresses cannot be shared here — all communication must stay in-app.' }
+  if (WHATSAPP_PATTERN.test(text)) return { blocked: true, reason: 'WhatsApp links are not allowed — keep all conversations inside TailorNow.' }
+  if (EXTERNAL_URL_PATTERN.test(text)) return { blocked: true, reason: 'External links are not allowed in chat.' }
+  if (SOCIAL_HANDLE_PATTERN.test(text)) return { blocked: true, reason: 'Social media handles cannot be shared here.' }
+
+  // Soft warning for bank details (allow send anyway)
+  BANK_ACCOUNT_PATTERN.lastIndex = 0
   const lower = text.toLowerCase()
   const hasAccountNumber = BANK_ACCOUNT_PATTERN.test(text)
   const hasAccountPhrase = /account\s*(number|no\.?|#)/i.test(text)
   const hasBankName = NIGERIAN_BANKS.some(b => lower.includes(b))
   const hasTransferPhrase = /(send|transfer|pay)\s*(to|me|directly)/i.test(lower)
-  BANK_ACCOUNT_PATTERN.lastIndex = 0 // reset regex state
-  return hasAccountNumber || (hasAccountPhrase && hasBankName) || (hasBankName && hasTransferPhrase)
+  BANK_ACCOUNT_PATTERN.lastIndex = 0
+  if (hasAccountNumber || (hasAccountPhrase && hasBankName) || (hasBankName && hasTransferPhrase)) {
+    return { blocked: false, warned: true, reason: 'This looks like bank account details.' }
+  }
+
+  return { blocked: false, warned: false }
+}
+
+export function containsBankDetails(text: string): boolean {
+  const r = classifyMessage(text)
+  return !r.blocked && 'warned' in r && r.warned
 }
 
 export function generateReferralCode(name: string): string {

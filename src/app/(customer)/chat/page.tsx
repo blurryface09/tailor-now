@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { Send, Phone, ArrowLeft, AlertTriangle, Lock, ShieldCheck } from 'lucide-react'
-import { formatRelativeTime, containsBankDetails, cn } from '@/lib/utils'
+import { formatRelativeTime, classifyMessage, containsBankDetails, cn } from '@/lib/utils'
 import type { ChatRoom, ChatMessage, Profile } from '@/types'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -160,7 +160,12 @@ function ChatContent() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!text.trim()) return
-    if (containsBankDetails(text)) {
+    const flag = classifyMessage(text)
+    if (flag.blocked) {
+      toast.error(flag.reason)
+      return
+    }
+    if (!flag.blocked && 'warned' in flag && flag.warned) {
       setPendingMessage(text)
       setShowFraudWarning(true)
       return
