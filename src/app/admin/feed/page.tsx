@@ -5,13 +5,28 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { ImageUpload } from '@/components/ui/image-upload'
-import { SERVICE_LABELS, formatRelativeTime } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/utils'
 import { Plus, Trash2, X, Heart, MessageSquare, ImageIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import type { Post, Profile } from '@/types'
 
-const SERVICE_OPTIONS = Object.entries(SERVICE_LABELS)
+const FEED_TAGS = [
+  { label: '🔥 Style of the Week', value: '🔥 Style of the Week' },
+  { label: '🎨 Alte Style', value: '🎨 Alte Style' },
+  { label: '👟 Street Wear', value: '👟 Street Wear' },
+  { label: '🌍 Ankara & African Prints', value: '🌍 Ankara & African Prints' },
+  { label: '💍 Bridal Inspo', value: '💍 Bridal Inspo' },
+  { label: '✨ New Trends', value: '✨ New Trends' },
+  { label: '😂 Fashion Memes', value: '😂 Fashion Memes' },
+  { label: '🎉 Customer Spotlight', value: '🎉 Customer Spotlight' },
+]
+
+function extractTag(caption: string | null): string | null {
+  if (!caption) return null
+  const match = caption.match(/^\[(.+?)\]\n/)
+  return match ? match[1] : null
+}
 
 export default function AdminFeedPage() {
   const supabase = createClient()
@@ -22,7 +37,7 @@ export default function AdminFeedPage() {
   const [saving, setSaving] = useState(false)
   const [images, setImages] = useState<string[]>([])
   const [caption, setCaption] = useState('')
-  const [serviceType, setServiceType] = useState('')
+  const [contentTag, setContentTag] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -44,22 +59,26 @@ export default function AdminFeedPage() {
     setPosts(data || [])
   }
 
+  const reset = () => { setAdding(false); setImages([]); setCaption(''); setContentTag('') }
+
   const savePost = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!userId) return
     if (images.length === 0) { toast.error('Add at least one photo'); return }
     if (!caption.trim()) { toast.error('Add a caption'); return }
     setSaving(true)
+    const fullCaption = contentTag ? `[${contentTag}]\n${caption.trim()}` : caption.trim()
     const { error } = await supabase.from('posts').insert({
       user_id: userId,
       creative_id: null,
-      caption: caption.trim(),
+      caption: fullCaption,
       image_urls: images,
-      service_type: serviceType || null,
+      service_type: null,
     })
     if (error) { toast.error(error.message); setSaving(false); return }
     toast.success('Post published to feed!')
-    setImages([]); setCaption(''); setServiceType(''); setAdding(false); setSaving(false)
+    reset()
+    setSaving(false)
     loadPosts(userId)
   }
 
@@ -77,7 +96,7 @@ export default function AdminFeedPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Feed Posts</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Post style inspiration, announcements, or featured work directly to the feed</p>
+            <p className="text-sm text-gray-500 mt-0.5">Post fashion inspiration, street wear, Ankara — anything that gets people excited</p>
           </div>
           {!adding && (
             <button
@@ -92,8 +111,8 @@ export default function AdminFeedPage() {
         {adding && (
           <form onSubmit={savePost} className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 space-y-4">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="font-semibold text-gray-900">New feed post</h2>
-              <button type="button" onClick={() => { setAdding(false); setImages([]); setCaption(''); setServiceType('') }}
+              <h2 className="font-semibold text-gray-900">New inspiration post</h2>
+              <button type="button" onClick={reset}
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
                 <X size={16} />
               </button>
@@ -115,6 +134,28 @@ export default function AdminFeedPage() {
               />
             </div>
 
+            {/* Content tag */}
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Content Tag (optional)
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {FEED_TAGS.map(t => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setContentTag(prev => prev === t.value ? '' : t.value)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
+                      contentTag === t.value
+                        ? 'border-violet-600 bg-violet-50 text-violet-700'
+                        : 'border-gray-200 text-gray-600 hover:border-violet-300'
+                    }`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Caption */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
@@ -124,26 +165,9 @@ export default function AdminFeedPage() {
                 value={caption}
                 onChange={e => setCaption(e.target.value)}
                 rows={4}
-                placeholder="Share a style, feature a creative, announce something exciting..."
+                placeholder="The vibe, the story, the hashtags... make it editorial ✨"
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
               />
-            </div>
-
-            {/* Service type */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                Category (optional)
-              </label>
-              <select
-                value={serviceType}
-                onChange={e => setServiceType(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 bg-white"
-              >
-                <option value="">No category</option>
-                {SERVICE_OPTIONS.map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
-                ))}
-              </select>
             </div>
 
             <Button type="submit" loading={saving} className="w-full" size="lg">
@@ -160,44 +184,48 @@ export default function AdminFeedPage() {
               <p className="text-sm">No posts yet. Create one above.</p>
             </div>
           ) : (
-            posts.map(post => (
-              <div key={post.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                {post.image_urls?.length > 0 && (
-                  <div className="relative h-56 bg-gray-100 overflow-hidden">
-                    <img src={post.image_urls[0]} alt="" className="w-full h-full object-cover" />
-                    {post.image_urls.length > 1 && (
-                      <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-                        +{post.image_urls.length - 1} more
-                      </div>
-                    )}
-                    {post.service_type && (
-                      <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-sm text-white text-xs px-2 py-0.5 rounded-full">
-                        {SERVICE_LABELS[post.service_type] ?? post.service_type}
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      {post.caption && (
-                        <p className="text-sm text-gray-800 leading-relaxed mb-2">{post.caption}</p>
+            posts.map(post => {
+              const tag = extractTag(post.caption)
+              const body = tag ? post.caption?.replace(/^\[.+?\]\n/, '') : post.caption
+              return (
+                <div key={post.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                  {post.image_urls?.length > 0 && (
+                    <div className="relative h-56 bg-gray-100 overflow-hidden">
+                      <img src={post.image_urls[0]} alt="" className="w-full h-full object-cover" />
+                      {post.image_urls.length > 1 && (
+                        <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
+                          +{post.image_urls.length - 1} more
+                        </div>
                       )}
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
-                        <span className="flex items-center gap-1"><Heart size={11} /> {post.likes_count ?? 0}</span>
-                        <span className="flex items-center gap-1"><MessageSquare size={11} /> {post.comments_count ?? 0}</span>
-                        <span>{formatRelativeTime(post.created_at)}</span>
-                      </div>
+                      {tag && (
+                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                          {tag}
+                        </div>
+                      )}
                     </div>
-                    <button
-                      onClick={() => deletePost(post.id)}
-                      className="p-2 text-red-400 hover:bg-red-50 rounded-xl transition-colors flex-shrink-0">
-                      <Trash2 size={15} />
-                    </button>
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        {body && (
+                          <p className="text-sm text-gray-800 leading-relaxed mb-2">{body}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                          <span className="flex items-center gap-1"><Heart size={11} /> {post.likes_count ?? 0}</span>
+                          <span className="flex items-center gap-1"><MessageSquare size={11} /> {post.comments_count ?? 0}</span>
+                          <span>{formatRelativeTime(post.created_at)}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deletePost(post.id)}
+                        className="p-2 text-red-400 hover:bg-red-50 rounded-xl transition-colors flex-shrink-0">
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       </div>

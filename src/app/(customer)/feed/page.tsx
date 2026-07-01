@@ -9,15 +9,23 @@ import Link from 'next/link'
 import toast from 'react-hot-toast'
 import type { Post, PostComment, Profile, TailorProfile } from '@/types'
 
-const STYLE_CHIPS = [
+const FEED_CHIPS = [
   { label: 'All', value: '' },
-  { label: '👗 Custom', value: 'custom_outfit' },
-  { label: '✂️ Alterations', value: 'alterations' },
+  { label: '🔥 Style of the Week', value: 'style_week' },
+  { label: '🎨 Alte Style', value: 'alte' },
+  { label: '👟 Street Wear', value: 'street' },
+  { label: '🌍 Ankara', value: 'ankara' },
   { label: '💍 Bridal', value: 'bridal' },
-  { label: '👕 Ready-to-Wear', value: 'ready_to_wear' },
-  { label: '🧵 Fabric', value: 'fabric_sourcing' },
-  { label: '👔 Uniforms', value: 'uniforms' },
+  { label: '✨ New Trends', value: 'trends' },
+  { label: '😂 Memes', value: 'memes' },
 ]
+
+function extractCaptionTag(caption: string | null): { tag: string | null; body: string } {
+  if (!caption) return { tag: null, body: '' }
+  const match = caption.match(/^\[(.+?)\]\n([\s\S]*)$/)
+  if (match) return { tag: match[1], body: match[2] }
+  return { tag: null, body: caption }
+}
 
 const COVER_GRADIENTS = [
   'from-violet-500 to-purple-700',
@@ -31,82 +39,56 @@ const DEMO_POSTS = [
   {
     id: 'demo-1',
     imageUrl: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&h=600&fit=crop&q=80&auto=format',
-    business_name: 'Adaeze Couture',
-    city: 'Lagos',
-    service: 'custom_outfit',
-    caption: 'Just finished this custom Ankara two-piece for a client\'s introduction ceremony 🎉 The embroidery alone took 3 days but every stitch was worth it. She looked STUNNING ✨ #TailorNow #Ankara #CustomFit',
-    likes: 142, comments: 18,
+    tag: '🔥 Style of the Week',
+    caption: 'Bold, unapologetic, and dripping in colour. This is what Nigerian fashion looks like when creatives are given full creative freedom. What would you order? 👇 #Ankara #NigerianFashion #TailorNow',
+    likes: 312, comments: 41,
   },
   {
     id: 'demo-2',
     imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop&q=80&auto=format',
-    business_name: 'Emeka Fashion House',
-    city: 'Enugu',
-    service: 'custom_outfit',
-    caption: 'Senator wear for a groom\'s family — 6 pieces, 4 days ⏱️ Matching pocket squares and perfectly fitted agbada for every man in the room 🔥 This is what we do. #MensFashion #SenatorWear #TailorNow',
-    likes: 89, comments: 7,
+    tag: '👔 Agbada Season',
+    caption: 'Senator. Agbada. Cap. The holy trinity 🙌 Nigerian men dressing up is a whole different level of elegance. Drop a 🔥 if you agree. #MensFashion #SenatorWear #Agbada',
+    likes: 198, comments: 27,
   },
   {
     id: 'demo-3',
     imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&h=600&fit=crop&q=80&auto=format',
-    business_name: 'Adeola Bridal Studio',
-    city: 'Ibadan',
-    service: 'bridal',
-    caption: 'Our bride walked in knowing what she wanted — we gave her what she deserved 👑 A-line silhouette with hand-sewn lace appliqué, cathedral train. She cried happy tears 🤍 #BridalCouture #NigerianBride #TailorNow',
-    likes: 231, comments: 34,
+    tag: '💍 Bridal Inspo',
+    caption: 'The moment she said yes and showed up looking like THIS 🤍 Every detail handcrafted by a creative on TailorNow. Your wedding look starts here. #NigerianBride #BridalCouture #TailorNow',
+    likes: 521, comments: 68,
   },
   {
     id: 'demo-4',
     imageUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&h=600&fit=crop&q=80&auto=format',
-    business_name: 'Kemi Stitch & Style',
-    city: 'Abuja',
-    service: 'alterations',
-    caption: 'Before & after alterations 🔄 Sometimes a few strategic tucks is all it takes to make a garment feel brand new. Brought this vintage dress back to life — no one would know ✂️ #Alterations #MadeToFit #TailorNow',
-    likes: 67, comments: 11,
+    tag: '🌍 Ankara of the Week',
+    caption: 'Ankara never goes out of style. It evolves. 🧵 From traditional ceremonies to street fashion — this fabric carries culture and creativity in every thread. Which pattern is your fav? #Ankara #AfricanPrints',
+    likes: 445, comments: 53,
   },
 ]
 
 function DemoPostCard({ post }: { post: typeof DEMO_POSTS[number] }) {
-  const initial = post.business_name[0].toUpperCase()
   return (
     <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-      {/* Image */}
-      <div className="relative h-72 bg-gray-100 overflow-hidden">
-        <img src={post.imageUrl} alt={post.caption} className="w-full h-full object-cover" loading="lazy" />
-        <div className="absolute top-3 left-3 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-full">
-          Sample post
-        </div>
-        <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
-          {SERVICE_LABELS[post.service] ?? post.service}
+      <div className="relative bg-gray-100 aspect-square overflow-hidden">
+        <img src={post.imageUrl} alt={post.tag} className="w-full h-full object-cover" loading="lazy" />
+        <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+          {post.tag}
         </div>
       </div>
-      {/* Author row */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-            {initial}
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900 leading-tight">{post.business_name}</p>
-            <p className="text-xs text-gray-400 flex items-center gap-0.5">
-              <MapPin size={10} /> {post.city}
-            </p>
-          </div>
+      <div className="px-4 pt-3 pb-4">
+        <div className="flex items-center gap-4 mb-2">
+          <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition-colors">
+            <Heart size={20} /> <span>{post.likes}</span>
+          </button>
+          <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-violet-600 transition-colors">
+            <MessageSquare size={20} /> <span>{post.comments}</span>
+          </button>
         </div>
-        <button className="flex items-center gap-1.5 text-xs font-semibold text-violet-700 border border-violet-200 px-3 py-1.5 rounded-full hover:bg-violet-50 transition-colors">
-          <UserPlus size={12} /> Follow
-        </button>
-      </div>
-      {/* Caption */}
-      <p className="px-4 pb-3 text-sm text-gray-700 leading-relaxed">{post.caption}</p>
-      {/* Engagement */}
-      <div className="flex items-center gap-4 px-4 pb-4 border-t border-gray-50 pt-3">
-        <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-500 transition-colors">
-          <Heart size={16} /> <span>{post.likes}</span>
-        </button>
-        <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-violet-600 transition-colors">
-          <MessageSquare size={16} /> <span>{post.comments}</span>
-        </button>
+        <p className="text-sm text-gray-800 leading-relaxed mb-2">{post.caption}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-gray-400">Just now</p>
+          <span className="text-xs font-bold text-violet-700">✂️ TailorNow</span>
+        </div>
       </div>
     </div>
   )
@@ -127,9 +109,11 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
   const [commentText, setCommentText] = useState('')
   const [posting, setPosting] = useState(false)
   const [imgIdx, setImgIdx] = useState(0)
+  const isAdminPost = !post.creative_id
   const creativeUserId = post.creative?.user_id || post.user_id
   const isOwnPost = userId === post.user_id
   const isFollowing = following.has(creativeUserId)
+  const authorName = isAdminPost ? 'TailorNow' : (post.creative?.business_name || post.author?.full_name)
 
   const loadComments = async () => {
     const { data } = await supabase.from('post_comments')
@@ -151,34 +135,20 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
     loadComments()
   }
 
+  const { tag: captionTag, body: captionBody } = extractCaptionTag(post.caption)
+
   return (
     <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3">
-        <Link href={`/tailors/${post.creative_id}`} className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-400 to-violet-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-            {post.creative?.business_name?.[0]?.toUpperCase() || 'C'}
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900 group-hover:text-violet-700 transition-colors">
-              {post.creative?.business_name || post.author?.full_name}
-            </p>
-            {post.service_type && <p className="text-xs text-gray-400">{SERVICE_LABELS[post.service_type]}</p>}
-          </div>
-        </Link>
-        {!isOwnPost && userId && (
-          <button onClick={() => onFollow(creativeUserId, isFollowing)}
-            className={`flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
-              isFollowing ? 'border-gray-200 text-gray-500 hover:border-red-200 hover:text-red-500'
-                : 'border-violet-600 text-violet-600 hover:bg-violet-600 hover:text-white'
-            }`}>
-            {isFollowing ? <><UserCheck size={11} /> Following</> : <><UserPlus size={11} /> Follow</>}
-          </button>
-        )}
-      </div>
-
+      {/* Image — full width, no header above it */}
       {post.image_urls.length > 0 && (
         <div className="relative bg-gray-100 aspect-square">
-          <img src={post.image_urls[imgIdx]} alt={post.caption || 'Post'} className="w-full h-full object-cover" />
+          <img src={post.image_urls[imgIdx]} alt={captionBody || 'Post'} className="w-full h-full object-cover" />
+          {/* Category badge */}
+          {(captionTag || post.service_type) && (
+            <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              {captionTag || SERVICE_LABELS[post.service_type!]}
+            </div>
+          )}
           {post.image_urls.length > 1 && (
             <>
               {imgIdx > 0 && (
@@ -201,8 +171,9 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
         </div>
       )}
 
-      <div className="px-4 pt-3 pb-1">
-        <div className="flex items-center gap-4">
+      <div className="px-4 pt-3 pb-4">
+        {/* Actions */}
+        <div className="flex items-center gap-4 mb-2">
           <button onClick={() => onLike(post.id, post.liked_by_me || false)} className="flex items-center gap-1.5 group">
             <Heart size={20} className={`transition-all ${post.liked_by_me ? 'fill-red-500 text-red-500' : 'text-gray-500 group-hover:text-red-400'}`} />
             <span className="text-sm text-gray-600">{post.likes_count}</span>
@@ -218,12 +189,29 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
             </Link>
           )}
         </div>
-        {post.caption && (
-          <p className="text-sm text-gray-800 mt-2 leading-relaxed">
-            <span className="font-semibold">{post.creative?.business_name || post.author?.full_name}</span>{' '}{post.caption}
-          </p>
-        )}
-        <p className="text-xs text-gray-400 mt-1 mb-2">{formatRelativeTime(post.created_at)}</p>
+
+        {/* Caption */}
+        {captionBody && <p className="text-sm text-gray-800 leading-relaxed mb-2">{captionBody}</p>}
+
+        {/* Attribution — subtle, at the bottom */}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-gray-400">{formatRelativeTime(post.created_at)}</p>
+          {isAdminPost ? (
+            <span className="text-xs font-bold text-violet-700">✂️ TailorNow</span>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href={`/tailors/${post.creative_id}`} className="text-xs font-semibold text-gray-600 hover:text-violet-700 transition-colors">
+                {authorName}
+              </Link>
+              {!isOwnPost && userId && (
+                <button onClick={() => onFollow(creativeUserId, isFollowing)}
+                  className={`text-xs font-semibold transition-colors ${isFollowing ? 'text-gray-400 hover:text-red-500' : 'text-violet-600 hover:text-violet-800'}`}>
+                  {isFollowing ? 'Following' : '+ Follow'}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {showComments && (
@@ -343,7 +331,23 @@ export default function FeedPage() {
     }
   }
 
-  const filteredPosts = activeChip ? posts.filter(p => p.service_type === activeChip) : posts
+  const filteredPosts = activeChip
+    ? posts.filter(p => {
+        const { tag } = extractCaptionTag(p.caption)
+        if (tag) {
+          const t = tag.toLowerCase()
+          if (activeChip === 'style_week') return t.includes('style of the week')
+          if (activeChip === 'alte') return t.includes('alte')
+          if (activeChip === 'street') return t.includes('street')
+          if (activeChip === 'ankara') return t.includes('ankara')
+          if (activeChip === 'bridal') return t.includes('bridal') || p.service_type === 'bridal'
+          if (activeChip === 'trends') return t.includes('trend')
+          if (activeChip === 'memes') return t.includes('meme')
+        }
+        if (activeChip === 'bridal' && p.service_type === 'bridal') return true
+        return false
+      })
+    : posts
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -364,7 +368,7 @@ export default function FeedPage() {
 
         {/* Style chips */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 mb-4">
-          {STYLE_CHIPS.map(chip => (
+          {FEED_CHIPS.map(chip => (
             <button key={chip.value} onClick={() => setActiveChip(chip.value)}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
                 activeChip === chip.value
