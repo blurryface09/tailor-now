@@ -30,12 +30,23 @@ const SERVICE_ICONS: Record<string, string> = {
 }
 
 const COVER_GRADIENTS = [
-  'from-violet-500 to-purple-700',
-  'from-indigo-500 to-violet-600',
-  'from-purple-600 to-pink-500',
-  'from-violet-600 to-indigo-700',
-  'from-fuchsia-500 to-violet-600',
-  'from-violet-700 to-purple-500',
+  'from-violet-600/80 to-purple-800/80',
+  'from-indigo-600/80 to-violet-700/80',
+  'from-purple-600/80 to-pink-600/80',
+  'from-violet-700/80 to-indigo-800/80',
+  'from-fuchsia-600/80 to-violet-700/80',
+  'from-violet-800/80 to-purple-600/80',
+]
+
+const FASHION_BG_IMAGES = [
+  'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=240&fit=crop&q=75',
+  'https://images.unsplash.com/photo-1524863479829-916d8e77f114?w=600&h=240&fit=crop&q=75',
 ]
 
 const DEMO_TAILORS: TailorWithProfile[] = [
@@ -250,31 +261,50 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
 
 function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: number }) {
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length]
+  const bgImage = FASHION_BG_IMAGES[index % FASHION_BG_IMAGES.length]
   const delayClass = ['fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][index % 6]
   const isDemo = tailor.id.startsWith('demo-')
-  const cardClass = cn('group bg-white rounded-2xl border border-gray-100 hover:border-violet-200 transition-all duration-300 overflow-hidden card-lift', delayClass)
+  const cardClass = cn(
+    'group bg-white rounded-3xl overflow-hidden transition-all duration-500',
+    'border border-gray-100 hover:border-violet-200/60',
+    'shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_48px_rgba(109,40,217,0.15),0_4px_16px_rgba(0,0,0,0.04)]',
+    'hover:-translate-y-1.5',
+    delayClass
+  )
 
   const body = (
     <>
-      <div className={cn('h-36 bg-gradient-to-br relative overflow-hidden', gradient)}>
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
-        <div className="absolute right-4 bottom-2 text-white/20 text-7xl leading-none select-none">✂</div>
+      {/* Header — fashion photo + brand gradient overlay */}
+      <div className="h-44 relative overflow-hidden">
+        <img
+          src={bgImage}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+        />
+        {/* Brand color tint overlay */}
+        <div className={cn('absolute inset-0 bg-gradient-to-br opacity-70', gradient)} />
+        {/* Bottom vignette so avatar pops */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        {/* Decorative scissors */}
+        <div className="absolute right-4 bottom-3 text-white/10 text-8xl leading-none select-none font-black">✂</div>
+
         {(tailor as any).is_founder && (
-          <div className="absolute top-3 left-3 flex items-center gap-1 bg-gradient-to-r from-gray-950 to-slate-800 rounded-full px-2.5 py-1 text-xs font-bold text-amber-400 shadow-md ring-1 ring-amber-500/30">
+          <div className="absolute top-3 left-3 flex items-center gap-1 bg-gradient-to-r from-gray-950 to-slate-800 rounded-full px-2.5 py-1 text-xs font-bold text-amber-400 shadow-md ring-1 ring-amber-500/30 backdrop-blur-sm">
             ✂ First Cut
           </div>
         )}
         {tailor.is_verified && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-sm">
+          <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-full px-2.5 py-1 text-xs font-semibold text-violet-700 shadow-sm">
             <CheckCircle size={11} className="text-violet-600" /> Verified
           </div>
         )}
         <div className="absolute bottom-0 left-4 translate-y-1/2">
           {(tailor as any).profile?.avatar_url ? (
             <img src={(tailor as any).profile.avatar_url} alt={tailor.business_name}
-              className="w-14 h-14 rounded-2xl object-cover shadow-lg border-2 border-white group-hover:scale-105 transition-transform duration-300" />
+              className="w-14 h-14 rounded-2xl object-cover shadow-xl border-2 border-white group-hover:scale-105 transition-transform duration-300" />
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-white shadow-lg flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-xl flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
               {tailor.business_name?.[0]?.toUpperCase() || '✂'}
             </div>
           )}
@@ -291,41 +321,42 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
             <span className="text-gray-400 text-xs">({tailor.total_reviews})</span>
           </div>
         </div>
-        <p className="text-xs text-gray-500 flex items-center gap-1 mb-3">
+        <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
           <MapPin size={11} /> {tailor.city}, {tailor.state}
         </p>
         {tailor.bio && <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{tailor.bio}</p>}
         <div className="flex flex-wrap gap-1.5 mb-3">
           {(tailor.specialties || []).slice(0, 3).map(s => (
-            <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2.5 py-1 rounded-full font-medium">
+            <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2.5 py-1 rounded-full font-medium border border-violet-100">
               {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
             </span>
           ))}
           {(tailor.specialties || []).length > 3 && (
             <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
-              +{tailor.specialties.length - 3} more
+              +{tailor.specialties.length - 3}
             </span>
           )}
         </div>
-        <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+        <div className="flex items-center justify-between pt-3 border-t border-gray-50 mb-3">
           {(() => {
             const lvl = getLevel(calcScore({ profile_likes: tailor.profile_likes, profile_views: tailor.profile_views, total_orders: tailor.total_orders }))
             return (
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${lvl.bg} ${lvl.color} ${lvl.border}`}>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${lvl.bg} ${lvl.color} ${lvl.border}`}>
                 {lvl.emoji} {lvl.level}
               </span>
             )
           })()}
-          <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full">
+          <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full border border-violet-100">
             {tailor.total_orders} orders
           </span>
         </div>
-        <div className="mt-3 overflow-hidden max-h-0 group-hover:max-h-12 transition-all duration-300">
-          <div className="pt-1">
-            <div className="w-full bg-violet-700 text-white text-xs font-bold py-2.5 rounded-xl text-center tracking-wide">
-              {isDemo ? 'Coming Soon' : 'Book Now'}
-            </div>
-          </div>
+        {/* Book Now — always visible, animates on hover */}
+        <div className={`w-full text-white text-xs font-bold py-2.5 rounded-xl text-center tracking-wide transition-all duration-300 ${
+          isDemo
+            ? 'bg-gray-200 text-gray-500 cursor-default'
+            : 'bg-violet-700 group-hover:bg-violet-800 group-hover:shadow-lg group-hover:shadow-violet-300/50 group-hover:scale-[1.02]'
+        }`}>
+          {isDemo ? 'Coming Soon' : 'Book Now →'}
         </div>
       </div>
     </>
