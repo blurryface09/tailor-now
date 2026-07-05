@@ -1,269 +1,272 @@
 import Link from 'next/link'
 import { Logo } from '@/components/ui/logo'
-import { TailoringBg } from '@/components/ui/tailoring-bg'
-
-const features = [
-  { icon: '✂️', title: 'Expert Creatives', desc: 'Verified professionals with proven portfolios and real customer reviews.' },
-  { icon: '📏', title: 'Save Your Measurements', desc: 'Store your measurements once. Use them for every order — no re-measuring ever again.' },
-  { icon: '🚚', title: 'Pickup and Delivery', desc: 'We collect your fabric and deliver your finished outfit to your door.' },
-  { icon: '💬', title: 'Direct Chat', desc: 'Message your creative directly. Share style references, discuss details, agree on price.' },
-  { icon: '📍', title: 'Live Order Tracking', desc: 'Track every stage from cutting to delivery in real time.' },
-  { icon: '⭐', title: 'Mutual Ratings', desc: 'Customers rate creatives. Creatives rate customers. Trust on both sides.' },
-]
 
 const stats = [
   { value: '2,400+', label: 'Verified Creatives' },
   { value: '18,000+', label: 'Orders Completed' },
   { value: '4.8★', label: 'Average Rating' },
-  { value: '24hrs', label: 'Avg Response Time' },
+  { value: '24hrs', label: 'Avg Response' },
 ]
 
 const steps = [
-  { step: '01', icon: '🔍', title: 'Browse Creatives', desc: 'Filter by service, location, rating, and price range. View portfolios and reviews.' },
-  { step: '02', icon: '💬', title: 'Book and Chat', desc: 'Send an order request with your measurements and style references. Chat to agree on price.' },
-  { step: '03', icon: '📦', title: 'Track Your Order', desc: 'Get real-time updates at every stage — cutting, sewing, ready, out for delivery.' },
-  { step: '04', icon: '⭐', title: 'Rate and Review', desc: 'Receive your outfit. Confirm delivery and leave a review. Creative rates you too.' },
+  { n: '01', icon: '🔍', title: 'Browse Creatives', desc: 'Filter by city, service, rating. View portfolios and real customer reviews.' },
+  { n: '02', icon: '💬', title: 'Book & Chat', desc: 'Send your order with measurements and style references. Agree on pricing.' },
+  { n: '03', icon: '📦', title: 'Track Your Order', desc: 'Live updates at every stage — cutting, sewing, ready, out for delivery.' },
+  { n: '04', icon: '⭐', title: 'Rate & Review', desc: 'Confirm delivery, leave a review. Build trust for the whole community.' },
+]
+
+const features = [
+  { icon: '📏', title: 'Saved Measurements', desc: 'Store once, use every order. No more measuring tape awkwardness.' },
+  { icon: '🚚', title: 'Pickup & Delivery', desc: 'We collect your fabric and deliver the finished outfit to your door.' },
+  { icon: '💬', title: 'Direct Chat', desc: 'Message your creative directly with style refs and discuss pricing.' },
+  { icon: '📍', title: 'Live Tracking', desc: 'Track every stage from cutting to delivery in real time.' },
+  { icon: '⭐', title: 'Mutual Ratings', desc: 'Customers rate creatives. Creatives rate customers. Trust built both ways.' },
+  { icon: '🏆', title: 'Hall of Fame', desc: 'Top-rated creatives get featured. Quality is recognised and rewarded.' },
 ]
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#09090B] text-white overflow-x-hidden">
 
-      {/* ── Navbar ──────────────────────────────────── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm shadow-violet-100/50">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/"><Logo size="sm" variant="full" /></Link>
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <Link href="/browse" className="hover:text-violet-700 transition-colors font-medium">Find Creatives</Link>
-            <Link href="/login?as=tailor" className="hover:text-violet-700 transition-colors font-medium">Join as Creative</Link>
-            <a href="#how-it-works" className="hover:text-violet-700 transition-colors font-medium">How it works</a>
+      {/* ── Navbar ─────────────────────────────────── */}
+      <nav className="fixed top-0 z-50 w-full bg-black/60 backdrop-blur-xl border-b border-white/[0.06]">
+        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+          <Link href="/"><Logo size="sm" variant="full" dark /></Link>
+          <div className="hidden md:flex items-center gap-7 text-sm text-gray-400">
+            <Link href="/browse" className="hover:text-white transition-colors">Find Creatives</Link>
+            <Link href="/signup?as=tailor" className="hover:text-white transition-colors">Join as Creative</Link>
+            <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
+            <Link href="/hall-of-fame" className="hover:text-amber-400 transition-colors">🏆 Hall of Fame</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-700 hover:text-violet-700 transition-colors px-3 py-2 rounded-xl hover:bg-violet-50">
+            <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
               Log in
             </Link>
-            <Link href="/signup" className="bg-violet-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:bg-violet-800 transition-all duration-200 shadow-sm shadow-violet-300 hover:shadow-violet-400 hover:scale-[1.03] active:scale-[0.97]">
+            <Link href="/signup" className="bg-amber-400 hover:bg-amber-500 text-black text-sm font-black px-5 py-2.5 rounded-xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-amber-500/25">
               Get Started
             </Link>
           </div>
         </div>
       </nav>
 
-      {/* ── Hero ────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-violet-950 via-violet-900 to-violet-800 text-white min-h-[92vh] flex items-center">
+      {/* ── Hero ───────────────────────────────────── */}
+      <section className="relative min-h-[100svh] flex items-center pt-16 overflow-hidden">
+        {/* Ambient glows */}
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[800px] h-[800px] bg-violet-600/12 rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-amber-500/6 rounded-full blur-[120px] pointer-events-none" />
         {/* Dot grid */}
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-        <TailoringBg dark />
-        {/* Thread wave bottom */}
-        <svg className="absolute bottom-0 left-0 w-full h-24 opacity-10" viewBox="0 0 1440 96" preserveAspectRatio="none" fill="none">
-          <path d="M0,48 Q180,0 360,48 Q540,96 720,48 Q900,0 1080,48 Q1260,96 1440,48" stroke="white" strokeWidth="2" fill="none" strokeDasharray="8 4" />
-        </svg>
+        <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
 
-        <div className="relative w-full max-w-6xl mx-auto px-4 py-24 md:py-36 text-center">
-          {/* Big logo in hero */}
-          <div className="fade-up flex justify-center mb-8">
-            <Logo size="xl" variant="full" animated dark />
+        <div className="relative w-full max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center py-20 lg:py-12 min-h-[calc(100svh-4rem)]">
+
+          {/* Text side */}
+          <div className="order-2 lg:order-1 flex flex-col justify-center">
+            <div className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/10 rounded-full px-4 py-2 text-sm mb-8 w-fit backdrop-blur-sm text-gray-300">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" />
+              1,200+ creatives online right now
+            </div>
+
+            <h1 className="text-5xl lg:text-[72px] font-black leading-[1.02] mb-6 tracking-tight">
+              Nigeria&apos;s<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500">Fashion</span><br />
+              Marketplace
+            </h1>
+
+            <p className="text-lg text-gray-400 max-w-lg mb-10 leading-relaxed">
+              Book verified tailors and designers for custom outfits, bridal wear, alterations and more. Fast, reliable, delivered to your door.
+            </p>
+
+            <div className="flex flex-wrap gap-4 mb-14">
+              <Link href="/browse"
+                className="flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-black text-base px-8 py-4 rounded-2xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-2xl shadow-amber-500/25">
+                Find a Creative →
+              </Link>
+              <Link href="/signup?as=tailor"
+                className="flex items-center gap-2 bg-white/[0.07] hover:bg-white/[0.12] border border-white/15 text-white font-bold text-base px-8 py-4 rounded-2xl transition-all backdrop-blur-sm">
+                Join as Creative
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4 border-t border-white/10 pt-8">
+              {stats.map(s => (
+                <div key={s.label}>
+                  <div className="text-xl font-black text-amber-400">{s.value}</div>
+                  <div className="text-xs text-gray-600 mt-0.5 leading-tight">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="fade-up-1 inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-5 py-2 text-sm mb-8 backdrop-blur-sm">
-            <span className="w-2 h-2 bg-green-400 rounded-full pulse-dot" />
-            <span>1,200+ creatives online right now</span>
-          </div>
-
-          <h1 className="fade-up-2 text-5xl md:text-7xl font-black leading-tight mb-6 tracking-tight">
-            Your perfect fit,<br />
-            <span className="text-amber-400">delivered to you.</span>
-          </h1>
-
-          <p className="fade-up-3 text-xl text-violet-200 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Book verified creatives for custom outfits, alterations, bridal wear, uniforms and more.
-            Fast. Reliable. Professional.
-          </p>
-
-          <div className="fade-up-4 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/browse"
-              className="gold-shimmer btn-press text-amber-950 font-black text-lg px-10 py-4 rounded-2xl shadow-xl shadow-amber-500/30 transition-transform hover:scale-105"
-            >
-              Find a Creative Now →
-            </Link>
-            <Link
-              href="/signup?as=tailor"
-              className="btn-press bg-white/10 hover:bg-white/20 border border-white/30 text-white font-bold text-lg px-10 py-4 rounded-2xl transition-all backdrop-blur-sm"
-            >
-              Join as a Creative
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="fade-up-5 mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto border-t border-white/10 pt-12">
-            {stats.map((s) => (
-              <div key={s.label} className="group">
-                <div className="text-3xl font-black text-amber-400 group-hover:scale-110 transition-transform duration-200">{s.value}</div>
-                <div className="text-sm text-violet-300 mt-1">{s.label}</div>
+          {/* Photo collage side */}
+          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+            <div className="relative w-72 h-[430px] lg:w-[360px] lg:h-[520px]">
+              {/* Back image — rotated left */}
+              <div className="absolute bottom-0 left-0 w-[200px] h-[280px] lg:w-[240px] lg:h-[340px] rounded-3xl overflow-hidden shadow-2xl shadow-black/70 -rotate-6 border border-white/10">
+                <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=480&h=680&fit=crop&q=80" alt="" className="w-full h-full object-cover" loading="eager" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
-            ))}
+              {/* Front image — rotated right, overlaps */}
+              <div className="absolute top-0 right-0 w-[215px] h-[310px] lg:w-[260px] lg:h-[380px] rounded-3xl overflow-hidden shadow-2xl shadow-violet-900/50 rotate-3 border border-white/10 z-10">
+                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=520&h=760&fit=crop&q=80" alt="" className="w-full h-full object-cover" loading="eager" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              </div>
+              {/* Floating verified card */}
+              <div className="absolute bottom-12 right-0 lg:-right-5 bg-white rounded-2xl px-4 py-3 shadow-2xl z-20 border border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-black text-sm flex-shrink-0">A</div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-900 whitespace-nowrap">Adaeze Couture</p>
+                    <p className="text-xs text-gray-500">⭐ 4.9 · 312 orders</p>
+                  </div>
+                  <div className="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center ml-1 flex-shrink-0">
+                    <span className="text-white text-[10px] font-bold">✓</span>
+                  </div>
+                </div>
+              </div>
+              {/* Floating order notification */}
+              <div className="absolute top-8 -left-2 lg:-left-5 bg-white/10 backdrop-blur-xl rounded-2xl px-3.5 py-2.5 shadow-xl z-20 border border-white/20">
+                <p className="text-xs text-gray-300 font-medium">📦 Order update</p>
+                <p className="text-xs text-white font-bold mt-0.5">Your outfit is ready! 🎉</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Community ──────────────────────────────── */}
-      <section className="py-24 bg-gray-50 relative overflow-hidden">
-        <TailoringBg />
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-14 page-enter">
-            <span className="text-xs font-bold tracking-widest text-violet-500 uppercase mb-3 block">Community</span>
-            <h2 className="text-4xl font-black text-gray-900">Connect with Nigerian creatives</h2>
-            <p className="text-gray-500 mt-3 text-lg">Discover talent, follow the feed, and commission your next look</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {/* Feed — featured card */}
-            <Link href="/feed"
-              className="group col-span-2 md:col-span-1 bg-gradient-to-br from-violet-600 to-violet-800 rounded-2xl p-6 border border-violet-500 card-lift transition-all fade-up relative overflow-hidden">
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '20px 20px' }} />
-              <div className="relative">
-                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300">✨</div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-bold text-white text-base">Creative Feed</h3>
-                  <span className="text-xs bg-amber-400 text-amber-950 font-bold px-2 py-0.5 rounded-full">Live</span>
+      {/* ── Services band ──────────────────────────── */}
+      <section className="py-20 border-y border-white/[0.06] bg-white/[0.015]">
+        <div className="max-w-7xl mx-auto px-5">
+          <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-10 text-center">What you can order</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: '👗', name: 'Custom Outfits', desc: 'Ankara, Aso-Oke, contemporary', img: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=300&fit=crop&q=75' },
+              { icon: '💍', name: 'Bridal Couture', desc: 'Gowns, asoebi, coordination', img: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=300&fit=crop&q=75' },
+              { icon: '✂️', name: 'Alterations', desc: 'Quick fixes, sizing, hemming', img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=300&fit=crop&q=75' },
+              { icon: '🧵', name: 'Fabric & More', desc: 'Sourcing, uniforms, ready-to-wear', img: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=300&fit=crop&q=75' },
+            ].map(s => (
+              <Link key={s.name} href="/browse"
+                className="group relative overflow-hidden rounded-3xl aspect-[4/3] cursor-pointer block">
+                <img src={s.img} alt={s.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-5">
+                  <div className="text-2xl mb-1">{s.icon}</div>
+                  <p className="font-bold text-white text-sm">{s.name}</p>
+                  <p className="text-xs text-gray-300 mt-0.5">{s.desc}</p>
                 </div>
-                <p className="text-xs text-violet-200 mt-1">See the latest looks and styles from creatives →</p>
-              </div>
-            </Link>
-
-            {([
-              { href: '/browse', icon: '🔍', title: 'Browse Creatives', desc: 'Filter by city, style, and rating' },
-              { href: '/orders/asoebi', icon: '👗', title: 'Asoebi Group Orders', desc: 'Coordinate outfits for events' },
-              { href: '/browse', icon: '📍', title: 'Find Nearby', desc: 'Discover talent in your city' },
-              { href: '/signup?as=tailor', icon: '🎨', title: 'Become a Creative', desc: 'Set up your profile and start earning' },
-              { href: '/browse', icon: '⭐', title: 'Top Rated', desc: 'Highest-rated creatives this month' },
-            ] as { href: string; icon: string; title: string; desc: string }[]).map(({ href, icon, title, desc }, i) => (
-              <Link key={title} href={href}
-                className={`group bg-white rounded-2xl p-6 border border-gray-100 hover:border-violet-300 card-lift transition-all ${['fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][i]}`}>
-                <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 group-hover:bg-violet-100 transition-all duration-300">
-                  {icon}
-                </div>
-                <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors text-base">{title}</h3>
-                <p className="text-xs text-gray-400 mt-1 group-hover:text-violet-400 transition-colors">{desc} →</p>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── How it works ────────────────────────────── */}
-      <section id="how-it-works" className="py-24 bg-white relative overflow-hidden">
-        <TailoringBg />
-        <div className="max-w-6xl mx-auto px-4">
+      {/* ── How it works ───────────────────────────── */}
+      <section id="how-it-works" className="py-24">
+        <div className="max-w-7xl mx-auto px-5">
           <div className="text-center mb-16">
-            <span className="text-xs font-bold tracking-widest text-violet-500 uppercase mb-3 block">Process</span>
-            <h2 className="text-4xl font-black text-gray-900">How TailorNow works</h2>
-            <p className="text-gray-500 mt-3 text-lg">From browse to fitted in 4 simple steps</p>
+            <p className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-4">Simple process</p>
+            <h2 className="text-4xl lg:text-5xl font-black">From browse to fitted<br className="hidden md:block" /> in 4 steps</h2>
           </div>
-          <div className="grid md:grid-cols-4 gap-8 relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-violet-200 via-violet-400 to-violet-200" />
-            {steps.map((item, i) => (
-              <div key={item.step} className={`relative text-center ${['fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3'][i]}`}>
-                <div className="relative inline-flex">
-                  <div className="w-20 h-20 rounded-2xl bg-violet-50 border-2 border-violet-100 flex items-center justify-center text-3xl mb-5 mx-auto hover:scale-110 transition-transform duration-300 hover:bg-violet-100 hover:border-violet-300 cursor-default relative z-10">
-                    {item.icon}
-                  </div>
-                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-violet-700 text-white text-[10px] font-black flex items-center justify-center z-20">
-                    {i + 1}
-                  </span>
+          <div className="grid md:grid-cols-4 gap-5">
+            {steps.map((step) => (
+              <div key={step.n}
+                className="relative bg-white/[0.04] border border-white/10 rounded-3xl p-6 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-300 group hover:-translate-y-1">
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.07] border border-white/10 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition-transform duration-300">
+                  {step.icon}
                 </div>
-                <h3 className="font-bold text-gray-900 text-base mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+                <div className="absolute top-5 right-5 text-4xl font-black text-white/[0.04] select-none">{step.n}</div>
+                <h3 className="font-bold text-white mb-2">{step.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Features ────────────────────────────────── */}
-      <section className="py-24 bg-violet-950 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
-        <TailoringBg dark />
-        {/* Decorative thread */}
-        <svg className="absolute top-0 left-0 w-full h-12 opacity-10" viewBox="0 0 1440 48" preserveAspectRatio="none" fill="none">
-          <path d="M0,24 Q180,0 360,24 Q540,48 720,24 Q900,0 1080,24 Q1260,48 1440,24" stroke="white" strokeWidth="2" fill="none" />
-        </svg>
-        <div className="relative max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <span className="text-xs font-bold tracking-widest text-violet-300 uppercase mb-3 block">Features</span>
-            <h2 className="text-4xl font-black">Everything you need for perfect tailoring</h2>
+      {/* ── Features ───────────────────────────────── */}
+      <section className="py-20 bg-white/[0.015] border-y border-white/[0.06]">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold tracking-widest text-violet-400 uppercase mb-4">Platform features</p>
+            <h2 className="text-4xl font-black">Built for Nigerian fashion</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {features.map((f, i) => (
+          <div className="grid md:grid-cols-3 gap-5">
+            {features.map((f) => (
               <div key={f.title}
-                className={`group bg-white/5 border border-white/10 rounded-2xl p-7 hover:bg-white/10 hover:border-white/20 transition-all duration-300 card-lift ${['fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][i]}`}>
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
-                <h3 className="font-bold text-lg mb-2">{f.title}</h3>
-                <p className="text-violet-300 text-sm leading-relaxed">{f.desc}</p>
+                className="bg-white/[0.04] border border-white/10 rounded-3xl p-7 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-300 group hover:-translate-y-1">
+                <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
+                <h3 className="font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Tailor CTA ──────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 gold-shimmer opacity-90" />
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, #92400E 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        <TailoringBg />
-        <div className="relative max-w-4xl mx-auto px-4 text-center">
-          <span className="text-xs font-bold tracking-widest text-amber-900/70 uppercase mb-4 block">For Creatives</span>
-          <h2 className="text-4xl font-black text-amber-950 mb-4">Are you a creative?</h2>
-          <p className="text-amber-900 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
-            Join thousands of creatives already earning on TailorNow. Get verified, build your portfolio, and reach customers who are ready to order today.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup?as=tailor" className="btn-press bg-violet-700 hover:bg-violet-800 text-white font-black text-lg px-10 py-4 rounded-2xl transition-all shadow-lg shadow-violet-900/30 hover:scale-105">
-              Start Taking Orders →
-            </Link>
-            <a href="#how-it-works" className="btn-press bg-amber-950/10 hover:bg-amber-950/20 text-amber-950 font-bold text-lg px-10 py-4 rounded-2xl transition-all">
-              Learn how it works
-            </a>
+      {/* ── Dual CTA ───────────────────────────────── */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-5 grid md:grid-cols-2 gap-5">
+          {/* Customers */}
+          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-900 to-violet-950 p-10 border border-violet-700/30">
+            <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-violet-500/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -left-8 -top-8 w-40 h-40 bg-violet-400/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative">
+              <p className="text-violet-300 text-xs font-bold uppercase tracking-widest mb-5">For customers</p>
+              <h3 className="text-3xl font-black text-white mb-3 leading-tight">Find your perfect<br />creative today</h3>
+              <p className="text-violet-200/70 text-sm mb-8 leading-relaxed">Browse hundreds of verified creatives across Lagos, Abuja, Port Harcourt and all of Nigeria.</p>
+              <Link href="/browse"
+                className="inline-flex items-center gap-2 bg-white text-violet-900 font-black px-6 py-3.5 rounded-2xl hover:bg-violet-50 transition-all hover:scale-[1.03] shadow-xl shadow-violet-900/50">
+                Browse Creatives →
+              </Link>
+            </div>
+          </div>
+          {/* Creatives */}
+          <div className="relative overflow-hidden rounded-3xl p-10 border border-amber-500/20" style={{ background: 'linear-gradient(135deg, #130b00 0%, #211200 100%)' }}>
+            <div className="absolute -right-12 -bottom-12 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -left-8 -top-8 w-40 h-40 bg-amber-400/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative">
+              <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-5">For creatives</p>
+              <h3 className="text-3xl font-black text-white mb-3 leading-tight">Turn your skill<br />into income</h3>
+              <p className="text-amber-100/50 text-sm mb-8 leading-relaxed">Get verified, build your portfolio, and reach thousands of customers ready to book today.</p>
+              <Link href="/signup?as=tailor"
+                className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-black px-6 py-3.5 rounded-2xl transition-all hover:scale-[1.03] shadow-xl shadow-amber-500/20">
+                Start Taking Orders →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ──────────────────────────────────── */}
-      <footer className="bg-gray-950 text-gray-400">
-        <div className="max-w-6xl mx-auto px-4 py-14">
-          <div className="grid md:grid-cols-4 gap-10 mb-12">
+      {/* ── Footer ─────────────────────────────────── */}
+      <footer className="border-t border-white/[0.06] py-14">
+        <div className="max-w-7xl mx-auto px-5">
+          <div className="grid md:grid-cols-4 gap-10 mb-10">
             <div className="md:col-span-2">
               <div className="mb-4"><Logo size="md" variant="full" dark /></div>
-              <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
+              <p className="text-sm text-gray-600 leading-relaxed max-w-xs">
                 Nigeria&apos;s premier fashion marketplace. Connecting skilled creatives with customers who deserve a perfect fit.
               </p>
             </div>
             <div>
-              <h4 className="text-white font-bold text-sm mb-4 tracking-wide">Platform</h4>
-              <ul className="space-y-3 text-sm">
-                <li><Link href="/browse" className="hover:text-violet-400 transition-colors">Find Creatives</Link></li>
-                <li><Link href="/orders/asoebi" className="hover:text-violet-400 transition-colors">Asoebi Group Orders</Link></li>
-                <li><Link href="/signup?as=tailor" className="hover:text-violet-400 transition-colors">Join as Creative</Link></li>
-                <li><Link href="/referral" className="hover:text-amber-400 transition-colors">Refer and Earn</Link></li>
-                <li><a href="#how-it-works" className="hover:text-violet-400 transition-colors">How it works</a></li>
+              <h4 className="text-white font-bold text-sm mb-5">Platform</h4>
+              <ul className="space-y-3 text-sm text-gray-600">
+                <li><Link href="/browse" className="hover:text-white transition-colors">Find Creatives</Link></li>
+                <li><Link href="/orders/asoebi" className="hover:text-white transition-colors">Asoebi Group Orders</Link></li>
+                <li><Link href="/signup?as=tailor" className="hover:text-white transition-colors">Join as Creative</Link></li>
+                <li><Link href="/hall-of-fame" className="hover:text-amber-400 transition-colors">Hall of Fame</Link></li>
+                <li><a href="#how-it-works" className="hover:text-white transition-colors">How it works</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold text-sm mb-4 tracking-wide">Legal</h4>
-              <ul className="space-y-3 text-sm">
-                <li><Link href="/privacy" className="hover:text-violet-400 transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-violet-400 transition-colors">Terms of Service</Link></li>
+              <h4 className="text-white font-bold text-sm mb-5">Legal</h4>
+              <ul className="space-y-3 text-sm text-gray-600">
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
-
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-gray-600">© 2026 TailorNow. All rights reserved.</p>
-            <p className="text-xs text-gray-600">
-              Built by{' '}
-              <span className="text-violet-400 font-semibold">Folub and Samuel Labs</span>
-            </p>
+          <div className="border-t border-white/[0.06] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-gray-700">© 2026 TailorNow. All rights reserved.</p>
+            <p className="text-xs text-gray-700">Built by <span className="text-violet-400 font-semibold">Folub and Samuel Labs</span></p>
           </div>
         </div>
       </footer>
