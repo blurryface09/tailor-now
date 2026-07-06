@@ -5,8 +5,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Logo } from '@/components/ui/logo'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import { CheckCircle, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -20,7 +18,6 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    // Supabase fires an auth state change when the reset link is clicked
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') setReady(true)
     })
@@ -39,65 +36,84 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md page-enter">
+    <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-fuchsia-600/8 rounded-full blur-3xl" />
+      </div>
+      <div className="w-full max-w-md page-enter relative z-10">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex mb-6 justify-center">
             <Logo size="md" variant="full" animated />
           </Link>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-3xl border border-white/[0.09] p-8 shadow-2xl">
           {done ? (
             <div className="text-center">
-              <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={28} className="text-green-600" />
+              <div className="w-14 h-14 bg-green-500/20 border border-green-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <CheckCircle size={28} className="text-green-400" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Password updated!</h1>
-              <p className="text-sm text-gray-500">Redirecting you to sign in…</p>
+              <h1 className="text-xl font-bold text-white mb-2">Password updated!</h1>
+              <p className="text-sm text-zinc-400">Redirecting you to sign in…</p>
             </div>
           ) : !ready ? (
             <div className="text-center py-4">
-              <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-sm text-gray-500">Verifying your reset link…</p>
-              <p className="text-xs text-gray-400 mt-2">
+              <div className="w-8 h-8 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin mx-auto mb-4" />
+              <p className="text-sm text-zinc-400">Verifying your reset link…</p>
+              <p className="text-xs text-zinc-600 mt-2">
                 If nothing happens,{' '}
-                <Link href="/forgot-password" className="text-violet-600 hover:underline">request a new link</Link>.
+                <Link href="/forgot-password" className="text-violet-400 hover:text-violet-300 underline">request a new link</Link>.
               </p>
             </div>
           ) : (
             <>
-              <div className="w-12 h-12 bg-violet-100 rounded-2xl flex items-center justify-center mb-4">
-                <Lock size={24} className="text-violet-700" />
+              <div className="w-12 h-12 bg-violet-500/20 border border-violet-500/30 rounded-2xl flex items-center justify-center mb-4">
+                <Lock size={24} className="text-violet-400" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Set new password</h1>
-              <p className="text-sm text-gray-500 mb-6">Choose a strong password you haven't used before.</p>
+              <h1 className="text-2xl font-bold text-white mb-1">Set new password</h1>
+              <p className="text-sm text-zinc-400 mb-6">Choose a strong password you haven&apos;t used before.</p>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Input
-                  label="New password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  icon={<Lock size={16} />}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
-                <Input
-                  label="Confirm new password"
-                  type="password"
-                  placeholder="Repeat your password"
-                  icon={<Lock size={16} />}
-                  value={confirm}
-                  onChange={e => setConfirm(e.target.value)}
-                  required
-                />
+                <div>
+                  <label className="text-sm font-medium text-zinc-300 block mb-1.5">New password</label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                    <input
+                      type="password"
+                      placeholder="At least 8 characters"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      required
+                      className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-zinc-600 text-sm transition-all focus:outline-none focus:border-violet-500/60 focus:bg-white/[0.08]"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-zinc-300 block mb-1.5">Confirm new password</label>
+                  <div className="relative">
+                    <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+                    <input
+                      type="password"
+                      placeholder="Repeat your password"
+                      value={confirm}
+                      onChange={e => setConfirm(e.target.value)}
+                      required
+                      className="w-full bg-white/[0.06] border border-white/[0.1] rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-zinc-600 text-sm transition-all focus:outline-none focus:border-violet-500/60 focus:bg-white/[0.08]"
+                    />
+                  </div>
+                </div>
                 {password && confirm && password !== confirm && (
-                  <p className="text-xs text-red-500">Passwords don't match</p>
+                  <p className="text-xs text-red-400">Passwords don&apos;t match</p>
                 )}
-                <Button type="submit" size="lg" className="w-full !mt-6" loading={loading}
-                  disabled={!password || !confirm || password !== confirm}>
-                  Update Password
-                </Button>
+                <button
+                  type="submit"
+                  disabled={loading || !password || !confirm || password !== confirm}
+                  className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 disabled:bg-violet-800 disabled:opacity-50 text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-violet-500/30 text-sm mt-2"
+                >
+                  {loading
+                    ? <div className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    : 'Update Password'}
+                </button>
               </form>
             </>
           )}

@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#7C3AED" />
       </head>
-      <body className="min-h-full bg-gray-50 font-sans">
+      <body className="min-h-full bg-[#09090B] text-white font-sans">
         {children}
         <Script
           id="sw-register"
