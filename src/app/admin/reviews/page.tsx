@@ -22,7 +22,7 @@ export default async function AdminReviewsPage() {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <AdminReviewsClient reviews={ratings || []} />
     </div>

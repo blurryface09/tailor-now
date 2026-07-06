@@ -29,10 +29,10 @@ type Payout = {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  pending:    { label: 'Pending',    color: 'text-amber-700 bg-amber-50 border-amber-200',  icon: <Clock size={13} /> },
+  pending:    { label: 'Pending',    color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',  icon: <Clock size={13} /> },
   processing: { label: 'Processing', color: 'text-blue-700 bg-blue-50 border-blue-200',    icon: <AlertCircle size={13} /> },
-  paid:       { label: 'Paid',       color: 'text-green-700 bg-green-50 border-green-200', icon: <CheckCircle size={13} /> },
-  failed:     { label: 'Failed',     color: 'text-red-700 bg-red-50 border-red-200',       icon: <XCircle size={13} /> },
+  paid:       { label: 'Paid',       color: 'text-green-700 bg-green-500/10 border-green-200', icon: <CheckCircle size={13} /> },
+  failed:     { label: 'Failed',     color: 'text-red-400 bg-red-500/10 border-red-200',       icon: <XCircle size={13} /> },
 }
 
 export default function AdminPayoutsPage() {
@@ -91,57 +91,57 @@ export default function AdminPayoutsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-8 page-enter">
         <div className="mb-6">
-          <h1 className="text-2xl font-black text-gray-900">Creative Payouts</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage earnings and approve bank transfers to creatives</p>
+          <h1 className="text-2xl font-black text-white">Creative Payouts</h1>
+          <p className="text-sm text-zinc-500 mt-1">Manage earnings and approve bank transfers to creatives</p>
         </div>
 
         {/* Summary cards */}
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Pending Payouts</p>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-sm">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Pending Payouts</p>
             <p className="text-2xl font-black text-amber-600 mt-1">₦{totalPending.toLocaleString()}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{payouts.filter(p => p.status === 'pending').length} orders awaiting transfer</p>
+            <p className="text-xs text-zinc-600 mt-0.5">{payouts.filter(p => p.status === 'pending').length} orders awaiting transfer</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Total Paid Out</p>
-            <p className="text-2xl font-black text-green-600 mt-1">₦{totalPaid.toLocaleString()}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{payouts.filter(p => p.status === 'paid').length} orders completed</p>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-sm">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Total Paid Out</p>
+            <p className="text-2xl font-black text-green-400 mt-1">₦{totalPaid.toLocaleString()}</p>
+            <p className="text-xs text-zinc-600 mt-0.5">{payouts.filter(p => p.status === 'paid').length} orders completed</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold">Platform Commission</p>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-sm">
+            <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Platform Commission</p>
             <p className="text-2xl font-black text-violet-600 mt-1">₦{totalCommission.toLocaleString()}</p>
-            <p className="text-xs text-gray-400 mt-0.5">20% on all completed orders</p>
+            <p className="text-xs text-zinc-600 mt-0.5">20% on all completed orders</p>
           </div>
         </div>
 
         {/* Filters */}
         <div className="flex gap-3 mb-4">
           <div className="relative flex-1 max-w-xs">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search creative or order..."
-              className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+              className="w-full pl-9 pr-4 py-2.5 text-sm border border-white/[0.1] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/30"
             />
           </div>
           <div className="relative">
             <select
               value={filter}
               onChange={e => setFilter(e.target.value)}
-              className="appearance-none pl-4 pr-8 py-2.5 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 font-medium"
+              className="appearance-none pl-4 pr-8 py-2.5 text-sm border border-white/[0.1] rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/30 font-medium"
             >
               <option value="all">All statuses</option>
               <option value="pending">Pending</option>
@@ -149,56 +149,56 @@ export default function AdminPayoutsPage() {
               <option value="paid">Paid</option>
               <option value="failed">Failed</option>
             </select>
-            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-600 pointer-events-none" />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors font-medium text-gray-600">
+          <button className="flex items-center gap-2 px-4 py-2.5 text-sm border border-white/[0.1] rounded-xl bg-white hover:bg-white/[0.06] transition-colors font-medium text-zinc-400">
             <Download size={14} /> Export CSV
           </button>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100 bg-gray-50/50">
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Creative</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Gross</th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Commission</th>
-                <th className="text-right px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Net (Creative)</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Bank Details</th>
-                <th className="text-left px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <tr className="border-b border-white/[0.08] bg-[#09090B]/50">
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Creative</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Order</th>
+                <th className="text-right px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Gross</th>
+                <th className="text-right px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Commission</th>
+                <th className="text-right px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Net (Creative)</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Bank Details</th>
+                <th className="text-left px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</th>
                 <th className="px-5 py-3.5"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-12 text-center text-gray-400 text-sm">No payouts found</td>
+                  <td colSpan={8} className="px-5 py-12 text-center text-zinc-600 text-sm">No payouts found</td>
                 </tr>
               ) : filtered.map(payout => {
                 const cfg = STATUS_CONFIG[payout.status] || STATUS_CONFIG.pending
                 return (
-                  <tr key={payout.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={payout.id} className="hover:bg-white/[0.06]/50 transition-colors">
                     <td className="px-5 py-4">
-                      <p className="font-semibold text-gray-900">{payout.tailor?.business_name || 'Unknown'}</p>
-                      <p className="text-xs text-gray-400">{payout.tailor?.profile?.email}</p>
+                      <p className="font-semibold text-white">{payout.tailor?.business_name || 'Unknown'}</p>
+                      <p className="text-xs text-zinc-600">{payout.tailor?.profile?.email}</p>
                     </td>
                     <td className="px-5 py-4">
-                      <p className="font-medium text-gray-700 max-w-[160px] truncate">{payout.order?.title}</p>
-                      <p className="text-xs text-gray-400">{new Date(payout.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      <p className="font-medium text-zinc-300 max-w-[160px] truncate">{payout.order?.title}</p>
+                      <p className="text-xs text-zinc-600">{new Date(payout.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </td>
-                    <td className="px-5 py-4 text-right font-semibold text-gray-900">₦{payout.gross_amount.toLocaleString()}</td>
+                    <td className="px-5 py-4 text-right font-semibold text-white">₦{payout.gross_amount.toLocaleString()}</td>
                     <td className="px-5 py-4 text-right text-violet-600 font-medium">₦{payout.commission_amount.toLocaleString()}</td>
-                    <td className="px-5 py-4 text-right font-bold text-green-600">₦{payout.net_amount.toLocaleString()}</td>
+                    <td className="px-5 py-4 text-right font-bold text-green-400">₦{payout.net_amount.toLocaleString()}</td>
                     <td className="px-5 py-4">
                       {payout.account_number ? (
                         <div>
-                          <p className="font-medium text-gray-800">{payout.account_name}</p>
-                          <p className="text-xs text-gray-400">{payout.account_number} · {payout.bank_name}</p>
+                          <p className="font-medium text-zinc-100">{payout.account_name}</p>
+                          <p className="text-xs text-zinc-600">{payout.account_number} · {payout.bank_name}</p>
                         </div>
                       ) : (
-                        <span className="text-xs text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Not provided</span>
+                        <span className="text-xs text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">Not provided</span>
                       )}
                     </td>
                     <td className="px-5 py-4">
@@ -222,19 +222,19 @@ export default function AdminPayoutsPage() {
                           <button
                             disabled={!!updating}
                             onClick={() => updateStatus(payout.id, 'paid')}
-                            className="text-xs px-3 py-1.5 bg-green-50 text-green-700 rounded-lg font-semibold hover:bg-green-100 transition-colors disabled:opacity-50">
+                            className="text-xs px-3 py-1.5 bg-green-500/10 text-green-700 rounded-lg font-semibold hover:bg-green-100 transition-colors disabled:opacity-50">
                             {updating === payout.id ? 'Saving...' : 'Mark Paid'}
                           </button>
                           <button
                             disabled={!!updating}
                             onClick={() => updateStatus(payout.id, 'failed')}
-                            className="text-xs px-3 py-1.5 bg-red-50 text-red-700 rounded-lg font-semibold hover:bg-red-100 transition-colors disabled:opacity-50">
+                            className="text-xs px-3 py-1.5 bg-red-500/10 text-red-400 rounded-lg font-semibold hover:bg-red-100 transition-colors disabled:opacity-50">
                             Failed
                           </button>
                         </div>
                       )}
                       {payout.status === 'paid' && payout.paid_at && (
-                        <p className="text-xs text-gray-400">{new Date(payout.paid_at).toLocaleDateString('en-NG')}</p>
+                        <p className="text-xs text-zinc-600">{new Date(payout.paid_at).toLocaleDateString('en-NG')}</p>
                       )}
                     </td>
                   </tr>
@@ -247,12 +247,12 @@ export default function AdminPayoutsPage() {
 
       {showBankModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <h3 className="font-bold text-gray-900 mb-4">Bank Details</h3>
-            <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Account Name:</span> {showBankModal.account_name || 'N/A'}</p>
-            <p className="text-sm text-gray-600 mb-1"><span className="font-medium">Account Number:</span> {showBankModal.account_number || 'N/A'}</p>
-            <p className="text-sm text-gray-600 mb-4"><span className="font-medium">Bank:</span> {showBankModal.bank_name || 'N/A'}</p>
-            <button onClick={() => setShowBankModal(null)} className="w-full py-2.5 bg-gray-100 rounded-xl text-sm font-semibold hover:bg-gray-200">Close</button>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm shadow-xl">
+            <h3 className="font-bold text-white mb-4">Bank Details</h3>
+            <p className="text-sm text-zinc-400 mb-1"><span className="font-medium">Account Name:</span> {showBankModal.account_name || 'N/A'}</p>
+            <p className="text-sm text-zinc-400 mb-1"><span className="font-medium">Account Number:</span> {showBankModal.account_number || 'N/A'}</p>
+            <p className="text-sm text-zinc-400 mb-4"><span className="font-medium">Bank:</span> {showBankModal.bank_name || 'N/A'}</p>
+            <button onClick={() => setShowBankModal(null)} className="w-full py-2.5 bg-white/[0.06] rounded-xl text-sm font-semibold hover:bg-white/[0.08]">Close</button>
           </div>
         </div>
       )}

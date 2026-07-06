@@ -76,17 +76,17 @@ export function LiveMap({ orderId }: LiveMapProps) {
   }
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-gray-200">
+    <div className="rounded-2xl overflow-hidden border border-white/[0.1]">
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <div className="flex items-center gap-2 px-4 py-2.5 bg-violet-50 border-b border-violet-100">
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
         <span className="text-sm font-medium text-violet-800">Creative is on the way</span>
         {location && (
-          <span className="ml-auto text-xs text-gray-400">Live tracking active</span>
+          <span className="ml-auto text-xs text-zinc-600">Live tracking active</span>
         )}
       </div>
       {offline ? (
-        <div className="h-48 flex items-center justify-center bg-gray-50 text-sm text-gray-400">
+        <div className="h-48 flex items-center justify-center bg-[#09090B] text-sm text-zinc-600">
           Waiting for creative to start delivery...
         </div>
       ) : (

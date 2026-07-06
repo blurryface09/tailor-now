@@ -34,10 +34,10 @@ const DEFAULT: MarketplaceSettings = {
 }
 
 const COLORS = [
-  { val: 'violet', label: 'Violet', bg: 'bg-violet-100 text-violet-800 border-violet-300' },
-  { val: 'amber',  label: 'Amber',  bg: 'bg-amber-100 text-amber-800 border-amber-300' },
+  { val: 'violet', label: 'Violet', bg: 'bg-violet-100 text-violet-300 border-violet-300' },
+  { val: 'amber',  label: 'Amber',  bg: 'bg-amber-100 text-amber-300 border-amber-300' },
   { val: 'green',  label: 'Green',  bg: 'bg-green-100 text-green-800 border-green-300' },
-  { val: 'red',    label: 'Red',    bg: 'bg-red-100 text-red-800 border-red-300' },
+  { val: 'red',    label: 'Red',    bg: 'bg-red-100 text-red-300 border-red-300' },
 ]
 
 const toggle = (arr: string[], val: string) =>
@@ -74,39 +74,39 @@ export default function MarketplacePage() {
   const colorCfg = COLORS.find(c => c.val === settings.announcement_color) || COLORS[0]
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="flex justify-center py-24"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center gap-3 mb-2">
-          <Link href="/admin" className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+          <Link href="/admin" className="p-2 rounded-xl hover:bg-white/[0.06] transition-colors text-zinc-500">
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Marketplace Settings</h1>
-            <p className="text-sm text-gray-500">Control what customers see on the platform</p>
+            <h1 className="text-2xl font-bold text-white">Marketplace Settings</h1>
+            <p className="text-sm text-zinc-500">Control what customers see on the platform</p>
           </div>
         </div>
 
         {/* Announcement banner */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-gray-900 flex items-center gap-2"><Megaphone size={18} className="text-violet-600" /> Site Announcement</h2>
+            <h2 className="font-bold text-white flex items-center gap-2"><Megaphone size={18} className="text-violet-600" /> Site Announcement</h2>
             <button
               onClick={() => setSettings(s => ({ ...s, announcement_enabled: !s.announcement_enabled }))}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                settings.announcement_enabled ? 'bg-green-100 text-green-700 border-green-300' : 'bg-gray-100 text-gray-500 border-gray-200'
+                settings.announcement_enabled ? 'bg-green-100 text-green-700 border-green-300' : 'bg-white/[0.06] text-zinc-500 border-white/[0.1]'
               }`}>
               {settings.announcement_enabled ? <><Eye size={12} /> Visible</> : <><EyeOff size={12} /> Hidden</>}
             </button>
           </div>
-          <p className="text-xs text-gray-500">When enabled, a banner shows at the top of all pages for logged-in users.</p>
+          <p className="text-xs text-zinc-500">When enabled, a banner shows at the top of all pages for logged-in users.</p>
 
           <Input
             label="Announcement text"
@@ -116,7 +116,7 @@ export default function MarketplacePage() {
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Banner colour</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">Banner colour</label>
             <div className="flex gap-2">
               {COLORS.map(c => (
                 <button key={c.val} type="button"
@@ -136,9 +136,9 @@ export default function MarketplacePage() {
         </div>
 
         {/* Featured services */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-          <h2 className="font-bold text-gray-900 flex items-center gap-2"><Star size={18} className="text-amber-500" /> Featured Services</h2>
-          <p className="text-xs text-gray-500">Highlight up to 3 services on the browse page and homepage. Leave empty to show all equally.</p>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-4">
+          <h2 className="font-bold text-white flex items-center gap-2"><Star size={18} className="text-amber-500" /> Featured Services</h2>
+          <p className="text-xs text-zinc-500">Highlight up to 3 services on the browse page and homepage. Leave empty to show all equally.</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(SERVICE_LABELS).map(([k, v]) => (
               <button key={k} type="button"
@@ -149,8 +149,8 @@ export default function MarketplacePage() {
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border-2 transition-all ${
                   settings.featured_services.includes(k)
-                    ? 'border-amber-400 bg-amber-50 text-amber-800 font-semibold'
-                    : 'border-gray-200 text-gray-600 hover:border-amber-300'
+                    ? 'border-amber-400 bg-amber-500/10 text-amber-300 font-semibold'
+                    : 'border-white/[0.1] text-zinc-400 hover:border-amber-300'
                 }`}>
                 {SERVICE_ICONS[k]} {v}
                 {settings.featured_services.includes(k) && <Star size={11} className="fill-amber-400 text-amber-400" />}
@@ -160,9 +160,9 @@ export default function MarketplacePage() {
         </div>
 
         {/* Hero copy */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-          <h2 className="font-bold text-gray-900 flex items-center gap-2"><Tag size={18} className="text-violet-600" /> Hero Section Copy</h2>
-          <p className="text-xs text-gray-500">Text shown in the landing page hero section.</p>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-4">
+          <h2 className="font-bold text-white flex items-center gap-2"><Tag size={18} className="text-violet-600" /> Hero Section Copy</h2>
+          <p className="text-xs text-zinc-500">Text shown in the landing page hero section.</p>
           <Input
             label="Hero tagline"
             placeholder="Your perfect fit, delivered to you."
@@ -178,14 +178,14 @@ export default function MarketplacePage() {
         </div>
 
         {/* Stats quick view */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-bold text-gray-900 flex items-center gap-2 mb-4"><Store size={18} className="text-violet-600" /> Quick Links</h2>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+          <h2 className="font-bold text-white flex items-center gap-2 mb-4"><Store size={18} className="text-violet-600" /> Quick Links</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: '/admin/tailors?filter=unverified', label: 'Pending Verifications', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-              { href: '/admin/disputes',                  label: 'Open Disputes',          color: 'bg-red-50 text-red-700 border-red-200' },
-              { href: '/admin/payouts',                   label: 'Pending Payouts',        color: 'bg-green-50 text-green-700 border-green-200' },
-              { href: '/admin/reviews',                   label: 'Review Moderation',      color: 'bg-violet-50 text-violet-700 border-violet-200' },
+              { href: '/admin/tailors?filter=unverified', label: 'Pending Verifications', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+              { href: '/admin/disputes',                  label: 'Open Disputes',          color: 'bg-red-500/10 text-red-400 border-red-200' },
+              { href: '/admin/payouts',                   label: 'Pending Payouts',        color: 'bg-green-500/10 text-green-700 border-green-200' },
+              { href: '/admin/reviews',                   label: 'Review Moderation',      color: 'bg-violet-50 text-violet-400 border-violet-200' },
             ].map(l => (
               <Link key={l.href} href={l.href}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all hover:opacity-80 ${l.color}`}>

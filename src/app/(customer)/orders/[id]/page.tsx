@@ -163,7 +163,7 @@ function OrderDetailContent() {
   }
 
   if (!order) return (
-    <div className="min-h-screen bg-gray-50"><Navbar />
+    <div className="min-h-screen bg-[#09090B]"><Navbar />
       <div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>
     </div>
   )
@@ -175,15 +175,15 @@ function OrderDetailContent() {
   const canRate = (order.status === 'completed' || order.status === 'delivered') && !myRating
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-xl font-bold text-gray-900">{order.title}</h1>
-              <p className="text-sm text-gray-500 mt-0.5">Order #{id.slice(0, 8).toUpperCase()}</p>
+              <h1 className="text-xl font-bold text-white">{order.title}</h1>
+              <p className="text-sm text-zinc-500 mt-0.5">Order #{id.slice(0, 8).toUpperCase()}</p>
             </div>
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
               {ORDER_STATUS_LABELS[order.status]}
@@ -192,36 +192,36 @@ function OrderDetailContent() {
 
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div>
-              <p className="text-gray-500">Creative</p>
-              <p className="font-medium text-gray-900">{order.tailor?.business_name}</p>
+              <p className="text-zinc-500">Creative</p>
+              <p className="font-medium text-white">{order.tailor?.business_name}</p>
             </div>
             <div>
-              <p className="text-gray-500">Placed</p>
-              <p className="font-medium text-gray-900">{formatDate(order.created_at)}</p>
+              <p className="text-zinc-500">Placed</p>
+              <p className="font-medium text-white">{formatDate(order.created_at)}</p>
             </div>
             {order.agreed_price && (
               <div>
-                <p className="text-gray-500">Total price</p>
+                <p className="text-zinc-500">Total price</p>
                 <p className="font-bold text-violet-700">{formatCurrency(order.agreed_price)}</p>
               </div>
             )}
             {order.deadline && (
               <div>
-                <p className="text-gray-500">Deadline</p>
-                <p className="font-medium text-gray-900 flex items-center gap-1"><Clock size={13} />{formatDate(order.deadline)}</p>
+                <p className="text-zinc-500">Deadline</p>
+                <p className="font-medium text-white flex items-center gap-1"><Clock size={13} />{formatDate(order.deadline)}</p>
               </div>
             )}
           </div>
 
           {order.style_reference_urls?.length > 0 && (
             <div className="mb-4">
-              <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1.5">
+              <p className="text-xs font-medium text-zinc-500 mb-2 flex items-center gap-1.5">
                 <Images size={13} /> Style references
               </p>
               <div className="flex gap-2 flex-wrap">
                 {order.style_reference_urls.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noreferrer">
-                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-gray-100 hover:opacity-90 transition-opacity" />
+                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-white/[0.08] hover:opacity-90 transition-opacity" />
                   </a>
                 ))}
               </div>
@@ -230,7 +230,7 @@ function OrderDetailContent() {
 
           <div className="flex flex-wrap gap-3">
             <Link href={`/chat?order=${id}&tailor=${order.tailor_id}`}
-              className="flex items-center gap-2 px-4 py-2 border border-violet-700 text-violet-700 rounded-xl text-sm font-medium hover:bg-violet-50 transition-colors">
+              className="flex items-center gap-2 px-4 py-2 border border-violet-700 text-violet-400 rounded-xl text-sm font-medium hover:bg-violet-500/10 transition-colors">
               <MessageSquare size={16} /> Chat with {isTailor ? 'Customer' : 'Creative'}
             </Link>
             {canConfirmDelivery && (
@@ -240,7 +240,7 @@ function OrderDetailContent() {
             )}
             {isCustomer && !['completed','cancelled','disputed'].includes(order.status) && order.deposit_paid && (
               <Link href={`/orders/${id}/dispute`}
-                className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors">
+                className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-xl text-sm font-medium hover:bg-red-500/10 transition-colors">
                 <AlertTriangle size={16} /> Raise Dispute
               </Link>
             )}
@@ -249,52 +249,52 @@ function OrderDetailContent() {
 
         {/* Price negotiation card — visible while pending (no payment yet) */}
         {isCustomer && order.status === 'pending' && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Price negotiation</h2>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+            <h2 className="font-bold text-white mb-4">Price negotiation</h2>
 
             {/* Customer's sent offer */}
             {order.customer_offer && (
-              <div className="flex items-center justify-between py-2 border-b border-gray-100 text-sm mb-3">
-                <span className="text-gray-500">Your offer</span>
-                <span className="font-semibold text-gray-900">{formatCurrency(order.customer_offer)}</span>
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.08] text-sm mb-3">
+                <span className="text-zinc-500">Your offer</span>
+                <span className="font-semibold text-white">{formatCurrency(order.customer_offer)}</span>
               </div>
             )}
 
             {/* Creative has countered */}
             {order.agreed_price && (
-              <div className="flex items-center justify-between py-2 border-b border-gray-100 text-sm mb-4">
-                <span className="text-gray-500">Creative&apos;s counter</span>
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.08] text-sm mb-4">
+                <span className="text-zinc-500">Creative&apos;s counter</span>
                 <span className="font-bold text-violet-700">{formatCurrency(order.agreed_price)}</span>
               </div>
             )}
 
             {order.agreed_price && !showCounter ? (
               <div className="space-y-2">
-                <p className="text-xs text-gray-500 mb-3">The creative has proposed a price. Accept to proceed to payment, or counter with your own offer.</p>
+                <p className="text-xs text-zinc-500 mb-3">The creative has proposed a price. Accept to proceed to payment, or counter with your own offer.</p>
                 <div className="flex gap-2 flex-wrap">
                   <Button size="sm" onClick={acceptCreativePrice} loading={sendingCounter}>
                     <CheckCircle size={14} /> Accept & Pay {formatCurrency(order.agreed_price)}
                   </Button>
                   <button onClick={() => setShowCounter(true)}
-                    className="flex items-center gap-1.5 text-sm text-amber-700 border border-amber-200 bg-amber-50 px-4 py-2 rounded-xl hover:bg-amber-100 transition-colors">
+                    className="flex items-center gap-1.5 text-sm text-amber-400 border border-amber-500/20 bg-amber-500/10 px-4 py-2 rounded-xl hover:bg-amber-500/15 transition-colors">
                     Counter offer
                   </button>
                 </div>
               </div>
             ) : !order.agreed_price ? (
-              <p className="text-sm text-gray-500 italic">Waiting for the creative to respond to your offer...</p>
+              <p className="text-sm text-zinc-500 italic">Waiting for the creative to respond to your offer...</p>
             ) : null}
 
             {showCounter && (
               <div className="mt-4 space-y-3">
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₦</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 font-medium text-sm">₦</span>
                   <input type="number" min="0" placeholder="Your counter price"
-                    className="w-full pl-8 pr-4 py-3 rounded-xl border-2 border-amber-300 focus:border-violet-500 focus:outline-none text-base font-semibold"
+                    className="w-full pl-8 pr-4 py-3 rounded-xl border-2 border-amber-500/30 focus:border-violet-500 focus:outline-none text-base font-semibold"
                     value={counterPrice} onChange={e => setCounterPrice(e.target.value)} autoFocus />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowCounter(false)} className="flex-1 py-2.5 text-sm text-gray-500 border border-gray-200 rounded-xl hover:bg-gray-50">Cancel</button>
+                  <button onClick={() => setShowCounter(false)} className="flex-1 py-2.5 text-sm text-zinc-500 border border-white/[0.1] rounded-xl hover:bg-white/[0.06]">Cancel</button>
                   <Button className="flex-1" size="sm" loading={sendingCounter} onClick={sendCounter}>Send counter</Button>
                 </div>
               </div>
@@ -306,18 +306,18 @@ function OrderDetailContent() {
         {isCustomer && order.status === 'accepted' && !order.deposit_paid && order.agreed_price && (() => {
           const { serviceCharge, totalCharged } = calculateServiceCharge(order.agreed_price)
           return (
-            <div className="bg-violet-50 border border-violet-200 rounded-2xl p-6">
-              <h2 className="font-bold text-gray-900 mb-4">Ready to pay</h2>
+            <div className="bg-violet-50 border border-violet-500/30 rounded-2xl p-6">
+              <h2 className="font-bold text-white mb-4">Ready to pay</h2>
               <div className="space-y-2 text-sm mb-4">
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-zinc-400">
                   <span>Order price</span>
                   <span>{formatCurrency(order.agreed_price)}</span>
                 </div>
-                <div className="flex justify-between text-gray-600">
+                <div className="flex justify-between text-zinc-400">
                   <span>Service charge (3%)</span>
                   <span>{formatCurrency(serviceCharge)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-gray-900 border-t border-violet-200 pt-2">
+                <div className="flex justify-between font-bold text-white border-t border-violet-500/30 pt-2">
                   <span>Total</span>
                   <span className="text-violet-700">{formatCurrency(totalCharged)}</span>
                 </div>
@@ -330,8 +330,8 @@ function OrderDetailContent() {
         })()}
 
         {/* Order tracking */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="font-bold text-gray-900 mb-6">Order tracking</h2>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+          <h2 className="font-bold text-white mb-6">Order tracking</h2>
           <div className="space-y-1">
             {TRACKING_STEPS.filter(s => !['cancelled', 'disputed'].includes(s.status)).map((s, i) => {
               const done = i < currentStepIdx
@@ -339,12 +339,12 @@ function OrderDetailContent() {
               return (
                 <div key={s.status} className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all ${done ? 'bg-violet-700 text-white' : active ? 'bg-violet-100 border-2 border-violet-700 text-violet-700' : 'bg-gray-100 text-gray-400'}`}>
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all ${done ? 'bg-violet-700 text-white' : active ? 'bg-violet-100 border-2 border-violet-700 text-violet-700' : 'bg-white/[0.06] text-zinc-600'}`}>
                       {done ? '✓' : s.icon}
                     </div>
-                    {i < TRACKING_STEPS.length - 2 && <div className={`w-0.5 h-6 mt-0.5 ${done ? 'bg-violet-700' : 'bg-gray-200'}`} />}
+                    {i < TRACKING_STEPS.length - 2 && <div className={`w-0.5 h-6 mt-0.5 ${done ? 'bg-violet-700' : 'bg-white/[0.08]'}`} />}
                   </div>
-                  <div className={`pb-4 ${active ? 'text-violet-700 font-semibold' : done ? 'text-gray-900' : 'text-gray-400'}`}>
+                  <div className={`pb-4 ${active ? 'text-violet-400 font-semibold' : done ? 'text-white' : 'text-zinc-600'}`}>
                     <p className="text-sm leading-tight mt-2">{s.label}</p>
                     {active && <p className="text-xs text-violet-500 mt-0.5">{formatRelativeTime(order.updated_at)}</p>}
                   </div>
@@ -361,29 +361,29 @@ function OrderDetailContent() {
 
         {/* Payment details */}
         {order.agreed_price && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-4">Payment</h2>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+            <h2 className="font-bold text-white mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Order price</span>
+                <span className="text-zinc-500">Order price</span>
                 <span>{formatCurrency(order.agreed_price)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-500">Service charge (3%)</span>
+                <span className="text-zinc-500">Service charge (3%)</span>
                 <span>{formatCurrency(calculateServiceCharge(order.agreed_price).serviceCharge)}</span>
               </div>
               <div className="flex justify-between font-bold border-t pt-2">
-                <span className="text-gray-900">Total charged</span>
+                <span className="text-white">Total charged</span>
                 <span className="text-violet-700">{formatCurrency(calculateServiceCharge(order.agreed_price).totalCharged)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
-                <span className="text-gray-500">Status</span>
-                <span className={`font-medium flex items-center gap-1 ${order.deposit_paid ? 'text-green-600' : 'text-amber-600'}`}>
+                <span className="text-zinc-500">Status</span>
+                <span className={`font-medium flex items-center gap-1 ${order.deposit_paid ? 'text-green-400' : 'text-amber-600'}`}>
                   {order.deposit_paid ? <><CheckCircle size={14} /> Paid</> : <><AlertCircle size={14} /> Awaiting payment</>}
                 </span>
               </div>
               {order.deposit_paid && !['completed'].includes(order.status) && (
-                <p className="text-xs text-gray-400">Payment held securely — released to creative after you confirm delivery</p>
+                <p className="text-xs text-zinc-600">Payment held securely — released to creative after you confirm delivery</p>
               )}
             </div>
           </div>
@@ -391,16 +391,16 @@ function OrderDetailContent() {
 
         {/* Rating */}
         {canRate && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+            <h2 className="font-bold text-white mb-1">
               Rate {isTailor ? 'this customer' : 'this creative'}
             </h2>
-            <p className="text-sm text-gray-500 mb-4">Your feedback helps build trust on the platform</p>
+            <p className="text-sm text-zinc-500 mb-4">Your feedback helps build trust on the platform</p>
             <div className="mb-4">
               <StarRating value={ratingVal} onChange={setRatingVal} size="lg" />
             </div>
             <textarea
-              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
+              className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
               placeholder="Leave a comment (optional)"
               rows={3}
               value={ratingComment}
@@ -411,7 +411,7 @@ function OrderDetailContent() {
         )}
 
         {myRating && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-2 text-green-800 text-sm">
+          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 flex items-center gap-2 text-green-800 text-sm">
             <CheckCircle size={16} /> You rated this order {myRating.rating}/5 stars
           </div>
         )}
@@ -423,7 +423,7 @@ function OrderDetailContent() {
 export default function OrderDetailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
       </div>
     }>

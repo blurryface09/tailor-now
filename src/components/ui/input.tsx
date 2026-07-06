@@ -13,16 +13,16 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+          <label className="block text-sm font-medium text-zinc-300 mb-1.5">{label}</label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">{icon}</div>
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600">{icon}</div>
           )}
           <input
             ref={ref}
             className={cn(
-              'w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all',
+              'w-full rounded-xl border border-white/[0.1] bg-white px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all',
               icon && 'pl-10',
               error && 'border-red-400 focus:ring-red-400',
               className

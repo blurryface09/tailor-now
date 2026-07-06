@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4">
       <div className="w-full max-w-md page-enter">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex mb-6 justify-center">
@@ -40,18 +40,18 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl shadow-sm border border-white/[0.08] p-8">
           {sent ? (
             <div className="text-center">
               <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <CheckCircle size={28} className="text-green-600" />
+                <CheckCircle size={28} className="text-green-400" />
               </div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Check your email</h1>
-              <p className="text-sm text-gray-500 mb-1">
+              <h1 className="text-xl font-bold text-white mb-2">Check your email</h1>
+              <p className="text-sm text-zinc-500 mb-1">
                 We sent a password reset link to
               </p>
-              <p className="text-sm font-semibold text-gray-800 mb-6">{email}</p>
-              <p className="text-xs text-gray-400 mb-6">
+              <p className="text-sm font-semibold text-zinc-100 mb-6">{email}</p>
+              <p className="text-xs text-zinc-600 mb-6">
                 Didn't receive it? Check your spam folder, or{' '}
                 <button
                   onClick={() => setSent(false)}
@@ -73,8 +73,8 @@ export default function ForgotPasswordPage() {
               <div className="w-12 h-12 bg-violet-100 rounded-2xl flex items-center justify-center mb-4">
                 <Mail size={24} className="text-violet-700" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Forgot password?</h1>
-              <p className="text-sm text-gray-500 mb-6">
+              <h1 className="text-2xl font-bold text-white mb-1">Forgot password?</h1>
+              <p className="text-sm text-zinc-500 mb-6">
                 Enter your email and we'll send you a reset link.
               </p>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -91,9 +91,9 @@ export default function ForgotPasswordPage() {
                   Send Reset Link
                 </Button>
               </form>
-              <p className="text-center text-sm text-gray-500 mt-5">
+              <p className="text-center text-sm text-zinc-500 mt-5">
                 Remember your password?{' '}
-                <Link href="/login" className="text-violet-700 font-medium hover:underline">
+                <Link href="/login" className="text-violet-400 font-medium hover:underline">
                   Sign in
                 </Link>
               </p>

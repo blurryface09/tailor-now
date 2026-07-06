@@ -101,27 +101,27 @@ export default function AdminOnboardTailorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/admin" className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500">
+          <Link href="/admin" className="p-2 rounded-xl hover:bg-white/[0.06] transition-colors text-zinc-500">
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Onboard a Creative</h1>
-            <p className="text-sm text-gray-500">Find a registered user and set them up as a verified creative</p>
+            <h1 className="text-2xl font-bold text-white">Onboard a Creative</h1>
+            <p className="text-sm text-zinc-500">Find a registered user and set them up as a verified creative</p>
           </div>
         </div>
 
         {done ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-12 text-center">
             <CheckCircle size={56} className="text-green-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Creative onboarded!</h2>
-            <p className="text-gray-500 text-sm mb-6">{foundUser?.full_name} is now a verified creative on TailorNow.</p>
+            <h2 className="text-xl font-bold text-white mb-2">Creative onboarded!</h2>
+            <p className="text-zinc-500 text-sm mb-6">{foundUser?.full_name} is now a verified creative on TailorNow.</p>
             <div className="flex justify-center gap-3">
               <button onClick={() => { setDone(false); setFoundUser(null); setEmailSearch(''); setForm({ business_name: '', bio: '', city: '', state: '', address: '', specialties: [], delivery_types: [], response_time_hours: '2' }) }}
-                className="px-5 py-2.5 text-sm font-medium border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                className="px-5 py-2.5 text-sm font-medium border border-white/[0.1] rounded-xl hover:bg-white/[0.06] transition-colors">
                 Onboard another
               </button>
               <Link href="/admin/tailors" className="px-5 py-2.5 text-sm font-semibold bg-violet-700 text-white rounded-xl hover:bg-violet-800 transition-colors">
@@ -132,12 +132,12 @@ export default function AdminOnboardTailorPage() {
         ) : (
           <div className="space-y-5">
             {/* Step 1: Find user */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6">
-              <h2 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
+            <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+              <h2 className="font-bold text-white mb-1 flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-violet-700 text-white text-xs flex items-center justify-center font-bold">1</span>
                 Find the user account
               </h2>
-              <p className="text-sm text-gray-500 mb-4">The person must have already signed up on TailorNow.</p>
+              <p className="text-sm text-zinc-500 mb-4">The person must have already signed up on TailorNow.</p>
 
               <div className="flex gap-3">
                 <div className="flex-1">
@@ -158,14 +158,14 @@ export default function AdminOnboardTailorPage() {
               </div>
 
               {notFound && (
-                <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+                <div className="mt-3 p-3 bg-red-500/10 border border-red-200 rounded-xl text-sm text-red-400">
                   No account found with that email. Ask them to sign up at <strong>tailornow.com/signup</strong> first.
                 </div>
               )}
 
               {foundUser && (
-                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                  <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
+                <div className="mt-3 p-3 bg-green-500/10 border border-green-200 rounded-xl flex items-center gap-3">
+                  <CheckCircle size={18} className="text-green-400 flex-shrink-0" />
                   <div>
                     <p className="text-sm font-semibold text-green-900">{foundUser.full_name}</p>
                     <p className="text-xs text-green-700">{foundUser.email}</p>
@@ -176,12 +176,12 @@ export default function AdminOnboardTailorPage() {
 
             {/* Step 2: Tailor profile details */}
             {foundUser && (
-              <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
-                <h2 className="font-bold text-gray-900 flex items-center gap-2">
+              <form onSubmit={handleSubmit} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-5">
+                <h2 className="font-bold text-white flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-violet-700 text-white text-xs flex items-center justify-center font-bold">2</span>
                   Set up their creative profile
                 </h2>
-                <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                <p className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl px-3 py-2">
                   This profile will be auto-verified. The creative can update their bio, portfolio and pricing after logging in.
                 </p>
 
@@ -202,20 +202,20 @@ export default function AdminOnboardTailorPage() {
                   onChange={e => setForm(f => ({ ...f, response_time_hours: e.target.value }))} />
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Bio (optional)</label>
-                  <textarea className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Bio (optional)</label>
+                  <textarea className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
                     rows={3} placeholder="Short description of the creative's work and experience..."
                     value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Services offered *</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">Services offered *</label>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(SERVICE_LABELS).map(([k, v]) => (
                       <button key={k} type="button"
                         onClick={() => setForm(f => ({ ...f, specialties: toggle(f.specialties, k) }))}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border-2 transition-all ${
-                          form.specialties.includes(k) ? 'border-violet-600 bg-violet-50 text-violet-700 font-medium' : 'border-gray-200 text-gray-600 hover:border-violet-300'
+                          form.specialties.includes(k) ? 'border-violet-600 bg-violet-50 text-violet-400 font-medium' : 'border-white/[0.1] text-zinc-400 hover:border-violet-300'
                         }`}>
                         {SERVICE_ICONS[k]} {v}
                         {form.specialties.includes(k) && <CheckCircle size={12} className="text-violet-600" />}
@@ -225,7 +225,7 @@ export default function AdminOnboardTailorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">How they work with customers *</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-2">How they work with customers *</label>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { val: 'pickup_delivery', icon: '🚚', label: 'Pickup & Delivery' },
@@ -234,7 +234,7 @@ export default function AdminOnboardTailorPage() {
                       <button key={opt.val} type="button"
                         onClick={() => setForm(f => ({ ...f, delivery_types: toggle(f.delivery_types, opt.val) }))}
                         className={`p-3 rounded-xl border-2 text-left flex items-center gap-2 transition-all ${
-                          form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50 text-violet-700' : 'border-gray-200 text-gray-600 hover:border-violet-300'
+                          form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50 text-violet-700' : 'border-white/[0.1] text-zinc-400 hover:border-violet-300'
                         }`}>
                         <span className="text-lg">{opt.icon}</span>
                         <span className="text-sm font-medium">{opt.label}</span>

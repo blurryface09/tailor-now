@@ -13,7 +13,7 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string }> = {
   payment:      { icon: <CreditCard size={16} />, color: 'bg-green-100 text-green-700' },
   post_like:    { icon: <Heart size={16} />, color: 'bg-pink-100 text-pink-700' },
   post_comment: { icon: <MessageSquare size={16} />, color: 'bg-blue-100 text-blue-700' },
-  new_follower: { icon: <UserPlus size={16} />, color: 'bg-amber-100 text-amber-700' },
+  new_follower: { icon: <UserPlus size={16} />, color: 'bg-amber-100 text-amber-400' },
   new_message:  { icon: <MessageSquare size={16} />, color: 'bg-violet-100 text-violet-700' },
 }
 
@@ -61,12 +61,12 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
               <Bell size={22} className="text-violet-700" /> Notifications
             </h1>
             {unreadCount > 0 && (
@@ -80,12 +80,12 @@ export default function NotificationsPage() {
             <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
           </div>
         ) : notifications.length === 0 ? (
-          <div className="text-center py-24 bg-white rounded-2xl border border-gray-100">
+          <div className="text-center py-24 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08]">
             <div className="w-16 h-16 bg-violet-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Bell size={28} className="text-violet-300" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">No notifications yet</h3>
-            <p className="text-sm text-gray-500">We'll let you know when something happens</p>
+            <h3 className="font-semibold text-white mb-1">No notifications yet</h3>
+            <p className="text-sm text-zinc-500">We'll let you know when something happens</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -93,7 +93,7 @@ export default function NotificationsPage() {
               const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.order_update
               const href = getLink(n)
               const itemClass = `flex items-start gap-4 p-4 rounded-2xl border transition-all ${
-                !n.read ? 'bg-violet-50 border-violet-100' : 'bg-white border-gray-100 hover:border-gray-200'
+                !n.read ? 'bg-violet-50 border-violet-500/20' : 'bg-white border-white/[0.08] hover:border-white/[0.1]'
               }`
               const inner = (
                 <>
@@ -101,9 +101,9 @@ export default function NotificationsPage() {
                     {cfg.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">{n.title}</p>
-                    {n.body && <p className="text-sm text-gray-500 mt-0.5">{n.body}</p>}
-                    <p className="text-xs text-gray-400 mt-1">{formatRelativeTime(n.created_at)}</p>
+                    <p className="text-sm font-semibold text-white">{n.title}</p>
+                    {n.body && <p className="text-sm text-zinc-500 mt-0.5">{n.body}</p>}
+                    <p className="text-xs text-zinc-600 mt-1">{formatRelativeTime(n.created_at)}</p>
                   </div>
                   {!n.read && (
                     <div className="w-2 h-2 rounded-full bg-violet-600 flex-shrink-0 mt-2" />

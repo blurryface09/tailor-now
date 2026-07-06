@@ -32,14 +32,14 @@ export default function LandingPage() {
       <nav className="fixed top-0 z-50 w-full bg-black/60 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
           <Link href="/"><Logo size="sm" variant="full" dark /></Link>
-          <div className="hidden md:flex items-center gap-7 text-sm text-gray-400">
+          <div className="hidden md:flex items-center gap-7 text-sm text-zinc-600">
             <Link href="/browse" className="hover:text-white transition-colors">Find Creatives</Link>
             <Link href="/signup?as=tailor" className="hover:text-white transition-colors">Join as Creative</Link>
             <a href="#how-it-works" className="hover:text-white transition-colors">How it works</a>
             <Link href="/hall-of-fame" className="hover:text-amber-400 transition-colors">🏆 Hall of Fame</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
+            <Link href="/login" className="text-sm font-medium text-zinc-600 hover:text-white transition-colors px-3 py-2 rounded-xl hover:bg-white/5">
               Log in
             </Link>
             <Link href="/signup" className="bg-amber-400 hover:bg-amber-500 text-black text-sm font-black px-5 py-2.5 rounded-xl transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-amber-500/25">
@@ -61,7 +61,7 @@ export default function LandingPage() {
 
           {/* Text side */}
           <div className="order-2 lg:order-1 flex flex-col justify-center">
-            <div className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/10 rounded-full px-4 py-2 text-sm mb-8 w-fit backdrop-blur-sm text-gray-300">
+            <div className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/10 rounded-full px-4 py-2 text-sm mb-8 w-fit backdrop-blur-sm text-zinc-600">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0" />
               1,200+ creatives online right now
             </div>
@@ -72,7 +72,7 @@ export default function LandingPage() {
               Marketplace
             </h1>
 
-            <p className="text-lg text-gray-400 max-w-lg mb-10 leading-relaxed">
+            <p className="text-lg text-zinc-600 max-w-lg mb-10 leading-relaxed">
               Book verified tailors and designers for custom outfits, bridal wear, alterations and more. Fast, reliable, delivered to your door.
             </p>
 
@@ -91,7 +91,7 @@ export default function LandingPage() {
               {stats.map(s => (
                 <div key={s.label}>
                   <div className="text-xl font-black text-amber-400">{s.value}</div>
-                  <div className="text-xs text-gray-600 mt-0.5 leading-tight">{s.label}</div>
+                  <div className="text-xs text-zinc-400 mt-0.5 leading-tight">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -111,12 +111,12 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               </div>
               {/* Floating verified card */}
-              <div className="absolute bottom-12 right-0 lg:-right-5 bg-white rounded-2xl px-4 py-3 shadow-2xl z-20 border border-gray-100">
+              <div className="absolute bottom-12 right-0 lg:-right-5 bg-white/[0.05] backdrop-blur-xl rounded-2xl px-4 py-3 shadow-2xl z-20 border border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-black text-sm flex-shrink-0">A</div>
                   <div>
-                    <p className="text-xs font-bold text-gray-900 whitespace-nowrap">Adaeze Couture</p>
-                    <p className="text-xs text-gray-500">⭐ 4.9 · 312 orders</p>
+                    <p className="text-xs font-bold text-white whitespace-nowrap">Adaeze Couture</p>
+                    <p className="text-xs text-zinc-500">⭐ 4.9 · 312 orders</p>
                   </div>
                   <div className="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center ml-1 flex-shrink-0">
                     <span className="text-white text-[10px] font-bold">✓</span>
@@ -125,7 +125,7 @@ export default function LandingPage() {
               </div>
               {/* Floating order notification */}
               <div className="absolute top-8 -left-2 lg:-left-5 bg-white/10 backdrop-blur-xl rounded-2xl px-3.5 py-2.5 shadow-xl z-20 border border-white/20">
-                <p className="text-xs text-gray-300 font-medium">📦 Order update</p>
+                <p className="text-xs text-zinc-600 font-medium">📦 Order update</p>
                 <p className="text-xs text-white font-bold mt-0.5">Your outfit is ready! 🎉</p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function LandingPage() {
       {/* ── Services band ──────────────────────────── */}
       <section className="py-20 border-y border-white/[0.06] bg-white/[0.015]">
         <div className="max-w-7xl mx-auto px-5">
-          <p className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-10 text-center">What you can order</p>
+          <p className="text-xs font-bold tracking-widest text-zinc-500 uppercase mb-10 text-center">What you can order</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: '👗', name: 'Custom Outfits', desc: 'Ankara, Aso-Oke, contemporary', img: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&h=300&fit=crop&q=75' },
@@ -151,7 +151,7 @@ export default function LandingPage() {
                 <div className="absolute bottom-0 left-0 p-5">
                   <div className="text-2xl mb-1">{s.icon}</div>
                   <p className="font-bold text-white text-sm">{s.name}</p>
-                  <p className="text-xs text-gray-300 mt-0.5">{s.desc}</p>
+                  <p className="text-xs text-zinc-600 mt-0.5">{s.desc}</p>
                 </div>
               </Link>
             ))}
@@ -175,7 +175,7 @@ export default function LandingPage() {
                 </div>
                 <div className="absolute top-5 right-5 text-4xl font-black text-white/[0.04] select-none">{step.n}</div>
                 <h3 className="font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -195,7 +195,7 @@ export default function LandingPage() {
                 className="bg-white/[0.04] border border-white/10 rounded-3xl p-7 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-300 group hover:-translate-y-1">
                 <div className="text-3xl mb-4 group-hover:scale-110 transition-transform duration-300">{f.icon}</div>
                 <h3 className="font-bold text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -242,13 +242,13 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-10 mb-10">
             <div className="md:col-span-2">
               <div className="mb-4"><Logo size="md" variant="full" dark /></div>
-              <p className="text-sm text-gray-600 leading-relaxed max-w-xs">
+              <p className="text-sm text-zinc-400 leading-relaxed max-w-xs">
                 Nigeria&apos;s premier fashion marketplace. Connecting skilled creatives with customers who deserve a perfect fit.
               </p>
             </div>
             <div>
               <h4 className="text-white font-bold text-sm mb-5">Platform</h4>
-              <ul className="space-y-3 text-sm text-gray-600">
+              <ul className="space-y-3 text-sm text-zinc-400">
                 <li><Link href="/browse" className="hover:text-white transition-colors">Find Creatives</Link></li>
                 <li><Link href="/orders/asoebi" className="hover:text-white transition-colors">Asoebi Group Orders</Link></li>
                 <li><Link href="/signup?as=tailor" className="hover:text-white transition-colors">Join as Creative</Link></li>
@@ -258,15 +258,15 @@ export default function LandingPage() {
             </div>
             <div>
               <h4 className="text-white font-bold text-sm mb-5">Legal</h4>
-              <ul className="space-y-3 text-sm text-gray-600">
+              <ul className="space-y-3 text-sm text-zinc-400">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
               </ul>
             </div>
           </div>
           <div className="border-t border-white/[0.06] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-gray-700">© 2026 TailorNow. All rights reserved.</p>
-            <p className="text-xs text-gray-700">Built by <span className="text-violet-400 font-semibold">Folub and Samuel Labs</span></p>
+            <p className="text-xs text-zinc-300">© 2026 TailorNow. All rights reserved.</p>
+            <p className="text-xs text-zinc-300">Built by <span className="text-violet-400 font-semibold">Folub and Samuel Labs</span></p>
           </div>
         </div>
       </footer>

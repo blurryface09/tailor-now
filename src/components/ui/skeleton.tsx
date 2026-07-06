@@ -6,7 +6,7 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function TailorCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl border border-white/[0.08] overflow-hidden">
       <Skeleton className="h-32 w-full rounded-none" />
       <div className="p-4 space-y-3">
         <Skeleton className="h-5 w-3/4" />
@@ -23,7 +23,7 @@ export function TailorCardSkeleton() {
 
 export function OrderCardSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-3">
+    <div className="bg-white rounded-2xl border border-white/[0.08] p-5 space-y-3">
       <div className="flex items-center justify-between">
         <Skeleton className="h-5 w-32" />
         <Skeleton className="h-6 w-20 rounded-full" />
@@ -37,7 +37,7 @@ export function OrderCardSkeleton() {
 export function ProfileSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-white/[0.08] overflow-hidden">
         <Skeleton className="h-40 w-full rounded-none" />
         <div className="p-6 space-y-4">
           <div className="flex gap-4 items-end -mt-10">

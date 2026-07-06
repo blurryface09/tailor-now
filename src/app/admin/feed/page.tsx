@@ -90,13 +90,13 @@ export default function AdminFeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Feed Posts</h1>
-            <p className="text-sm text-gray-500 mt-0.5">Post fashion inspiration, street wear, Ankara — anything that gets people excited</p>
+            <h1 className="text-2xl font-bold text-white">Feed Posts</h1>
+            <p className="text-sm text-zinc-500 mt-0.5">Post fashion inspiration, street wear, Ankara — anything that gets people excited</p>
           </div>
           {!adding && (
             <button
@@ -109,18 +109,18 @@ export default function AdminFeedPage() {
 
         {/* Compose form */}
         {adding && (
-          <form onSubmit={savePost} className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 space-y-4">
+          <form onSubmit={savePost} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 mb-6 space-y-4">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="font-semibold text-gray-900">New inspiration post</h2>
+              <h2 className="font-semibold text-white">New inspiration post</h2>
               <button type="button" onClick={reset}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
+                className="p-1.5 rounded-lg hover:bg-white/[0.06] text-zinc-600 transition-colors">
                 <X size={16} />
               </button>
             </div>
 
             {/* Image upload */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
                 Photos
               </label>
               <ImageUpload
@@ -136,7 +136,7 @@ export default function AdminFeedPage() {
 
             {/* Content tag */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
                 Content Tag (optional)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -148,7 +148,7 @@ export default function AdminFeedPage() {
                     className={`px-3 py-1.5 rounded-full text-xs font-semibold border-2 transition-all ${
                       contentTag === t.value
                         ? 'border-violet-600 bg-violet-50 text-violet-700'
-                        : 'border-gray-200 text-gray-600 hover:border-violet-300'
+                        : 'border-white/[0.1] text-zinc-400 hover:border-violet-300'
                     }`}>
                     {t.label}
                   </button>
@@ -158,7 +158,7 @@ export default function AdminFeedPage() {
 
             {/* Caption */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1.5">
                 Caption
               </label>
               <textarea
@@ -166,7 +166,7 @@ export default function AdminFeedPage() {
                 onChange={e => setCaption(e.target.value)}
                 rows={4}
                 placeholder="The vibe, the story, the hashtags... make it editorial ✨"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                className="w-full border border-white/[0.1] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
               />
             </div>
 
@@ -179,7 +179,7 @@ export default function AdminFeedPage() {
         {/* Existing posts */}
         <div className="space-y-4">
           {posts.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 text-gray-400">
+            <div className="text-center py-16 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] text-zinc-600">
               <div className="text-4xl mb-3">📸</div>
               <p className="text-sm">No posts yet. Create one above.</p>
             </div>
@@ -188,9 +188,9 @@ export default function AdminFeedPage() {
               const tag = extractTag(post.caption)
               const body = tag ? post.caption?.replace(/^\[.+?\]\n/, '') : post.caption
               return (
-                <div key={post.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div key={post.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-hidden">
                   {post.image_urls?.length > 0 && (
-                    <div className="relative h-56 bg-gray-100 overflow-hidden">
+                    <div className="relative h-56 bg-white/[0.06] overflow-hidden">
                       <img src={post.image_urls[0]} alt="" className="w-full h-full object-cover" />
                       {post.image_urls.length > 1 && (
                         <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
@@ -208,9 +208,9 @@ export default function AdminFeedPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         {body && (
-                          <p className="text-sm text-gray-800 leading-relaxed mb-2">{body}</p>
+                          <p className="text-sm text-zinc-100 leading-relaxed mb-2">{body}</p>
                         )}
-                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <div className="flex items-center gap-4 text-xs text-zinc-600">
                           <span className="flex items-center gap-1"><Heart size={11} /> {post.likes_count ?? 0}</span>
                           <span className="flex items-center gap-1"><MessageSquare size={11} /> {post.comments_count ?? 0}</span>
                           <span>{formatRelativeTime(post.created_at)}</span>
@@ -218,7 +218,7 @@ export default function AdminFeedPage() {
                       </div>
                       <button
                         onClick={() => deletePost(post.id)}
-                        className="p-2 text-red-400 hover:bg-red-50 rounded-xl transition-colors flex-shrink-0">
+                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors flex-shrink-0">
                         <Trash2 size={15} />
                       </button>
                     </div>

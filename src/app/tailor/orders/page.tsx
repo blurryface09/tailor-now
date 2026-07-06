@@ -170,24 +170,24 @@ export default function TailorOrdersPage() {
   const tabs = ['active', 'pending', 'completed']
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Orders</h1>
+        <h1 className="text-2xl font-bold text-white mb-6">Orders</h1>
 
-        <div className="flex gap-1 bg-white rounded-xl border border-gray-100 p-1 mb-6 w-fit">
+        <div className="flex gap-1 bg-white/[0.05] backdrop-blur-xl rounded-xl border border-white/[0.08] p-1 mb-6 w-fit">
           {tabs.map(t => (
             <button key={t} onClick={() => setFilter(t)}
-              className={cn('px-5 py-2 text-sm font-medium rounded-lg capitalize transition-colors', filter === t ? 'bg-violet-700 text-white' : 'text-gray-500 hover:text-gray-700')}>
+              className={cn('px-5 py-2 text-sm font-medium rounded-lg capitalize transition-colors', filter === t ? 'bg-violet-700 text-white' : 'text-zinc-500 hover:text-zinc-300')}>
               {t}
             </button>
           ))}
         </div>
 
         {orders.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+          <div className="text-center py-20 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08]">
             <div className="text-4xl mb-3">📋</div>
-            <p className="text-gray-500">No {filter} orders</p>
+            <p className="text-zinc-500">No {filter} orders</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -199,15 +199,15 @@ export default function TailorOrdersPage() {
               const myCounter = isPending && order.agreed_price && order.agreed_price !== customerOffer
               const waitingForCustomer = myCounter
               return (
-                <div key={order.id} className="bg-white rounded-2xl border border-gray-100 p-5">
+                <div key={order.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold">
+                      <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-400 font-bold">
                         {o.customer?.full_name?.[0]?.toUpperCase() || 'C'}
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-900">{order.title}</p>
-                        <p className="text-sm text-gray-500">{o.customer?.full_name} • {formatDate(order.created_at)}</p>
+                        <p className="font-semibold text-white">{order.title}</p>
+                        <p className="text-sm text-zinc-500">{o.customer?.full_name} • {formatDate(order.created_at)}</p>
                       </div>
                     </div>
                     <span className={`flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
@@ -215,41 +215,41 @@ export default function TailorOrdersPage() {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-3 leading-relaxed">{order.description}</p>
+                  <p className="text-sm text-zinc-400 mb-3 leading-relaxed">{order.description}</p>
 
                   {/* Price negotiation strip */}
                   {isPending && (
-                    <div className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl mb-3 text-sm flex-wrap">
+                    <div className="flex items-center gap-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-3 text-sm flex-wrap">
                       {customerOffer ? (
-                        <span className="text-amber-800">Customer offers <strong>{formatCurrency(customerOffer)}</strong></span>
+                        <span className="text-amber-300">Customer offers <strong>{formatCurrency(customerOffer)}</strong></span>
                       ) : (
-                        <span className="text-amber-700">No price proposed yet</span>
+                        <span className="text-amber-400">No price proposed yet</span>
                       )}
                       {myCounter && (
-                        <span className="text-gray-500">→ Your counter: <strong>{formatCurrency(order.agreed_price!)}</strong> — waiting for customer</span>
+                        <span className="text-zinc-500">→ Your counter: <strong>{formatCurrency(order.agreed_price!)}</strong> — waiting for customer</span>
                       )}
                     </div>
                   )}
                   {order.status === 'accepted' && order.agreed_price && (
-                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-xl mb-3 text-sm">
-                      <CheckCircle size={14} className="text-green-600" />
+                    <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-xl mb-3 text-sm">
+                      <CheckCircle size={14} className="text-green-400" />
                       <span className="text-green-800">Agreed price: <strong>{formatCurrency(order.agreed_price)}</strong></span>
-                      {!order.deposit_paid && <span className="text-green-600 ml-auto">Waiting for payment</span>}
+                      {!order.deposit_paid && <span className="text-green-400 ml-auto">Waiting for payment</span>}
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                  <div className="flex items-center gap-2 text-xs text-zinc-600 mb-3">
                     <span>{order.delivery_type === 'pickup_delivery' ? '🚚 Pickup & Delivery' : '🏪 Visit Shop'}</span>
                     {order.deadline && <span>• Deadline: {formatDate(order.deadline)}</span>}
                   </div>
 
                   <div className="flex items-center gap-2 flex-wrap">
                     <Link href={`/orders/${order.id}`}
-                      className="flex items-center gap-1.5 text-sm text-violet-700 border border-violet-200 px-3 py-2 rounded-xl hover:bg-violet-50 transition-colors">
+                      className="flex items-center gap-1.5 text-sm text-violet-400 border border-violet-500/30 px-3 py-2 rounded-xl hover:bg-violet-500/10 transition-colors">
                       Details <ChevronRight size={13} />
                     </Link>
                     <Link href={`/tailor/chat?order=${order.id}`}
-                      className="text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+                      className="text-sm text-zinc-400 border border-white/[0.1] px-3 py-2 rounded-xl hover:bg-white/[0.06] transition-colors">
                       💬 Chat
                     </Link>
 
@@ -261,7 +261,7 @@ export default function TailorOrdersPage() {
 
                     {isPending && !waitingForCustomer && (
                       <button onClick={() => openQuoteModal(order)}
-                        className="flex items-center gap-1.5 text-sm text-amber-700 border border-amber-200 bg-amber-50 px-3 py-2 rounded-xl hover:bg-amber-100 transition-colors">
+                        className="flex items-center gap-1.5 text-sm text-amber-400 border border-amber-500/20 bg-amber-500/10 px-3 py-2 rounded-xl hover:bg-amber-500/15 transition-colors">
                         <Send size={13} /> Counter
                       </button>
                     )}
@@ -284,7 +284,7 @@ export default function TailorOrdersPage() {
 
                     {isPending && (
                       <button onClick={() => rejectOrder(order.id)}
-                        className="flex items-center gap-1.5 text-sm text-red-500 border border-red-100 px-3 py-2 rounded-xl hover:bg-red-50 transition-colors">
+                        className="flex items-center gap-1.5 text-sm text-red-500 border border-red-500/20 px-3 py-2 rounded-xl hover:bg-red-500/10 transition-colors">
                         <XCircle size={13} /> Reject
                       </button>
                     )}
@@ -299,20 +299,20 @@ export default function TailorOrdersPage() {
       {/* Quote modal */}
       {quoteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setQuoteModal(null)}>
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-            <h2 className="font-bold text-gray-900 text-lg mb-1">Send a counter offer</h2>
-            <p className="text-sm text-gray-500 mb-5">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            <h2 className="font-bold text-white text-lg mb-1">Send a counter offer</h2>
+            <p className="text-sm text-zinc-500 mb-5">
               {quoteModal.currentBudget
                 ? `Customer offered: ${formatCurrency(quoteModal.currentBudget)}`
                 : 'No offer from customer yet'}
             </p>
             <div className="relative mb-5">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm">₦</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 font-medium text-sm">₦</span>
               <input
                 type="number"
                 min="0"
                 placeholder="e.g. 45000"
-                className="w-full pl-8 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-violet-500 focus:outline-none text-lg font-semibold"
+                className="w-full pl-8 pr-4 py-3 rounded-xl border-2 border-white/[0.1] focus:border-violet-500 focus:outline-none text-lg font-semibold"
                 value={quotePrice}
                 onChange={e => setQuotePrice(e.target.value)}
                 autoFocus
@@ -320,7 +320,7 @@ export default function TailorOrdersPage() {
             </div>
             <div className="flex gap-3">
               <button onClick={() => setQuoteModal(null)}
-                className="flex-1 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                className="flex-1 py-2.5 text-sm font-medium text-zinc-400 border border-white/[0.1] rounded-xl hover:bg-white/[0.06] transition-colors">
                 Cancel
               </button>
               <Button className="flex-1" loading={sendingQuote}

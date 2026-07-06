@@ -35,7 +35,7 @@ export default async function TailorProfilePage({ params }: { params: Promise<{ 
   const isOwner = user?.id === tailor.user_id
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <TailorProfileClient
         tailor={tailor}

@@ -14,7 +14,7 @@ export default async function BroadcastPage() {
   if (profile?.role !== 'admin') redirect('/browse')
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <BroadcastClient />
     </div>

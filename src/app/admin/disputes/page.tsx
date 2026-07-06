@@ -26,11 +26,11 @@ type Dispute = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  open:               'text-red-700 bg-red-50 border-red-200',
+  open:               'text-red-400 bg-red-500/10 border-red-200',
   under_review:       'text-blue-700 bg-blue-50 border-blue-200',
-  resolved_customer:  'text-green-700 bg-green-50 border-green-200',
-  resolved_tailor:    'text-violet-700 bg-violet-50 border-violet-200',
-  refunded:           'text-amber-700 bg-amber-50 border-amber-200',
+  resolved_customer:  'text-green-700 bg-green-500/10 border-green-200',
+  resolved_tailor:    'text-violet-400 bg-violet-50 border-violet-200',
+  refunded:           'text-amber-400 bg-amber-500/10 border-amber-500/20',
 }
 
 const RESOLUTIONS = [
@@ -96,100 +96,100 @@ export default function AdminDisputesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-8 page-enter">
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-black text-gray-900">Disputes</h1>
-            <p className="text-sm text-gray-500 mt-1">Mediate order disputes between customers and creatives</p>
+            <h1 className="text-2xl font-black text-white">Disputes</h1>
+            <p className="text-sm text-zinc-500 mt-1">Mediate order disputes between customers and creatives</p>
           </div>
           {open > 0 && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full">
-              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <span className="text-sm font-semibold text-red-700">{open} open</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/10 border border-red-200 rounded-full">
+              <div className="w-2 h-2 bg-red-500/100 rounded-full animate-pulse" />
+              <span className="text-sm font-semibold text-red-400">{open} open</span>
             </div>
           )}
         </div>
 
         {disputes.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center shadow-sm">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-12 text-center shadow-sm">
             <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <CheckCircle size={24} className="text-green-600" />
+              <CheckCircle size={24} className="text-green-400" />
             </div>
-            <p className="font-bold text-gray-900">No disputes</p>
-            <p className="text-sm text-gray-400 mt-1">All orders are running smoothly.</p>
+            <p className="font-bold text-white">No disputes</p>
+            <p className="text-sm text-zinc-600 mt-1">All orders are running smoothly.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {disputes.map(dispute => (
-              <div key={dispute.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div key={dispute.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-sm overflow-hidden">
                 <button
                   onClick={() => setExpanded(expanded === dispute.id ? null : dispute.id)}
-                  className="w-full text-left px-6 py-4 flex items-start justify-between hover:bg-gray-50/50 transition-colors"
+                  className="w-full text-left px-6 py-4 flex items-start justify-between hover:bg-white/[0.06]/50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${STATUS_COLORS[dispute.status] || STATUS_COLORS.open}`}>
                         <AlertTriangle size={11} /> {dispute.status.replace('_', ' ')}
                       </span>
-                      <span className="text-sm font-bold text-gray-900 truncate">{dispute.order?.title}</span>
+                      <span className="text-sm font-bold text-white truncate">{dispute.order?.title}</span>
                     </div>
-                    <div className="flex items-center gap-4 mt-1.5 text-xs text-gray-500">
+                    <div className="flex items-center gap-4 mt-1.5 text-xs text-zinc-500">
                       <span className="flex items-center gap-1"><User size={11} /> Raised by: {dispute.raiser?.full_name} ({dispute.raiser?.role})</span>
                       <span>{new Date(dispute.created_at).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 truncate">{dispute.reason}</p>
+                    <p className="text-xs text-zinc-500 mt-1 truncate">{dispute.reason}</p>
                   </div>
-                  <ChevronDown size={16} className={`text-gray-400 flex-shrink-0 ml-3 mt-1 transition-transform ${expanded === dispute.id ? 'rotate-180' : ''}`} />
+                  <ChevronDown size={16} className={`text-zinc-600 flex-shrink-0 ml-3 mt-1 transition-transform ${expanded === dispute.id ? 'rotate-180' : ''}`} />
                 </button>
 
                 {expanded === dispute.id && (
-                  <div className="border-t border-gray-100 px-6 py-5 space-y-5">
+                  <div className="border-t border-white/[0.08] px-6 py-5 space-y-5">
                     {/* Order info */}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Customer</p>
-                        <p className="font-medium text-gray-900">{dispute.order?.customer?.full_name}</p>
-                        <p className="text-xs text-gray-500">{dispute.order?.customer?.email}</p>
+                        <p className="text-xs text-zinc-600 mb-1 font-semibold uppercase tracking-wider">Customer</p>
+                        <p className="font-medium text-white">{dispute.order?.customer?.full_name}</p>
+                        <p className="text-xs text-zinc-500">{dispute.order?.customer?.email}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Creative</p>
-                        <p className="font-medium text-gray-900">{dispute.order?.tailor?.business_name}</p>
+                        <p className="text-xs text-zinc-600 mb-1 font-semibold uppercase tracking-wider">Creative</p>
+                        <p className="font-medium text-white">{dispute.order?.tailor?.business_name}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Order Value</p>
+                        <p className="text-xs text-zinc-600 mb-1 font-semibold uppercase tracking-wider">Order Value</p>
                         <p className="font-bold text-violet-700">₦{(dispute.order?.agreed_price || 0).toLocaleString()}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400 mb-1 font-semibold uppercase tracking-wider">Amount Paid</p>
+                        <p className="text-xs text-zinc-600 mb-1 font-semibold uppercase tracking-wider">Amount Paid</p>
                         <p className="font-bold text-green-700">₦{(dispute.order?.agreed_price || 0).toLocaleString()}</p>
                       </div>
                     </div>
 
                     {/* Complaint */}
-                    <div className="bg-red-50 rounded-xl p-4">
-                      <p className="text-xs font-semibold text-red-700 mb-1">Reason: {dispute.reason}</p>
-                      <p className="text-sm text-red-800 leading-relaxed">{dispute.description}</p>
+                    <div className="bg-red-500/10 rounded-xl p-4">
+                      <p className="text-xs font-semibold text-red-400 mb-1">Reason: {dispute.reason}</p>
+                      <p className="text-sm text-red-300 leading-relaxed">{dispute.description}</p>
                     </div>
 
                     {/* Admin notes */}
                     {['open','under_review'].includes(dispute.status) && (
                       <div>
-                        <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Admin notes (optional)</label>
+                        <label className="text-xs font-semibold text-zinc-400 mb-1.5 block">Admin notes (optional)</label>
                         <textarea
                           value={notes[dispute.id] || ''}
                           onChange={e => setNotes(n => ({ ...n, [dispute.id]: e.target.value }))}
                           rows={3}
                           placeholder="Internal notes about the resolution..."
-                          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none"
+                          className="w-full border border-white/[0.1] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none"
                         />
                       </div>
                     )}
@@ -213,9 +213,9 @@ export default function AdminDisputesPage() {
                             disabled={!!updating}
                             onClick={() => resolve(dispute.id, r.value)}
                             className={`px-4 py-2 text-sm rounded-xl font-semibold transition-colors disabled:opacity-50 ${
-                              r.value === 'resolved_customer' ? 'bg-green-50 text-green-700 hover:bg-green-100' :
-                              r.value === 'resolved_tailor'   ? 'bg-violet-50 text-violet-700 hover:bg-violet-100' :
-                              'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                              r.value === 'resolved_customer' ? 'bg-green-500/10 text-green-700 hover:bg-green-100' :
+                              r.value === 'resolved_tailor'   ? 'bg-violet-50 text-violet-400 hover:bg-violet-100' :
+                              'bg-amber-500/10 text-amber-400 hover:bg-amber-100'
                             }`}>
                             {updating === dispute.id ? 'Saving...' : r.label}
                           </button>
@@ -224,9 +224,9 @@ export default function AdminDisputesPage() {
                     )}
 
                     {dispute.admin_notes && (
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs font-semibold text-gray-500 mb-0.5">Admin notes</p>
-                        <p className="text-sm text-gray-700">{dispute.admin_notes}</p>
+                      <div className="bg-[#09090B] rounded-xl p-3">
+                        <p className="text-xs font-semibold text-zinc-500 mb-0.5">Admin notes</p>
+                        <p className="text-sm text-zinc-300">{dispute.admin_notes}</p>
                       </div>
                     )}
                   </div>

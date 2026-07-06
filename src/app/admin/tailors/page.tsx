@@ -31,7 +31,7 @@ export default async function AdminTailorsPage() {
   const enriched = (tailors || []).map(t => ({ ...t, portfolio_count: countMap[t.id] || 0 }))
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <AdminTailorsClient tailors={enriched} />
     </div>

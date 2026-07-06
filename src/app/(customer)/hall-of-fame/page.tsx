@@ -37,7 +37,7 @@ export default async function HallOfFamePage() {
   const list = creatives.slice(3)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
 
       {/* Hero */}
@@ -60,9 +60,9 @@ export default async function HallOfFamePage() {
 
       <div className="max-w-5xl mx-auto px-4 py-12">
         {creatives.length === 0 ? (
-          <div className="text-center py-24 text-gray-400">
+          <div className="text-center py-24 text-zinc-600">
             <div className="text-5xl mb-4">🏆</div>
-            <p className="text-lg font-medium text-gray-600">No verified creatives yet</p>
+            <p className="text-lg font-medium text-zinc-400">No verified creatives yet</p>
             <p className="text-sm mt-1">Be the first to earn a spot on the leaderboard!</p>
           </div>
         ) : (
@@ -70,7 +70,7 @@ export default async function HallOfFamePage() {
             {/* ── Podium top 3 ── */}
             {podium.length > 0 && (
               <div className="mb-12">
-                <h2 className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">
+                <h2 className="text-center text-xs font-bold uppercase tracking-widest text-zinc-600 mb-8">
                   Top Creatives
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -108,9 +108,9 @@ export default async function HallOfFamePage() {
 
                         <span className="text-3xl mb-1">{meta.medal}</span>
 
-                        <h3 className="font-bold text-gray-900 text-lg leading-tight">{c.business_name}</h3>
+                        <h3 className="font-bold text-white text-lg leading-tight">{c.business_name}</h3>
                         {c.city && (
-                          <p className="text-xs text-gray-500 flex items-center justify-center gap-1 mt-1">
+                          <p className="text-xs text-zinc-500 flex items-center justify-center gap-1 mt-1">
                             <MapPin size={11} /> {c.city}, {c.state}
                           </p>
                         )}
@@ -119,10 +119,10 @@ export default async function HallOfFamePage() {
                           <span className="flex items-center gap-1 text-sm font-semibold text-amber-600">
                             <Star size={14} className="fill-amber-400 stroke-amber-400" />
                             {c.avg_rating?.toFixed(1) ?? '—'}
-                            <span className="font-normal text-gray-400 text-xs">({c.total_reviews ?? 0})</span>
+                            <span className="font-normal text-zinc-600 text-xs">({c.total_reviews ?? 0})</span>
                           </span>
-                          <span className="text-gray-300">·</span>
-                          <span className="flex items-center gap-1 text-xs text-gray-500">
+                          <span className="text-zinc-600">·</span>
+                          <span className="flex items-center gap-1 text-xs text-zinc-500">
                             <Package size={12} /> {c.total_orders ?? 0} orders
                           </span>
                         </div>
@@ -141,7 +141,7 @@ export default async function HallOfFamePage() {
                         {(c.specialties ?? []).slice(0, 2).length > 0 && (
                           <div className="flex flex-wrap justify-center gap-1 mt-3">
                             {(c.specialties ?? []).slice(0, 2).map((s: string) => (
-                              <span key={s} className="text-[11px] bg-white/70 text-gray-600 px-2 py-0.5 rounded-full border border-gray-200">
+                              <span key={s} className="text-[11px] bg-white/70 text-zinc-400 px-2 py-0.5 rounded-full border border-white/[0.1]">
                                 {SERVICE_LABELS[s as keyof typeof SERVICE_LABELS] ?? s}
                               </span>
                             ))}
@@ -156,10 +156,10 @@ export default async function HallOfFamePage() {
 
             {/* ── Ranked list #4–20 ── */}
             {list.length > 0 && (
-              <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+              <div className="bg-white/[0.05] backdrop-blur-xl rounded-3xl border border-white/[0.08] overflow-hidden">
+                <div className="px-6 py-4 border-b border-white/[0.08] flex items-center gap-2">
                   <Trophy size={16} className="text-violet-600" />
-                  <h2 className="font-bold text-gray-900">Top 20 Leaderboard</h2>
+                  <h2 className="font-bold text-white">Top 20 Leaderboard</h2>
                 </div>
                 <div className="divide-y divide-gray-50">
                   {list.map((c, i) => {
@@ -171,14 +171,14 @@ export default async function HallOfFamePage() {
 
                     return (
                       <Link key={c.id} href={`/tailors/${c.id}`}
-                        className="flex items-center gap-4 px-6 py-4 hover:bg-violet-50/50 transition-colors group">
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-violet-500/10/50 transition-colors group">
                         {/* Rank */}
                         <div className="w-8 text-center flex-shrink-0">
-                          <span className="text-lg font-bold text-gray-300">#{rank}</span>
+                          <span className="text-lg font-bold text-zinc-600">#{rank}</span>
                         </div>
 
                         {/* Avatar */}
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100">
+                        <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/[0.06]">
                           {avatar ? (
                             <Image src={avatar} alt={profile?.full_name ?? c.business_name} fill className="object-cover" />
                           ) : (
@@ -191,7 +191,7 @@ export default async function HallOfFamePage() {
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-gray-900 text-sm truncate group-hover:text-violet-700 transition-colors">
+                            <p className="font-semibold text-white text-sm truncate group-hover:text-violet-400 transition-colors">
                               {c.business_name}
                             </p>
                             {c.is_founder && (
@@ -202,12 +202,12 @@ export default async function HallOfFamePage() {
                           </div>
                           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                             {c.city && (
-                              <span className="text-xs text-gray-400 flex items-center gap-0.5">
+                              <span className="text-xs text-zinc-600 flex items-center gap-0.5">
                                 <MapPin size={10} /> {c.city}
                               </span>
                             )}
                             {(c.specialties ?? []).slice(0, 2).map((s: string) => (
-                              <span key={s} className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">
+                              <span key={s} className="text-[10px] bg-white/[0.06] text-zinc-500 px-1.5 py-0.5 rounded-full">
                                 {SERVICE_LABELS[s as keyof typeof SERVICE_LABELS] ?? s}
                               </span>
                             ))}
@@ -221,11 +221,11 @@ export default async function HallOfFamePage() {
                               <Star size={13} className="fill-amber-400 stroke-amber-400" />
                               {c.avg_rating?.toFixed(1) ?? '—'}
                             </div>
-                            <div className="text-[10px] text-gray-400">{c.total_reviews ?? 0} reviews</div>
+                            <div className="text-[10px] text-zinc-600">{c.total_reviews ?? 0} reviews</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-semibold text-gray-700">{c.total_orders ?? 0}</div>
-                            <div className="text-[10px] text-gray-400">orders</div>
+                            <div className="text-sm font-semibold text-zinc-300">{c.total_orders ?? 0}</div>
+                            <div className="text-[10px] text-zinc-600">orders</div>
                           </div>
                           <span className={cn('text-xs font-medium px-2 py-1 rounded-full border', level.bg, level.color, level.border)}>
                             {level.emoji} {level.level}
@@ -238,7 +238,7 @@ export default async function HallOfFamePage() {
                             <Star size={12} className="fill-amber-400 stroke-amber-400" />
                             {c.avg_rating?.toFixed(1) ?? '—'}
                           </div>
-                          <div className="text-[10px] text-gray-400">{c.total_orders ?? 0} orders</div>
+                          <div className="text-[10px] text-zinc-600">{c.total_orders ?? 0} orders</div>
                         </div>
                       </Link>
                     )
@@ -248,7 +248,7 @@ export default async function HallOfFamePage() {
             )}
 
             {/* Footer note */}
-            <p className="text-center text-xs text-gray-400 mt-8">
+            <p className="text-center text-xs text-zinc-600 mt-8">
               Rankings update in real-time · Only verified creatives appear on this page
             </p>
           </>

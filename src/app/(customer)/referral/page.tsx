@@ -46,17 +46,17 @@ export default function ReferralPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-10 page-enter">
 
         {/* Hero */}
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-violet-500 to-amber-400 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-200 text-4xl">
+          <div className="w-20 h-20 bg-gradient-to-br from-violet-500/100 to-amber-400 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-200 text-4xl">
             🎁
           </div>
-          <h1 className="text-2xl font-black text-gray-900">Refer and Earn</h1>
-          <p className="text-gray-500 mt-2 max-w-sm mx-auto">
+          <h1 className="text-2xl font-black text-white">Refer and Earn</h1>
+          <p className="text-zinc-500 mt-2 max-w-sm mx-auto">
             Invite tailors to TailorNow. Earn ₦2,000 credit when they complete their first 3 orders.
           </p>
         </div>
@@ -65,22 +65,22 @@ export default function ReferralPage() {
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
             { icon: <Users size={18} />, label: 'Referred', value: referralCount, color: 'text-violet-600 bg-violet-50' },
-            { icon: <TrendingUp size={18} />, label: 'Active', value: 0, color: 'text-green-600 bg-green-50' },
-            { icon: <Gift size={18} />, label: 'Earned (₦)', value: '0', color: 'text-amber-600 bg-amber-50' },
+            { icon: <TrendingUp size={18} />, label: 'Active', value: 0, color: 'text-green-400 bg-green-500/10' },
+            { icon: <Gift size={18} />, label: 'Earned (₦)', value: '0', color: 'text-amber-600 bg-amber-500/10' },
           ].map(s => (
-            <div key={s.label} className="bg-white rounded-2xl border border-gray-100 p-4 text-center card-lift">
+            <div key={s.label} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 text-center card-lift">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2 ${s.color}`}>{s.icon}</div>
-              <div className="text-xl font-black text-gray-900">{s.value}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+              <div className="text-xl font-black text-white">{s.value}</div>
+              <div className="text-xs text-zinc-500 mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
 
         {/* Referral link */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-4">Your referral link</h2>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 mb-6 shadow-sm">
+          <h2 className="text-base font-bold text-white mb-4">Your referral link</h2>
           <div className="flex gap-2">
-            <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-600 truncate font-mono">
+            <div className="flex-1 bg-[#09090B] border border-white/[0.1] rounded-xl px-4 py-3 text-sm text-zinc-400 truncate font-mono">
               {profile?.referral_code ? referralLink : 'Loading...'}
             </div>
             <button onClick={copy}
@@ -91,15 +91,15 @@ export default function ReferralPage() {
           </div>
           <div className="flex gap-3 mt-3">
             <button onClick={share}
-              className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors">
+              className="flex-1 flex items-center justify-center gap-2 py-3 border border-white/[0.1] text-zinc-300 text-sm font-semibold rounded-xl hover:bg-white/[0.06] transition-colors">
               <Share2 size={15} /> Share via WhatsApp or socials
             </button>
           </div>
         </div>
 
         {/* How it works */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-bold text-gray-900 mb-4">How it works</h2>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 shadow-sm">
+          <h2 className="text-base font-bold text-white mb-4">How it works</h2>
           <div className="space-y-4">
             {[
               { step: '1', title: 'Share your link', desc: 'Send your referral link to creatives you know via WhatsApp, Instagram, or anywhere.' },
@@ -108,12 +108,12 @@ export default function ReferralPage() {
               { step: '4', title: 'You earn ₦2,000', desc: 'Credit is added to your TailorNow wallet automatically. No limit on how many you refer.' },
             ].map(item => (
               <div key={item.step} className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 font-black text-sm flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-violet-100 text-violet-400 font-black text-sm flex items-center justify-center flex-shrink-0">
                   {item.step}
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-900">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm font-bold text-white">{item.title}</p>
+                  <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}

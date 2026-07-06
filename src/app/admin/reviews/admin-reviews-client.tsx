@@ -24,7 +24,7 @@ function Stars({ value }: { value: number }) {
       {[1, 2, 3, 4, 5].map(i => (
         <Star key={i} size={13} className={i <= value ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'} />
       ))}
-      <span className="ml-1 text-xs font-semibold text-gray-700">{value}.0</span>
+      <span className="ml-1 text-xs font-semibold text-zinc-300">{value}.0</span>
     </div>
   )
 }
@@ -61,19 +61,19 @@ export function AdminReviewsClient({ reviews: initial }: { reviews: Review[] }) 
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reviews &amp; Ratings</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{reviews.length} reviews · avg {avgRating}★</p>
+          <h1 className="text-2xl font-bold text-white">Reviews &amp; Ratings</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">{reviews.length} reviews · avg {avgRating}★</p>
         </div>
         <input
-          className="rounded-xl border border-gray-200 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 w-64"
+          className="rounded-xl border border-white/[0.1] px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 w-64"
           placeholder="Search reviews..." value={search} onChange={e => setSearch(e.target.value)}
         />
       </div>
 
       {lowRatings > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
+        <div className="bg-red-500/10 border border-red-200 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
           <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />
-          <p className="text-sm text-red-800 font-medium">{lowRatings} review{lowRatings > 1 ? 's' : ''} rated 1–2 stars — consider reviewing</p>
+          <p className="text-sm text-red-300 font-medium">{lowRatings} review{lowRatings > 1 ? 's' : ''} rated 1–2 stars — consider reviewing</p>
           <button onClick={() => setRatingFilter(ratingFilter === 1 ? null : 1)} className="ml-auto text-xs text-red-600 font-semibold hover:underline">
             Filter low ratings
           </button>
@@ -83,21 +83,21 @@ export function AdminReviewsClient({ reviews: initial }: { reviews: Review[] }) 
       {/* Filters */}
       <div className="flex gap-2 mb-5 flex-wrap">
         <button onClick={() => setRoleFilter('all')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === 'all' ? 'bg-violet-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}>
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === 'all' ? 'bg-violet-700 text-white' : 'bg-white border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
           All roles
         </button>
         <button onClick={() => setRoleFilter('customer')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === 'customer' ? 'bg-violet-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}>
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === 'customer' ? 'bg-violet-700 text-white' : 'bg-white border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
           By customers
         </button>
         <button onClick={() => setRoleFilter('tailor')}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === 'tailor' ? 'bg-violet-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300'}`}>
+          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === 'tailor' ? 'bg-violet-700 text-white' : 'bg-white border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
           By tailors
         </button>
-        <div className="border-l border-gray-200 mx-1" />
+        <div className="border-l border-white/[0.1] mx-1" />
         {[5, 4, 3, 2, 1].map(n => (
           <button key={n} onClick={() => setRatingFilter(ratingFilter === n ? null : n)}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${ratingFilter === n ? 'bg-amber-500 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-amber-300'}`}>
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${ratingFilter === n ? 'bg-amber-500/100 text-white' : 'bg-white border border-white/[0.1] text-zinc-400 hover:border-amber-300'}`}>
             {n}<Star size={12} className={ratingFilter === n ? 'fill-white text-white' : 'fill-amber-400 text-amber-400'} />
           </button>
         ))}
@@ -105,38 +105,38 @@ export function AdminReviewsClient({ reviews: initial }: { reviews: Review[] }) 
 
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">No reviews found</div>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-12 text-center text-zinc-600">No reviews found</div>
         )}
         {filtered.map(review => (
-          <div key={review.id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:border-gray-200 transition-colors">
+          <div key={review.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 hover:border-white/[0.1] transition-colors">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3 flex-1 min-w-0">
-                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-sm flex-shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-white/[0.06] flex items-center justify-center text-zinc-400 font-bold text-sm flex-shrink-0">
                   {review.reviewer?.full_name?.[0]?.toUpperCase() || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="font-semibold text-gray-900 text-sm">{review.reviewer?.full_name || 'Unknown'}</span>
+                    <span className="font-semibold text-white text-sm">{review.reviewer?.full_name || 'Unknown'}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${review.reviewer_role === 'customer' ? 'bg-blue-100 text-blue-700' : 'bg-violet-100 text-violet-700'}`}>
                       {review.reviewer_role}
                     </span>
                     {review.order?.tailor && (
-                      <span className="text-xs text-gray-400">→ {review.order.tailor.business_name}</span>
+                      <span className="text-xs text-zinc-600">→ {review.order.tailor.business_name}</span>
                     )}
                   </div>
                   <Stars value={review.rating} />
                   {review.comment && (
-                    <p className="text-sm text-gray-600 mt-2 leading-relaxed">{review.comment}</p>
+                    <p className="text-sm text-zinc-400 mt-2 leading-relaxed">{review.comment}</p>
                   )}
                   {!review.comment && (
-                    <p className="text-xs text-gray-400 mt-1 italic">No comment left</p>
+                    <p className="text-xs text-zinc-600 mt-1 italic">No comment left</p>
                   )}
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-xs text-gray-400 whitespace-nowrap">{formatDate(review.created_at)}</span>
+                <span className="text-xs text-zinc-600 whitespace-nowrap">{formatDate(review.created_at)}</span>
                 <button onClick={() => deleteReview(review.id)}
-                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete review">
+                  className="p-1.5 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors" title="Delete review">
                   <Trash2 size={14} />
                 </button>
               </div>

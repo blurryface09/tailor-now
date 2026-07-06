@@ -71,48 +71,48 @@ export default function AseobiOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8 page-enter">
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-violet-500 to-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
+          <div className="w-16 h-16 bg-gradient-to-br from-violet-500/100 to-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg">
             👗
           </div>
-          <h1 className="text-2xl font-black text-gray-900">Asoebi Group Order</h1>
-          <p className="text-gray-500 mt-1">Coordinate outfits for your whole group — weddings, parties, events</p>
+          <h1 className="text-2xl font-black text-white">Asoebi Group Order</h1>
+          <p className="text-zinc-500 mt-1">Coordinate outfits for your whole group — weddings, parties, events</p>
         </div>
 
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-3 mb-8">
           {(['details', 'members', 'confirm'] as const).map((s, i) => (
             <div key={s} className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === s || (s === 'details' && step !== 'details') || (s === 'members' && step === 'confirm') ? 'bg-violet-700 text-white scale-110 shadow-sm' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === s || (s === 'details' && step !== 'details') || (s === 'members' && step === 'confirm') ? 'bg-violet-700 text-white scale-110 shadow-sm' : 'bg-white/[0.08] text-zinc-500'}`}>
                 {i + 1}
               </div>
-              {i < 2 && <div className={`w-12 h-0.5 transition-colors ${(s === 'details' && step !== 'details') || (s === 'members' && step === 'confirm') ? 'bg-violet-700' : 'bg-gray-200'}`} />}
+              {i < 2 && <div className={`w-12 h-0.5 transition-colors ${(s === 'details' && step !== 'details') || (s === 'members' && step === 'confirm') ? 'bg-violet-700' : 'bg-white/[0.08]'}`} />}
             </div>
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 shadow-sm">
 
           {/* Step 1: Event details */}
           {step === 'details' && (
             <div className="space-y-4 fade-up">
               <div className="flex items-center gap-2 mb-2">
                 <Crown size={18} className="text-amber-500" />
-                <h2 className="text-lg font-bold text-gray-900">Event details</h2>
+                <h2 className="text-lg font-bold text-white">Event details</h2>
               </div>
               <Input label="Event name" placeholder="e.g. Adaeze and Emeka's wedding" value={form.event_name}
                 onChange={e => setForm(f => ({ ...f, event_name: e.target.value }))} required />
               <Input label="Fabric colour" placeholder="e.g. Royal blue Ankara, Gold George" value={form.fabric_color}
                 onChange={e => setForm(f => ({ ...f, fabric_color: e.target.value }))} required />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Style description</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Style description</label>
                 <textarea
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 min-h-[90px] transition-all"
+                  className="w-full rounded-xl border border-white/[0.1] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 min-h-[90px] transition-all"
                   placeholder="Describe the style — blouse and wrapper, agbada, gown, etc. Include any photos or inspo links."
                   value={form.style_description}
                   onChange={e => setForm(f => ({ ...f, style_description: e.target.value }))}
@@ -138,7 +138,7 @@ export default function AseobiOrderPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Users size={18} className="text-violet-600" />
-                  <h2 className="text-lg font-bold text-gray-900">Group members</h2>
+                  <h2 className="text-lg font-bold text-white">Group members</h2>
                 </div>
                 <span className="text-sm text-violet-600 font-semibold bg-violet-50 px-3 py-1 rounded-full">
                   {validMembers.length} added
@@ -147,7 +147,7 @@ export default function AseobiOrderPage() {
 
               <div className="space-y-3 mb-4 max-h-80 overflow-y-auto pr-1">
                 {members.map((m, i) => (
-                  <div key={i} className="p-4 bg-gray-50 rounded-xl border border-gray-100 scale-in">
+                  <div key={i} className="p-4 bg-[#09090B] rounded-xl border border-white/[0.08] scale-in">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
                         Member {i + 1}
@@ -159,11 +159,11 @@ export default function AseobiOrderPage() {
                       )}
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <input className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                      <input className="px-3 py-2 rounded-lg border border-white/[0.1] text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                         placeholder="Full name" value={m.name} onChange={e => updateMember(i, 'name', e.target.value)} />
-                      <input className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                      <input className="px-3 py-2 rounded-lg border border-white/[0.1] text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                         placeholder="Phone number" value={m.phone} onChange={e => updateMember(i, 'phone', e.target.value)} />
-                      <input className="col-span-2 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                      <input className="col-span-2 px-3 py-2 rounded-lg border border-white/[0.1] text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                         placeholder="Measurements (e.g. 36 bust, 32 waist)" value={m.measurements} onChange={e => updateMember(i, 'measurements', e.target.value)} />
                     </div>
                   </div>
@@ -171,17 +171,17 @@ export default function AseobiOrderPage() {
               </div>
 
               <button onClick={addMember}
-                className="w-full py-3 border-2 border-dashed border-violet-200 text-violet-600 text-sm font-semibold rounded-xl hover:border-violet-400 hover:bg-violet-50 transition-all flex items-center justify-center gap-2">
+                className="w-full py-3 border-2 border-dashed border-violet-500/30 text-violet-600 text-sm font-semibold rounded-xl hover:border-violet-400 hover:bg-violet-500/10 transition-all flex items-center justify-center gap-2">
                 <Plus size={16} /> Add another member
               </button>
 
               {form.price_per_member && (
                 <div className="mt-4 p-4 bg-violet-50 rounded-xl">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">{validMembers.length} members × {formatCurrency(parseFloat(form.price_per_member))}</span>
+                    <span className="text-zinc-400">{validMembers.length} members × {formatCurrency(parseFloat(form.price_per_member))}</span>
                     <span className="font-bold text-violet-700">{formatCurrency(totalPrice)}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <div className="flex justify-between text-xs text-zinc-500 mt-1">
                     <span>No payment until creative confirms</span>
                   </div>
                 </div>
@@ -201,7 +201,7 @@ export default function AseobiOrderPage() {
             <div className="fade-up">
               <div className="flex items-center gap-2 mb-4">
                 <Shirt size={18} className="text-violet-600" />
-                <h2 className="text-lg font-bold text-gray-900">Review and place order</h2>
+                <h2 className="text-lg font-bold text-white">Review and place order</h2>
               </div>
 
               <div className="space-y-3 text-sm mb-5">
@@ -212,14 +212,14 @@ export default function AseobiOrderPage() {
                   { label: 'Event date', value: form.deadline || 'Flexible' },
                   { label: 'Total', value: totalPrice ? formatCurrency(totalPrice) : 'To be agreed' },
                 ].map(row => (
-                  <div key={row.label} className="flex gap-3 py-2 border-b border-gray-100">
-                    <span className="text-gray-500 w-24 flex-shrink-0">{row.label}</span>
-                    <span className="text-gray-900 font-semibold">{row.value}</span>
+                  <div key={row.label} className="flex gap-3 py-2 border-b border-white/[0.08]">
+                    <span className="text-zinc-500 w-24 flex-shrink-0">{row.label}</span>
+                    <span className="text-white font-semibold">{row.value}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 mb-5">
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-300 mb-5">
                 <p className="font-semibold mb-1">How group Asoebi orders work</p>
                 <ul className="space-y-1 text-xs list-disc list-inside">
                   <li>Your order is sent to the creative for review</li>

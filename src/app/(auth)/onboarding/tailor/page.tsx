@@ -242,43 +242,43 @@ export default function TailorOnboarding() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
       <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 py-12">
+    <div className="min-h-screen bg-[#09090B] px-4 py-12">
       <div className="max-w-lg mx-auto">
 
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex mb-6 justify-center">
             <Logo size="md" variant="full" animated />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Set up your creative profile</h1>
-          <p className="text-gray-500 mt-1 text-sm">Complete all steps to be listed and found by customers</p>
+          <h1 className="text-2xl font-bold text-white">Set up your creative profile</h1>
+          <p className="text-zinc-500 mt-1 text-sm">Complete all steps to be listed and found by customers</p>
         </div>
 
         {/* Progress bar */}
         <div className="flex gap-1 mb-3">
           {STEPS.map((_, i) => (
             <div key={i} className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${
-              i < step ? 'bg-green-400' : i === step ? 'bg-violet-600' : 'bg-gray-200'
+              i < step ? 'bg-green-400' : i === step ? 'bg-violet-600' : 'bg-white/[0.08]'
             }`} />
           ))}
         </div>
-        <p className="text-center text-xs text-gray-500 mb-6">
-          Step {step + 1} of {STEPS.length} — <span className="font-medium text-gray-700">{STEPS[step]}</span>
+        <p className="text-center text-xs text-zinc-500 mb-6">
+          Step {step + 1} of {STEPS.length} — <span className="font-medium text-zinc-300">{STEPS[step]}</span>
         </p>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
 
           {/* Step 0 — Business Info */}
           {step === 0 && (
             <div className="space-y-4">
               <div>
-                <h2 className="font-bold text-gray-900 mb-1">Tell us about your business</h2>
-                <p className="text-sm text-gray-500 mb-4">Customers will see your name, location, and bio.</p>
+                <h2 className="font-bold text-white mb-1">Tell us about your business</h2>
+                <p className="text-sm text-zinc-500 mb-4">Customers will see your name, location, and bio.</p>
               </div>
               <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style"
                 value={form.business_name}
@@ -286,15 +286,15 @@ export default function TailorOnboarding() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-sm font-medium text-gray-700">State *</label>
+                    <label className="text-sm font-medium text-zinc-300">State *</label>
                     <button type="button" onClick={detectLocation} disabled={detecting}
-                      className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 disabled:opacity-50">
+                      className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-300 disabled:opacity-50">
                       <Navigation size={11} className={detecting ? 'animate-spin' : ''} />
                       {detecting ? 'Detecting…' : 'Detect'}
                     </button>
                   </div>
                   <select
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     value={form.state}
                     onChange={e => setForm(f => ({ ...f, state: e.target.value, city: '' }))}>
                     <option value="">— Select state —</option>
@@ -302,9 +302,9 @@ export default function TailorOnboarding() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">City *</label>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">City *</label>
                   <select
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
+                    className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-[#09090B] disabled:text-zinc-600"
                     value={form.city}
                     disabled={!form.state}
                     onChange={e => setForm(f => ({ ...f, city: e.target.value }))}>
@@ -317,16 +317,16 @@ export default function TailorOnboarding() {
                 value={form.address}
                 onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  About your business * <span className="font-normal text-gray-400 text-xs">(min 20 chars)</span>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                  About your business * <span className="font-normal text-zinc-600 text-xs">(min 20 chars)</span>
                 </label>
                 <textarea
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                  className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
                   rows={4}
                   placeholder="Tell customers about your experience, style, and what makes you stand out..."
                   value={form.bio}
                   onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
-                <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
+                <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-400' : 'text-zinc-600'}`}>
                   {form.bio.trim().length}/20 minimum characters
                 </p>
               </div>
@@ -336,16 +336,16 @@ export default function TailorOnboarding() {
           {/* Step 1 — Services */}
           {step === 1 && (
             <div>
-              <h2 className="font-bold text-gray-900 mb-1">What services do you offer?</h2>
-              <p className="text-sm text-gray-500 mb-4">Select all that apply — customers filter by these.</p>
+              <h2 className="font-bold text-white mb-1">What services do you offer?</h2>
+              <p className="text-sm text-zinc-500 mb-4">Select all that apply — customers filter by these.</p>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(SERVICE_LABELS).map(([k, v]) => (
                   <button key={k} type="button"
                     onClick={() => setForm(f => ({ ...f, specialties: toggle(f.specialties, k) }))}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm border-2 transition-all duration-200 ${
                       form.specialties.includes(k)
-                        ? 'border-violet-600 bg-violet-50 text-violet-700 font-semibold scale-[1.04]'
-                        : 'border-gray-200 text-gray-600 hover:border-violet-300 hover:text-violet-600'
+                        ? 'border-violet-600 bg-violet-50 text-violet-400 font-semibold scale-[1.04]'
+                        : 'border-white/[0.1] text-zinc-400 hover:border-violet-300 hover:text-violet-600'
                     }`}>
                     {SERVICE_ICONS[k]} {v}
                     {form.specialties.includes(k) && <CheckCircle size={13} className="text-violet-600" />}
@@ -358,8 +358,8 @@ export default function TailorOnboarding() {
           {/* Step 2 — How You Work */}
           {step === 2 && (
             <div>
-              <h2 className="font-bold text-gray-900 mb-1">How do you work with customers?</h2>
-              <p className="text-sm text-gray-500 mb-4">You can offer both options.</p>
+              <h2 className="font-bold text-white mb-1">How do you work with customers?</h2>
+              <p className="text-sm text-zinc-500 mb-4">You can offer both options.</p>
               <div className="space-y-3">
                 {[
                   { val: 'pickup_delivery', icon: '🚚', label: 'Pickup & Delivery', sub: 'You collect fabric from the customer and deliver the finished item' },
@@ -368,13 +368,13 @@ export default function TailorOnboarding() {
                   <button key={opt.val} type="button"
                     onClick={() => setForm(f => ({ ...f, delivery_types: toggle(f.delivery_types, opt.val) }))}
                     className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                      form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-violet-300'
+                      form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50' : 'border-white/[0.1] hover:border-violet-300'
                     }`}>
                     <div className="flex items-start gap-3">
                       <span className="text-2xl">{opt.icon}</span>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">{opt.label}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{opt.sub}</p>
+                        <p className="font-semibold text-white text-sm">{opt.label}</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">{opt.sub}</p>
                       </div>
                       {form.delivery_types.includes(opt.val) && (
                         <CheckCircle size={18} className="text-violet-600 flex-shrink-0 mt-0.5" />
@@ -390,16 +390,16 @@ export default function TailorOnboarding() {
           {step === 3 && (
             <div className="space-y-6">
               <div>
-                <h2 className="font-bold text-gray-900 mb-1">Profile photo & phone number</h2>
-                <p className="text-sm text-gray-500 mb-4">Your photo builds trust. Customers may call or WhatsApp your number.</p>
+                <h2 className="font-bold text-white mb-1">Profile photo & phone number</h2>
+                <p className="text-sm text-zinc-500 mb-4">Your photo builds trust. Customers may call or WhatsApp your number.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">Profile photo *</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-3">Profile photo *</label>
                 <div className="flex items-center gap-5">
                   <div className="relative flex-shrink-0">
                     {avatarUrl
-                      ? <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-gray-100" />
-                      : <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
+                      ? <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-white/[0.08]" />
+                      : <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500/100 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
                           {form.business_name?.[0]?.toUpperCase() || '✂'}
                         </div>
                     }
@@ -422,10 +422,10 @@ export default function TailorOnboarding() {
                     </label>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-700">Clear photo of your face</p>
-                    <p className="text-xs text-gray-400 mt-0.5">JPG or PNG, max 5MB</p>
+                    <p className="text-sm font-medium text-zinc-300">Clear photo of your face</p>
+                    <p className="text-xs text-zinc-600 mt-0.5">JPG or PNG, max 5MB</p>
                     {avatarUrl && (
-                      <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                      <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
                         <CheckCircle size={10} /> Uploaded
                       </p>
                     )}
@@ -433,11 +433,11 @@ export default function TailorOnboarding() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Phone number * <span className="font-normal text-gray-400 text-xs">(customers can call/WhatsApp)</span>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                  Phone number * <span className="font-normal text-zinc-600 text-xs">(customers can call/WhatsApp)</span>
                 </label>
-                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                  <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">+234</span>
+                <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                  <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1] flex-shrink-0">+234</span>
                   <input type="tel" placeholder="08012345678" value={phone}
                     onChange={e => setPhone(e.target.value)}
                     className="flex-1 px-3 py-2.5 text-sm focus:outline-none" />
@@ -449,15 +449,15 @@ export default function TailorOnboarding() {
           {/* Step 4 — Face Verification */}
           {step === 4 && (
             <div>
-              <h2 className="font-bold text-gray-900 mb-1">Face verification photo</h2>
-              <p className="text-sm text-gray-500 mb-4">
+              <h2 className="font-bold text-white mb-1">Face verification photo</h2>
+              <p className="text-sm text-zinc-500 mb-4">
                 A clear selfie holding a piece of paper with today's date.
                 Used only by admin for identity verification — never shown publicly.
               </p>
               <div className="flex items-start gap-4 mb-4">
                 {facePhotoUrl ? (
                   <div className="relative flex-shrink-0">
-                    <img src={facePhotoUrl} alt="Face verification" className="w-28 h-28 rounded-xl object-cover border-2 border-green-200" />
+                    <img src={facePhotoUrl} alt="Face verification" className="w-28 h-28 rounded-xl object-cover border-2 border-green-500/20" />
                     <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer">
                       {uploading
                         ? <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -477,10 +477,10 @@ export default function TailorOnboarding() {
                     </label>
                   </div>
                 ) : (
-                  <label className={`flex flex-col items-center justify-center w-28 h-28 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-violet-300 bg-violet-50' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50'}`}>
+                  <label className={`flex flex-col items-center justify-center w-28 h-28 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploading ? 'border-violet-300 bg-violet-50' : 'border-white/[0.1] hover:border-violet-400 hover:bg-violet-500/10'}`}>
                     {uploading
                       ? <div className="w-5 h-5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
-                      : <><Camera size={20} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Upload</span></>}
+                      : <><Camera size={20} className="text-zinc-600 mb-1" /><span className="text-xs text-zinc-600">Upload</span></>}
                     <input type="file" accept="image/*" className="hidden" disabled={uploading}
                       onChange={async (e) => {
                         const file = e.target.files?.[0]
@@ -495,7 +495,7 @@ export default function TailorOnboarding() {
                       }} />
                   </label>
                 )}
-                <ul className="text-xs text-gray-500 space-y-1.5 pt-1">
+                <ul className="text-xs text-zinc-500 space-y-1.5 pt-1">
                   <li>• Clear, well-lit selfie</li>
                   <li>• Hold paper with today's date</li>
                   <li>• Face must be clearly visible</li>
@@ -503,7 +503,7 @@ export default function TailorOnboarding() {
                 </ul>
               </div>
               {facePhotoUrl && (
-                <p className="text-xs text-green-600 flex items-center gap-1">
+                <p className="text-xs text-green-400 flex items-center gap-1">
                   <CheckCircle size={12} /> Photo uploaded — you can retake it if needed.
                 </p>
               )}
@@ -513,22 +513,22 @@ export default function TailorOnboarding() {
           {/* Step 5 — Pricing */}
           {step === 5 && (
             <div>
-              <h2 className="font-bold text-gray-900 mb-1">Your price range</h2>
-              <p className="text-sm text-gray-500 mb-4">Typical range for a full outfit (₦). Customers filter by budget.</p>
+              <h2 className="font-bold text-white mb-1">Your price range</h2>
+              <p className="text-sm text-zinc-500 mb-4">Typical range for a full outfit (₦). Customers filter by budget.</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Minimum (₦) *</label>
-                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                    <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Minimum (₦) *</label>
+                  <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                    <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
                     <input type="number" min="0" placeholder="5000"
                       className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
                       value={minPrice} onChange={e => setMinPrice(e.target.value)} />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum (₦) *</label>
-                  <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                    <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                  <label className="block text-sm font-medium text-zinc-300 mb-1.5">Maximum (₦) *</label>
+                  <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                    <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
                     <input type="number" min="0" placeholder="150000"
                       className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
                       value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
@@ -544,8 +544,8 @@ export default function TailorOnboarding() {
           {/* Step 6 — Portfolio */}
           {step === 6 && (
             <div>
-              <h2 className="font-bold text-gray-900 mb-1">Upload your work</h2>
-              <p className="text-sm text-gray-500 mb-4">
+              <h2 className="font-bold text-white mb-1">Upload your work</h2>
+              <p className="text-sm text-zinc-500 mb-4">
                 Add at least 2 photos of outfits you've made. This is the first thing customers see.
               </p>
 
@@ -559,7 +559,7 @@ export default function TailorOnboarding() {
                           supabase.from('portfolio_items').delete().eq('id', item.id)
                           setPortfolioItems(p => p.filter(i => i.id !== item.id))
                         }}
-                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        className="absolute top-1 right-1 bg-red-500/100 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                         <X size={10} />
                       </button>
                       <p className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[10px] px-2 py-1 truncate">
@@ -571,8 +571,8 @@ export default function TailorOnboarding() {
               )}
 
               {portfolioItems.length < 6 && (
-                <div className="border border-gray-100 rounded-xl p-4 space-y-3">
-                  <p className="text-xs font-medium text-gray-700">Add a photo</p>
+                <div className="border border-white/[0.08] rounded-xl p-4 space-y-3">
+                  <p className="text-xs font-medium text-zinc-300">Add a photo</p>
                   {portfolioForm.image_url ? (
                     <div className="relative w-24 h-24 rounded-xl overflow-hidden">
                       <img src={portfolioForm.image_url} alt="" className="w-full h-full object-cover" />
@@ -586,7 +586,7 @@ export default function TailorOnboarding() {
                     <label className="flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-violet-400 transition-colors">
                       {uploadingPortfolio
                         ? <div className="animate-spin w-5 h-5 border-2 border-violet-700 border-t-transparent rounded-full" />
-                        : <><Upload size={18} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Upload</span></>}
+                        : <><Upload size={18} className="text-zinc-600 mb-1" /><span className="text-xs text-zinc-600">Upload</span></>}
                       <input type="file" accept="image/*" className="hidden"
                         onChange={async (e) => {
                           const file = e.target.files?.[0]
@@ -605,7 +605,7 @@ export default function TailorOnboarding() {
                   <input
                     type="text"
                     placeholder="Title (e.g. Custom agbada suit)"
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    className="w-full rounded-xl border border-white/[0.1] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     value={portfolioForm.title}
                     onChange={e => setPortfolioForm(f => ({ ...f, title: e.target.value }))}
                   />
@@ -620,10 +620,10 @@ export default function TailorOnboarding() {
               <div className="mt-3 flex items-center gap-2">
                 <div className="flex gap-1">
                   {Array.from({ length: Math.max(portfolioItems.length + 1, 2) }, (_, i) => (
-                    <div key={i} className={`w-5 h-1.5 rounded-full ${i < portfolioItems.length ? 'bg-violet-600' : 'bg-gray-200'}`} />
+                    <div key={i} className={`w-5 h-1.5 rounded-full ${i < portfolioItems.length ? 'bg-violet-600' : 'bg-white/[0.08]'}`} />
                   ))}
                 </div>
-                <p className={`text-xs ${portfolioItems.length >= 2 ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+                <p className={`text-xs ${portfolioItems.length >= 2 ? 'text-green-400 font-medium' : 'text-zinc-600'}`}>
                   {portfolioItems.length}/2 minimum {portfolioItems.length >= 2 ? '✓' : ''}
                 </p>
               </div>
@@ -634,7 +634,7 @@ export default function TailorOnboarding() {
           <div className="flex gap-3 mt-6">
             {step > 0 && (
               <button type="button" onClick={() => setStep(s => s - 1)}
-                className="px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                className="px-5 py-2.5 text-sm font-medium text-zinc-400 hover:text-white border border-white/[0.1] rounded-xl hover:bg-white/[0.06] transition-colors">
                 ← Back
               </button>
             )}

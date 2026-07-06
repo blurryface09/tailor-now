@@ -195,7 +195,7 @@ export default function EditCreativeProfile() {
   const doneCount = checks.filter(c => c.done).length
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="flex justify-center py-24">
         <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
@@ -204,34 +204,34 @@ export default function EditCreativeProfile() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Link href={tailorId ? `/tailors/${tailorId}` : '/dashboard'} className="p-2 rounded-xl hover:bg-gray-200 transition-colors text-gray-500">
+          <Link href={tailorId ? `/tailors/${tailorId}` : '/dashboard'} className="p-2 rounded-xl hover:bg-white/[0.08] transition-colors text-zinc-500">
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
-            <p className="text-sm text-gray-500">This is what customers and admin see</p>
+            <h1 className="text-xl font-bold text-white">Edit Profile</h1>
+            <p className="text-sm text-zinc-500">This is what customers and admin see</p>
           </div>
         </div>
 
         {/* Verification checklist banner */}
-        <div className={`rounded-2xl border p-4 mb-5 ${doneCount === checks.length ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
+        <div className={`rounded-2xl border p-4 mb-5 ${doneCount === checks.length ? 'bg-green-500/10 border-green-500/20' : 'bg-amber-500/10 border-amber-500/20'}`}>
           <div className="flex items-center justify-between mb-2">
-            <p className={`text-sm font-semibold ${doneCount === checks.length ? 'text-green-700' : 'text-amber-700'}`}>
+            <p className={`text-sm font-semibold ${doneCount === checks.length ? 'text-green-700' : 'text-amber-400'}`}>
               {doneCount === checks.length ? 'Profile complete — ready for verification!' : `Complete your profile to get verified (${doneCount}/${checks.length})`}
             </p>
             <div className="flex gap-0.5">
               {checks.map((c, i) => (
-                <div key={i} className={`w-5 h-1.5 rounded-full ${c.done ? 'bg-green-500' : 'bg-gray-200'}`} />
+                <div key={i} className={`w-5 h-1.5 rounded-full ${c.done ? 'bg-green-500/100' : 'bg-white/[0.08]'}`} />
               ))}
             </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1">
             {checks.map(c => (
-              <div key={c.label} className={`flex items-center gap-1.5 text-xs ${c.done ? 'text-green-700' : 'text-amber-700'}`}>
+              <div key={c.label} className={`flex items-center gap-1.5 text-xs ${c.done ? 'text-green-700' : 'text-amber-400'}`}>
                 {c.done ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
                 {c.label}
               </div>
@@ -241,17 +241,17 @@ export default function EditCreativeProfile() {
 
         <div className="space-y-5">
           {/* Profile photo */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900">Profile Photo <span className="text-red-500 text-sm">*</span></h2>
-              {avatarUrl && <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle size={12} /> Uploaded</span>}
+              <h2 className="font-bold text-white">Profile Photo <span className="text-red-500 text-sm">*</span></h2>
+              {avatarUrl && <span className="flex items-center gap-1 text-xs text-green-400"><CheckCircle size={12} /> Uploaded</span>}
             </div>
             <div className="flex items-center gap-5">
               <div className="relative flex-shrink-0">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-gray-100" />
+                  <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-white/[0.08]" />
                 ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500/100 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
                     {form.business_name?.[0]?.toUpperCase() || '✂'}
                   </div>
                 )}
@@ -263,38 +263,38 @@ export default function EditCreativeProfile() {
                 </label>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-700">Your profile picture</p>
-                <p className="text-xs text-gray-400 mt-0.5">Clear photo of your face — builds customer trust</p>
-                <p className="text-xs text-gray-400">JPG or PNG, max 5MB</p>
+                <p className="text-sm font-medium text-zinc-300">Your profile picture</p>
+                <p className="text-xs text-zinc-600 mt-0.5">Clear photo of your face — builds customer trust</p>
+                <p className="text-xs text-zinc-600">JPG or PNG, max 5MB</p>
               </div>
             </div>
           </div>
 
           {/* Face / identity photo */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="font-bold text-gray-900">Face Verification Photo <span className="text-red-500 text-sm">*</span></h2>
-              {facePhotoUrl && <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle size={12} /> Uploaded</span>}
+              <h2 className="font-bold text-white">Face Verification Photo <span className="text-red-500 text-sm">*</span></h2>
+              {facePhotoUrl && <span className="flex items-center gap-1 text-xs text-green-400"><CheckCircle size={12} /> Uploaded</span>}
             </div>
-            <p className="text-sm text-gray-500 mb-4">A clear selfie holding a piece of paper with today's date. Used only for admin identity verification — not shown publicly.</p>
+            <p className="text-sm text-zinc-500 mb-4">A clear selfie holding a piece of paper with today's date. Used only for admin identity verification — not shown publicly.</p>
             <div className="flex items-start gap-4">
               {facePhotoUrl ? (
                 <div className="relative flex-shrink-0">
-                  <img src={facePhotoUrl} alt="Face verification" className="w-24 h-24 rounded-xl object-cover border-2 border-green-200" />
+                  <img src={facePhotoUrl} alt="Face verification" className="w-24 h-24 rounded-xl object-cover border-2 border-green-500/20" />
                   <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-violet-800 transition-colors">
                     {uploadingFace ? <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera size={10} className="text-white" />}
                     <input type="file" accept="image/*" className="hidden" onChange={uploadFace} disabled={uploadingFace} />
                   </label>
                 </div>
               ) : (
-                <label className={`flex flex-col items-center justify-center w-24 h-24 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploadingFace ? 'border-violet-300 bg-violet-50' : 'border-gray-200 hover:border-violet-400 hover:bg-violet-50'}`}>
+                <label className={`flex flex-col items-center justify-center w-24 h-24 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${uploadingFace ? 'border-violet-300 bg-violet-50' : 'border-white/[0.1] hover:border-violet-400 hover:bg-violet-500/10'}`}>
                   {uploadingFace
                     ? <div className="w-5 h-5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
-                    : <><Camera size={20} className="text-gray-400 mb-1" /><span className="text-xs text-gray-400">Upload</span></>}
+                    : <><Camera size={20} className="text-zinc-600 mb-1" /><span className="text-xs text-zinc-600">Upload</span></>}
                   <input type="file" accept="image/*" className="hidden" onChange={uploadFace} disabled={uploadingFace} />
                 </label>
               )}
-              <ul className="text-xs text-gray-500 space-y-1">
+              <ul className="text-xs text-zinc-500 space-y-1">
                 <li>• Clear, well-lit selfie</li>
                 <li>• Hold a paper with today's date</li>
                 <li>• Face clearly visible</li>
@@ -304,18 +304,18 @@ export default function EditCreativeProfile() {
           </div>
 
           {/* Basic info */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-            <h2 className="font-bold text-gray-900">Business Info</h2>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-4">
+            <h2 className="font-bold text-white">Business Info</h2>
             <Input label="Business name *" placeholder="e.g. Lagos Stitch & Style"
               value={form.business_name} onChange={e => setForm(f => ({ ...f, business_name: e.target.value }))} />
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Phone number * <span className="font-normal text-gray-400 text-xs">(customers can call/WhatsApp you)</span>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                Phone number * <span className="font-normal text-zinc-600 text-xs">(customers can call/WhatsApp you)</span>
               </label>
-              <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200 flex-shrink-0">+234</span>
+              <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1] flex-shrink-0">+234</span>
                 <input
                   type="tel"
                   placeholder="08012345678"
@@ -329,15 +329,15 @@ export default function EditCreativeProfile() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-sm font-medium text-gray-700">State *</label>
+                  <label className="text-sm font-medium text-zinc-300">State *</label>
                   <button type="button" onClick={detectLocation} disabled={detecting}
-                    className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 disabled:opacity-50">
+                    className="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-300 disabled:opacity-50">
                     <Navigation size={11} className={detecting ? 'animate-spin' : ''} />
                     {detecting ? 'Detecting…' : 'Detect'}
                   </button>
                 </div>
                 <select
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   value={form.state}
                   onChange={e => setForm(f => ({ ...f, state: e.target.value, city: citiesForState(e.target.value).includes(f.city) ? f.city : '' }))}
                 >
@@ -346,9 +346,9 @@ export default function EditCreativeProfile() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">City *</label>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">City *</label>
                 <select
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-gray-50 disabled:text-gray-400"
+                  className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-[#09090B] disabled:text-zinc-600"
                   value={form.city}
                   disabled={!form.state}
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
@@ -361,40 +361,40 @@ export default function EditCreativeProfile() {
             <Input label="Shop address * (street / shop number)" placeholder="e.g. 12 Balogun Market, Shop B4"
               value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                About your business * <span className="font-normal text-gray-400 text-xs">(min 20 characters)</span>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                About your business * <span className="font-normal text-zinc-600 text-xs">(min 20 characters)</span>
               </label>
               <textarea
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
                 rows={4}
                 placeholder="Tell customers about your experience, style, specialties, and what makes you stand out..."
                 value={form.bio}
                 onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
               />
-              <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
+              <p className={`text-xs mt-1 ${form.bio.trim().length >= 20 ? 'text-green-400' : 'text-zinc-600'}`}>
                 {form.bio.trim().length} / 20 minimum characters
               </p>
             </div>
           </div>
 
           {/* Price range */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">Price Range *</h2>
-            <p className="text-sm text-gray-500 mb-4">Your typical price range for outfits (₦). Customers use this to find creatives in their budget.</p>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+            <h2 className="font-bold text-white mb-1">Price Range *</h2>
+            <p className="text-sm text-zinc-500 mb-4">Your typical price range for outfits (₦). Customers use this to find creatives in their budget.</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Minimum (₦)</label>
-                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                  <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Minimum (₦)</label>
+                <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                  <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
                   <input type="number" min="0" placeholder="5000"
                     className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
                     value={form.min_price} onChange={e => setForm(f => ({ ...f, min_price: e.target.value }))} />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Maximum (₦)</label>
-                <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                  <span className="px-3 py-2.5 bg-gray-50 text-sm text-gray-500 border-r border-gray-200">₦</span>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Maximum (₦)</label>
+                <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
+                  <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
                   <input type="number" min="0" placeholder="150000"
                     className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
                     value={form.max_price} onChange={e => setForm(f => ({ ...f, max_price: e.target.value }))} />
@@ -404,17 +404,17 @@ export default function EditCreativeProfile() {
           </div>
 
           {/* Specialties */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">Specialties *</h2>
-            <p className="text-sm text-gray-500 mb-4">Select all that apply.</p>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+            <h2 className="font-bold text-white mb-1">Specialties *</h2>
+            <p className="text-sm text-zinc-500 mb-4">Select all that apply.</p>
             <div className="flex flex-wrap gap-2">
               {Object.entries(SERVICE_LABELS).map(([k, v]) => (
                 <button key={k} type="button"
                   onClick={() => setForm(f => ({ ...f, specialties: toggle(f.specialties, k) }))}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm border-2 transition-all duration-200 ${
                     form.specialties.includes(k)
-                      ? 'border-violet-600 bg-violet-50 text-violet-700 font-semibold'
-                      : 'border-gray-200 text-gray-600 hover:border-violet-300 hover:text-violet-600'
+                      ? 'border-violet-600 bg-violet-50 text-violet-400 font-semibold'
+                      : 'border-white/[0.1] text-zinc-400 hover:border-violet-300 hover:text-violet-600'
                   }`}>
                   {SERVICE_ICONS[k]} {v}
                   {form.specialties.includes(k) && <CheckCircle size={13} className="text-violet-600" />}
@@ -424,9 +424,9 @@ export default function EditCreativeProfile() {
           </div>
 
           {/* Delivery types */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-6">
-            <h2 className="font-bold text-gray-900 mb-1">How you work *</h2>
-            <p className="text-sm text-gray-500 mb-4">You can offer both options.</p>
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+            <h2 className="font-bold text-white mb-1">How you work *</h2>
+            <p className="text-sm text-zinc-500 mb-4">You can offer both options.</p>
             <div className="space-y-3">
               {[
                 { val: 'pickup_delivery', icon: '🚚', label: 'Pickup & Delivery', sub: 'You collect fabric and deliver the finished item' },
@@ -435,13 +435,13 @@ export default function EditCreativeProfile() {
                 <button key={opt.val} type="button"
                   onClick={() => setForm(f => ({ ...f, delivery_types: toggle(f.delivery_types, opt.val) }))}
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                    form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-violet-300'
+                    form.delivery_types.includes(opt.val) ? 'border-violet-600 bg-violet-50' : 'border-white/[0.1] hover:border-violet-300'
                   }`}>
                   <div className="flex items-start gap-3">
                     <span className="text-2xl">{opt.icon}</span>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900 text-sm">{opt.label}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{opt.sub}</p>
+                      <p className="font-semibold text-white text-sm">{opt.label}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">{opt.sub}</p>
                     </div>
                     {form.delivery_types.includes(opt.val) && <CheckCircle size={18} className="text-violet-600 flex-shrink-0 mt-0.5" />}
                   </div>
@@ -451,8 +451,8 @@ export default function EditCreativeProfile() {
           </div>
 
           {/* Portfolio reminder */}
-          <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4">
-            <p className="text-sm font-semibold text-violet-800 mb-1">Don't forget your portfolio</p>
+          <div className="bg-violet-50 border border-violet-500/30 rounded-2xl p-4">
+            <p className="text-sm font-semibold text-violet-300 mb-1">Don't forget your portfolio</p>
             <p className="text-xs text-violet-700">Upload at least 2 photos of your work to complete your profile. Go to <strong>My Portfolio</strong> in your dashboard.</p>
           </div>
 

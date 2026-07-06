@@ -69,14 +69,14 @@ export default function ProfilePage() {
   const pct = Math.round((filled / MEASUREMENT_FIELDS.length) * 100)
 
   if (!profile) return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="flex justify-center py-20"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
 
@@ -96,8 +96,8 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile info */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-5 flex items-center gap-2"><User size={18} className="text-violet-600" /> Personal Details</h2>
+        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+          <h2 className="text-base font-bold text-white mb-5 flex items-center gap-2"><User size={18} className="text-violet-600" /> Personal Details</h2>
           <form onSubmit={saveProfile} className="space-y-4">
             <Input label="Full name" value={profile.full_name || ''} icon={<User size={16} />}
               onChange={e => setProfile(p => p ? { ...p, full_name: e.target.value } : p)} />
@@ -116,31 +116,31 @@ export default function ProfilePage() {
         </div>
 
         {/* Measurements */}
-        <div id="measurements" className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div id="measurements" className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
               <Ruler size={18} className="text-violet-600" /> My Measurements
             </h2>
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${pct === 100 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${pct === 100 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-400'}`}>
               {filled}/{MEASUREMENT_FIELDS.length} filled
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full bg-gray-100 rounded-full h-2 mb-1 mt-3">
+          <div className="w-full bg-white/[0.06] rounded-full h-2 mb-1 mt-3">
             <div
               className="h-2 rounded-full transition-all duration-500"
               style={{ width: `${pct}%`, background: pct === 100 ? '#16a34a' : '#7c3aed' }}
             />
           </div>
-          <p className="text-xs text-gray-400 mb-5">
+          <p className="text-xs text-zinc-600 mb-5">
             {pct === 100
-              ? <span className="text-green-600 font-medium flex items-center gap-1"><CheckCircle size={12} /> All measurements saved — tailors can use them automatically</span>
+              ? <span className="text-green-400 font-medium flex items-center gap-1"><CheckCircle size={12} /> All measurements saved — tailors can use them automatically</span>
               : 'Fill in your measurements once and they\'ll be shared with tailors on every order.'}
           </p>
 
           {/* Guide tip */}
-          <div className="bg-violet-50 border border-violet-100 rounded-xl px-4 py-3 mb-5 text-xs text-violet-700">
+          <div className="bg-violet-50 border border-violet-500/20 rounded-xl px-4 py-3 mb-5 text-xs text-violet-700">
             <span className="font-semibold">How to measure:</span> Use a soft tape measure. Measure in inches, standing straight in light clothing. Ask someone to help for accuracy.
           </div>
 
@@ -166,9 +166,9 @@ export default function ProfilePage() {
               })}
             </div>
             <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Notes for tailors</label>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">Notes for tailors</label>
               <textarea
-                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
                 rows={3}
                 placeholder="e.g. broad shoulders, prefer extra room in chest, petite frame..."
                 value={measurements.notes || ''}

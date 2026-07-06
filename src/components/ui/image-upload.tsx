@@ -42,13 +42,13 @@ export function ImageUpload({ bucket, folder, value, onChange, maxFiles = 5, lab
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        <label className="block text-sm font-medium text-zinc-300 mb-1.5">
           {label}
         </label>
       )}
       <div className="flex flex-wrap gap-3 items-start">
         {value.map((url, i) => (
-          <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-sm group">
+          <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border border-white/[0.08] shadow-sm group">
             <img src={url} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
             <button
               type="button"
@@ -72,8 +72,8 @@ export function ImageUpload({ bucket, folder, value, onChange, maxFiles = 5, lab
               </div>
             ) : (
               <>
-                <Upload size={18} className="text-gray-400 mb-1" />
-                <span className="text-xs text-gray-400 text-center leading-tight px-1">Add photo</span>
+                <Upload size={18} className="text-zinc-600 mb-1" />
+                <span className="text-xs text-zinc-600 text-center leading-tight px-1">Add photo</span>
               </>
             )}
             <input
@@ -87,14 +87,14 @@ export function ImageUpload({ bucket, folder, value, onChange, maxFiles = 5, lab
         )}
         {value.length === 0 && !uploading && (
           <div className="flex items-center gap-2 self-center ml-1">
-            <ImageIcon size={14} className="text-gray-300" />
-            <span className="text-xs text-gray-400">No photos yet</span>
+            <ImageIcon size={14} className="text-zinc-600" />
+            <span className="text-xs text-zinc-600">No photos yet</span>
           </div>
         )}
       </div>
-      {hint && <p className="text-xs text-gray-400 mt-1.5">{hint}</p>}
+      {hint && <p className="text-xs text-zinc-600 mt-1.5">{hint}</p>}
       {maxFiles > 1 && value.length > 0 && (
-        <p className="text-xs text-gray-400 mt-1">{value.length}/{maxFiles} photos added</p>
+        <p className="text-xs text-zinc-600 mt-1">{value.length}/{maxFiles} photos added</p>
       )}
     </div>
   )

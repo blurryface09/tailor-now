@@ -72,13 +72,13 @@ export default function PricingPage() {
   const SERVICE_ICONS: Record<string, string> = { street_wear: '🧢', custom_outfit: '👗', alterations: '✂️', bridal: '💍', ready_to_wear: '👕', fabric_sourcing: '🧵', uniforms: '👔' }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#09090B]">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Services & Pricing</h1>
-            <p className="text-sm text-gray-500">Set what you offer and your rates</p>
+            <h1 className="text-2xl font-bold text-white">Services & Pricing</h1>
+            <p className="text-sm text-zinc-500">Set what you offer and your rates</p>
           </div>
           <Button onClick={() => { setForm(emptyForm); setEditingId(null); setAdding(true) }} size="md">
             <Plus size={16} /> Add Service
@@ -87,15 +87,15 @@ export default function PricingPage() {
 
         {/* Form */}
         {adding && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900">{editingId ? 'Edit Service' : 'New Service'}</h2>
-              <button onClick={() => { setAdding(false); setEditingId(null) }}><X size={18} className="text-gray-400" /></button>
+              <h2 className="font-bold text-white">{editingId ? 'Edit Service' : 'New Service'}</h2>
+              <button onClick={() => { setAdding(false); setEditingId(null) }}><X size={18} className="text-zinc-600" /></button>
             </div>
             <form onSubmit={saveService} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Service type</label>
-                <select className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Service type</label>
+                <select className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   value={form.service_type} onChange={e => setForm(f => ({ ...f, service_type: e.target.value }))}>
                   {Object.entries(SERVICE_LABELS).map(([k, v]) => <option key={k} value={k}>{SERVICE_ICONS[k]} {v}</option>)}
                 </select>
@@ -103,8 +103,8 @@ export default function PricingPage() {
               <Input label="Service title" placeholder="e.g. Custom agbada & isiagu" value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description (optional)</label>
-                <textarea className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Description (optional)</label>
+                <textarea className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                   rows={2} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
               </div>
               <div className="grid grid-cols-3 gap-4">
@@ -118,7 +118,7 @@ export default function PricingPage() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={form.price_negotiable} onChange={e => setForm(f => ({ ...f, price_negotiable: e.target.checked }))}
                   className="w-4 h-4 rounded accent-violet-700" />
-                <span className="text-sm text-gray-700">Price is negotiable</span>
+                <span className="text-sm text-zinc-300">Price is negotiable</span>
               </label>
               <div className="flex gap-3">
                 <Button type="button" variant="outline" onClick={() => { setAdding(false); setEditingId(null) }}>Cancel</Button>
@@ -131,25 +131,25 @@ export default function PricingPage() {
         )}
 
         {services.length === 0 && !adding ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
+          <div className="text-center py-20 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08]">
             <div className="text-5xl mb-3">✂️</div>
-            <h3 className="font-semibold text-gray-900 mb-2">No services yet</h3>
-            <p className="text-gray-500 text-sm mb-4">Add the services you offer so customers can book you</p>
+            <h3 className="font-semibold text-white mb-2">No services yet</h3>
+            <p className="text-zinc-500 text-sm mb-4">Add the services you offer so customers can book you</p>
             <Button onClick={() => setAdding(true)}><Plus size={16} /> Add First Service</Button>
           </div>
         ) : (
           <div className="space-y-4">
             {services.map(s => (
-              <div key={s.id} className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div key={s.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xl">{SERVICE_ICONS[s.service_type]}</span>
-                      <h3 className="font-semibold text-gray-900">{s.title}</h3>
-                      <span className="text-xs bg-violet-50 text-violet-700 px-2 py-0.5 rounded-full">{SERVICE_LABELS[s.service_type]}</span>
+                      <h3 className="font-semibold text-white">{s.title}</h3>
+                      <span className="text-xs bg-violet-50 text-violet-400 px-2 py-0.5 rounded-full">{SERVICE_LABELS[s.service_type]}</span>
                     </div>
-                    {s.description && <p className="text-sm text-gray-600 mb-2">{s.description}</p>}
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    {s.description && <p className="text-sm text-zinc-400 mb-2">{s.description}</p>}
+                    <div className="flex items-center gap-4 text-sm text-zinc-500">
                       <span>⏱ {s.min_days}–{s.max_days} days</span>
                       {s.price_negotiable && <span>🤝 Negotiable</span>}
                     </div>
@@ -157,8 +157,8 @@ export default function PricingPage() {
                   <div className="text-right ml-4">
                     <p className="text-xl font-bold text-violet-700">{formatCurrency(s.base_price)}</p>
                     <div className="flex gap-2 mt-2">
-                      <button onClick={() => startEdit(s)} className="p-1.5 text-gray-400 hover:text-violet-700 hover:bg-violet-50 rounded-lg transition-colors"><Pencil size={15} /></button>
-                      <button onClick={() => deleteService(s.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={15} /></button>
+                      <button onClick={() => startEdit(s)} className="p-1.5 text-zinc-600 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg transition-colors"><Pencil size={15} /></button>
+                      <button onClick={() => deleteService(s.id)} className="p-1.5 text-zinc-600 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors"><Trash2 size={15} /></button>
                     </div>
                   </div>
                 </div>

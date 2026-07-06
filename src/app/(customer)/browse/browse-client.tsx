@@ -140,12 +140,12 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Search bar */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-8 fade-up">
+      <div className="bg-white/[0.04] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-4 mb-8 fade-up">
         <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
             <input
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.1] text-white placeholder:text-zinc-600 text-sm focus:outline-none focus:border-violet-500/60 focus:bg-white/[0.08] transition-all"
               placeholder="Search creatives, styles, or looks (e.g. Ankara, bridal, agbada)..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -154,38 +154,38 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
           </div>
           <div className="relative flex-1 md:flex-none">
             <select
-              className="appearance-none pl-3 pr-8 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-36 bg-white"
+              className="appearance-none pl-3 pr-8 py-3 rounded-xl bg-white/[0.06] border border-white/[0.1] text-white text-sm focus:outline-none focus:border-violet-500/60 transition-all w-full md:w-36"
               value={selectedState}
               onChange={e => { setSelectedState(e.target.value); setSelectedCity('') }}
             >
-              <option value="">Any state</option>
-              {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              <option value="" className="bg-zinc-900">Any state</option>
+              {NIGERIAN_STATES.map(s => <option key={s} value={s} className="bg-zinc-900">{s}</option>)}
             </select>
           </div>
           <div className="relative flex-1 md:flex-none">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={18} />
             <select
-              className="appearance-none pl-10 pr-8 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all w-full md:w-40 bg-white disabled:bg-gray-50 disabled:text-gray-400"
+              className="appearance-none pl-10 pr-8 py-3 rounded-xl bg-white/[0.06] border border-white/[0.1] text-white text-sm focus:outline-none focus:border-violet-500/60 transition-all w-full md:w-40 disabled:opacity-40"
               value={selectedCity}
               disabled={!selectedState}
               onChange={e => setSelectedCity(e.target.value)}
             >
-              <option value="">{selectedState ? 'Any city' : 'Pick a state first'}</option>
-              {citiesForState(selectedState).map(c => <option key={c} value={c}>{c}</option>)}
+              <option value="" className="bg-zinc-900">{selectedState ? 'Any city' : 'Pick a state first'}</option>
+              {citiesForState(selectedState).map(c => <option key={c} value={c} className="bg-zinc-900">{c}</option>)}
             </select>
           </div>
           <button
             onClick={detectLocation}
             disabled={locating}
             title="Detect my location"
-            className="flex items-center justify-center gap-1.5 border border-violet-200 bg-violet-50 text-violet-700 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-violet-100 transition-all duration-200 disabled:opacity-60 flex-shrink-0"
+            className="flex items-center justify-center gap-1.5 border border-violet-500/30 bg-violet-500/10 text-violet-400 px-4 py-3 rounded-xl text-sm font-semibold hover:bg-violet-500/20 transition-all duration-200 disabled:opacity-60 flex-shrink-0"
           >
             <Navigation size={15} className={locating ? 'animate-spin' : ''} />
             <span className="hidden sm:inline">{locating ? 'Finding...' : 'Near me'}</span>
           </button>
           <button
             onClick={handleFilter}
-            className="flex items-center justify-center gap-2 bg-violet-700 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:bg-violet-800 transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] shadow-sm shadow-violet-300 flex-shrink-0"
+            className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.97] shadow-lg shadow-violet-500/25 flex-shrink-0"
           >
             <Filter size={16} /> Search
           </button>
@@ -198,8 +198,8 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
             className={cn(
               'flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200',
               !selectedService
-                ? 'bg-violet-700 text-white shadow-sm shadow-violet-300'
-                : 'bg-gray-100 text-gray-600 hover:bg-violet-50 hover:text-violet-700'
+                ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25'
+                : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08] hover:bg-violet-500/15 hover:text-violet-300 hover:border-violet-500/30'
             )}
           >
             All Services
@@ -211,8 +211,8 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
               className={cn(
                 'flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200',
                 selectedService === key
-                  ? 'bg-violet-700 text-white shadow-sm shadow-violet-300 scale-[1.04]'
-                  : 'bg-gray-100 text-gray-600 hover:bg-violet-50 hover:text-violet-700'
+                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/25 scale-[1.04]'
+                  : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08] hover:bg-violet-500/15 hover:text-violet-300 hover:border-violet-500/30'
               )}
             >
               {SERVICE_ICONS[key]} {label}
@@ -222,21 +222,21 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
       </div>
 
       {isDemo && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3 fade-up">
-          <span className="text-amber-500 text-xl">✂️</span>
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3 fade-up">
+          <span className="text-amber-400 text-xl">✂️</span>
           <div>
-            <p className="text-sm font-semibold text-amber-800">Sample profiles</p>
-            <p className="text-xs text-amber-700">These are demo creatives. Real creatives will appear here once they sign up.</p>
+            <p className="text-sm font-semibold text-amber-300">Sample profiles</p>
+            <p className="text-xs text-amber-400/80">These are demo creatives. Real creatives will appear here once they sign up.</p>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between mb-5 fade-up-1">
-        <p className="text-sm text-gray-500">
-          <span className="font-semibold text-gray-900">{filtered.length}</span> creatives found
+        <p className="text-sm text-zinc-500">
+          <span className="font-semibold text-white">{filtered.length}</span> creatives found
         </p>
         {filtered.length > 0 && (
-          <span className="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded-full font-medium">
+          <span className="flex items-center gap-1.5 text-xs text-green-400 bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full font-medium">
             <Zap size={12} /> Ready to book
           </span>
         )}
@@ -245,8 +245,8 @@ export function BrowseClient({ tailors, initialService, initialCity, initialStat
       {filtered.length === 0 ? (
         <div className="text-center py-24 fade-up">
           <div className="text-6xl mb-4">✂️</div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">No creatives found</h3>
-          <p className="text-gray-500">Try adjusting your filters or search terms</p>
+          <h3 className="text-xl font-bold text-white mb-2">No creatives found</h3>
+          <p className="text-zinc-500">Try adjusting your filters or search terms</p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -265,8 +265,8 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
   const delayClass = ['fade-up', 'fade-up-1', 'fade-up-2', 'fade-up-3', 'fade-up-4', 'fade-up-5'][index % 6]
   const isDemo = tailor.id.startsWith('demo-')
   const cardClass = cn(
-    'group bg-white rounded-3xl overflow-hidden transition-all duration-500',
-    'border border-gray-100 hover:border-violet-200/60',
+    'group bg-white/[0.05] backdrop-blur-xl rounded-3xl overflow-hidden transition-all duration-500',
+    'border border-white/[0.08] hover:border-violet-200/60',
     'shadow-[0_2px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_48px_rgba(109,40,217,0.15),0_4px_16px_rgba(0,0,0,0.04)]',
     'hover:-translate-y-1.5',
     delayClass
@@ -304,7 +304,7 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
             <img src={(tailor as any).profile.avatar_url} alt={tailor.business_name}
               className="w-14 h-14 rounded-2xl object-cover shadow-xl border-2 border-white group-hover:scale-105 transition-transform duration-300" />
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-white shadow-xl flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
+            <div className="w-14 h-14 rounded-2xl bg-white/[0.05] backdrop-blur-xl shadow-xl flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">
               {tailor.business_name?.[0]?.toUpperCase() || '✂'}
             </div>
           )}
@@ -312,32 +312,32 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
       </div>
       <div className="px-4 pt-10 pb-4">
         <div className="flex items-start justify-between mb-1">
-          <h3 className="font-bold text-gray-900 group-hover:text-violet-700 transition-colors leading-tight text-base">
+          <h3 className="font-bold text-white group-hover:text-violet-700 transition-colors leading-tight text-base">
             {tailor.business_name}
           </h3>
           <div className="flex items-center gap-1 text-sm flex-shrink-0 ml-2">
             <Star size={13} className="text-amber-400 fill-amber-400" />
-            <span className="font-semibold text-gray-900">{tailor.avg_rating?.toFixed(1) || 'New'}</span>
-            <span className="text-gray-400 text-xs">({tailor.total_reviews})</span>
+            <span className="font-semibold text-white">{tailor.avg_rating?.toFixed(1) || 'New'}</span>
+            <span className="text-zinc-600 text-xs">({tailor.total_reviews})</span>
           </div>
         </div>
-        <p className="text-xs text-gray-400 flex items-center gap-1 mb-3">
+        <p className="text-xs text-zinc-600 flex items-center gap-1 mb-3">
           <MapPin size={11} /> {tailor.city}, {tailor.state}
         </p>
-        {tailor.bio && <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">{tailor.bio}</p>}
+        {tailor.bio && <p className="text-xs text-zinc-500 line-clamp-2 mb-3 leading-relaxed">{tailor.bio}</p>}
         <div className="flex flex-wrap gap-1.5 mb-3">
           {(tailor.specialties || []).slice(0, 3).map(s => (
-            <span key={s} className="text-xs bg-violet-50 text-violet-600 px-2.5 py-1 rounded-full font-medium border border-violet-100">
+            <span key={s} className="text-xs bg-violet-500/10 text-violet-300 px-2.5 py-1 rounded-full font-medium border border-violet-500/20">
               {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
             </span>
           ))}
           {(tailor.specialties || []).length > 3 && (
-            <span className="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full font-medium">
+            <span className="text-xs bg-white/[0.06] text-zinc-500 px-2.5 py-1 rounded-full font-medium">
               +{tailor.specialties.length - 3}
             </span>
           )}
         </div>
-        <div className="flex items-center justify-between pt-3 border-t border-gray-50 mb-3">
+        <div className="flex items-center justify-between pt-3 border-t border-white/[0.07] mb-3">
           {(() => {
             const lvl = getLevel(calcScore({ profile_likes: tailor.profile_likes, profile_views: tailor.profile_views, total_orders: tailor.total_orders }))
             return (
@@ -346,15 +346,15 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
               </span>
             )
           })()}
-          <span className="text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full border border-violet-100">
+          <span className="text-xs font-semibold text-violet-300 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/20">
             {tailor.total_orders} orders
           </span>
         </div>
         {/* Book Now — always visible, animates on hover */}
-        <div className={`w-full text-white text-xs font-bold py-2.5 rounded-xl text-center tracking-wide transition-all duration-300 ${
+        <div className={`w-full text-xs font-bold py-2.5 rounded-xl text-center tracking-wide transition-all duration-300 ${
           isDemo
-            ? 'bg-gray-200 text-gray-500 cursor-default'
-            : 'bg-violet-700 group-hover:bg-violet-800 group-hover:shadow-lg group-hover:shadow-violet-300/50 group-hover:scale-[1.02]'
+            ? 'bg-white/[0.06] text-zinc-500 cursor-default'
+            : 'bg-amber-400 hover:bg-amber-300 text-black group-hover:shadow-lg group-hover:shadow-amber-400/30 group-hover:scale-[1.02]'
         }`}>
           {isDemo ? 'Coming Soon' : 'Book Now →'}
         </div>
