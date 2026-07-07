@@ -13,15 +13,25 @@ function VerifiedContent() {
   const searchParams = useSearchParams()
   const hasError = searchParams.get('error') === '1'
   const supabase = createClient()
-  const [checking, setChecking] = useState(true)
+  const [checking, setChecking] = useState(!hasError)
 
   useEffect(() => {
-    if (hasError) { setChecking(false); return }
+    if (hasError) return
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { setChecking(false); return }
-      supabase.from('profiles').select('role').eq('id', user.id).single().then(({ data }) => {
+      supabase.from('profiles').select('role').eq('id', user.id).maybeSingle().then(async ({ data }) => {
+        const metadataRole = user.user_metadata?.role === 'tailor' ? 'tailor' : 'customer'
+        const role = data?.role === 'admin' ? 'admin' : metadataRole || data?.role || 'customer'
+        if (!data) {
+          await supabase.from('profiles').upsert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || '',
+            role,
+          }, { onConflict: 'id' })
+        }
         setChecking(false)
-        const dest = data?.role === 'tailor' ? '/onboarding/tailor' : '/home'
+        const dest = role === 'tailor' ? '/onboarding/tailor' : '/home'
         setTimeout(() => router.push(dest), 2000)
       })
     })

@@ -34,9 +34,19 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password })
     if (error) { toast.error(error.message); setLoading(false); return }
     toast.success('Welcome back!')
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-    if (profile?.role === 'tailor') router.push('/dashboard')
-    else if (profile?.role === 'admin') router.push('/admin')
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle()
+    const metadataRole = data.user.user_metadata?.role === 'tailor' ? 'tailor' : null
+    const role = profile?.role === 'admin' ? 'admin' : metadataRole || profile?.role || 'customer'
+    if (!profile || (metadataRole === 'tailor' && profile.role !== 'tailor')) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email: data.user.email,
+        full_name: data.user.user_metadata?.full_name || '',
+        role,
+      }, { onConflict: 'id' })
+    }
+    if (role === 'tailor') router.push('/dashboard')
+    else if (role === 'admin') router.push('/admin')
     else router.push('/home')
   }
 

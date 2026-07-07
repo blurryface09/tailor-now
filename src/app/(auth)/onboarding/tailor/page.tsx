@@ -170,6 +170,13 @@ export default function TailorOnboarding() {
   const saveCore = async (): Promise<string | null> => {
     if (!userId) return null
     setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    await supabase.from('profiles').upsert({
+      id: userId,
+      email: user?.email,
+      full_name: user?.user_metadata?.full_name || '',
+      role: 'tailor',
+    }, { onConflict: 'id' })
     const payload = {
       business_name: form.business_name.trim(),
       bio: form.bio.trim(),
@@ -189,7 +196,6 @@ export default function TailorOnboarding() {
       .insert({ user_id: userId, ...payload }).select('id').single()
     setSaving(false)
     if (error) { toast.error(error.message); return null }
-    await supabase.from('profiles').update({ role: 'tailor' }).eq('id', userId)
     setTailorId(data.id)
     return data.id
   }
