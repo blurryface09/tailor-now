@@ -3,10 +3,10 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } from '@/lib/utils'
-import { CREATIVE_SUPPORT_LABEL, CREATIVE_SUPPORT_URL } from '@/lib/support'
+import { CREATIVE_SUPPORT_EMAIL_URL, CREATIVE_SUPPORT_WHATSAPP_URL } from '@/lib/support'
 import { isCreativeProfileComplete } from '@/lib/creative-completeness'
 import { calcScore, getLevel } from '@/lib/creative-score'
-import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, ImageIcon, UserCog, AlertCircle } from 'lucide-react'
+import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, ImageIcon, UserCog, AlertCircle, Mail } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -141,15 +141,24 @@ export default async function TailorDashboard() {
                 </p>
               </div>
               </div>
-              <a
-                href={CREATIVE_SUPPORT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-black shadow-lg shadow-amber-900/20 transition-colors hover:bg-amber-300"
-              >
-                <MessageSquare size={16} />
-                {CREATIVE_SUPPORT_LABEL}
-              </a>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <a
+                  href={CREATIVE_SUPPORT_WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-950/20 transition-colors hover:bg-green-400"
+                >
+                  <MessageSquare size={16} />
+                  Chat on WhatsApp
+                </a>
+                <a
+                  href={CREATIVE_SUPPORT_EMAIL_URL}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-400/40 px-4 py-2.5 text-sm font-bold text-amber-200 transition-colors hover:bg-amber-500/10"
+                >
+                  <Mail size={16} />
+                  Email admin
+                </a>
+              </div>
             </div>
           </div>
         )}

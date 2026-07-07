@@ -4,11 +4,10 @@ const CREATIVE_SUPPORT_MESSAGE = [
   'I am a creative and I need help continuing my onboarding process.',
 ].join('\n')
 
-const CREATIVE_SUPPORT_WHATSAPP = `https://wa.me/2347075613715?text=${encodeURIComponent(CREATIVE_SUPPORT_MESSAGE)}`
+const CREATIVE_SUPPORT_EMAIL = 'admin@folubandsamuellabs.com'
 
-export const CREATIVE_SUPPORT_URL =
-  process.env.NEXT_PUBLIC_CREATIVE_SUPPORT_URL ||
-  CREATIVE_SUPPORT_WHATSAPP
+export const CREATIVE_SUPPORT_WHATSAPP_URL =
+  `https://wa.me/2347075613715?text=${encodeURIComponent(CREATIVE_SUPPORT_MESSAGE)}`
 
-export const CREATIVE_SUPPORT_LABEL =
-  process.env.NEXT_PUBLIC_CREATIVE_SUPPORT_LABEL || 'Chat on WhatsApp'
+export const CREATIVE_SUPPORT_EMAIL_URL =
+  `mailto:${CREATIVE_SUPPORT_EMAIL}?subject=${encodeURIComponent('Creative onboarding support')}&body=${encodeURIComponent(CREATIVE_SUPPORT_MESSAGE)}`
