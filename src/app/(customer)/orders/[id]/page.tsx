@@ -163,7 +163,7 @@ function OrderDetailContent() {
   }
 
   if (!order) return (
-    <div className="min-h-screen bg-[#09090B]"><Navbar />
+    <div className="min-h-screen"><Navbar />
       <div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>
     </div>
   )
@@ -175,14 +175,14 @@ function OrderDetailContent() {
   const canRate = (order.status === 'completed' || order.status === 'delivered') && !myRating
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         {/* Header */}
-        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-xl font-bold text-white">{order.title}</h1>
+              <h1 className="text-xl font-bold text-zinc-900">{order.title}</h1>
               <p className="text-sm text-zinc-500 mt-0.5">Order #{id.slice(0, 8).toUpperCase()}</p>
             </div>
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
@@ -221,7 +221,7 @@ function OrderDetailContent() {
               <div className="flex gap-2 flex-wrap">
                 {order.style_reference_urls.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noreferrer">
-                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-white/[0.08] hover:opacity-90 transition-opacity" />
+                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-zinc-100 hover:opacity-90 transition-opacity" />
                   </a>
                 ))}
               </div>
@@ -249,20 +249,20 @@ function OrderDetailContent() {
 
         {/* Price negotiation card — visible while pending (no payment yet) */}
         {isCustomer && order.status === 'pending' && (
-          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
             <h2 className="font-bold text-white mb-4">Price negotiation</h2>
 
             {/* Customer's sent offer */}
             {order.customer_offer && (
-              <div className="flex items-center justify-between py-2 border-b border-white/[0.08] text-sm mb-3">
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 text-sm mb-3">
                 <span className="text-zinc-500">Your offer</span>
-                <span className="font-semibold text-white">{formatCurrency(order.customer_offer)}</span>
+                <span className="font-semibold text-zinc-900">{formatCurrency(order.customer_offer)}</span>
               </div>
             )}
 
             {/* Creative has countered */}
             {order.agreed_price && (
-              <div className="flex items-center justify-between py-2 border-b border-white/[0.08] text-sm mb-4">
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 text-sm mb-4">
                 <span className="text-zinc-500">Creative&apos;s counter</span>
                 <span className="font-bold text-violet-700">{formatCurrency(order.agreed_price)}</span>
               </div>
@@ -294,7 +294,7 @@ function OrderDetailContent() {
                     value={counterPrice} onChange={e => setCounterPrice(e.target.value)} autoFocus />
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowCounter(false)} className="flex-1 py-2.5 text-sm text-zinc-500 border border-white/[0.1] rounded-xl hover:bg-white/[0.06]">Cancel</button>
+                  <button onClick={() => setShowCounter(false)} className="flex-1 py-2.5 text-sm text-zinc-500 border border-zinc-200 rounded-xl hover:bg-white/[0.06]">Cancel</button>
                   <Button className="flex-1" size="sm" loading={sendingCounter} onClick={sendCounter}>Send counter</Button>
                 </div>
               </div>
@@ -330,7 +330,7 @@ function OrderDetailContent() {
         })()}
 
         {/* Order tracking */}
-        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
           <h2 className="font-bold text-white mb-6">Order tracking</h2>
           <div className="space-y-1">
             {TRACKING_STEPS.filter(s => !['cancelled', 'disputed'].includes(s.status)).map((s, i) => {
@@ -361,7 +361,7 @@ function OrderDetailContent() {
 
         {/* Payment details */}
         {order.agreed_price && (
-          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
             <h2 className="font-bold text-white mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
@@ -373,7 +373,7 @@ function OrderDetailContent() {
                 <span>{formatCurrency(calculateServiceCharge(order.agreed_price).serviceCharge)}</span>
               </div>
               <div className="flex justify-between font-bold border-t pt-2">
-                <span className="text-white">Total charged</span>
+                <span className="text-zinc-900">Total charged</span>
                 <span className="text-violet-700">{formatCurrency(calculateServiceCharge(order.agreed_price).totalCharged)}</span>
               </div>
               <div className="flex justify-between border-t pt-2">
@@ -391,7 +391,7 @@ function OrderDetailContent() {
 
         {/* Rating */}
         {canRate && (
-          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
             <h2 className="font-bold text-white mb-1">
               Rate {isTailor ? 'this customer' : 'this creative'}
             </h2>
@@ -400,7 +400,7 @@ function OrderDetailContent() {
               <StarRating value={ratingVal} onChange={setRatingVal} size="lg" />
             </div>
             <textarea
-              className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
+              className="w-full rounded-xl border border-zinc-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
               placeholder="Leave a comment (optional)"
               rows={3}
               value={ratingComment}
@@ -423,7 +423,7 @@ function OrderDetailContent() {
 export default function OrderDetailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
       </div>
     }>

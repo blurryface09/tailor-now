@@ -80,14 +80,14 @@ export default function DisputePage({ params }: { params: Promise<{ id: string }
 
   if (!order) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
       <div className="max-w-lg mx-auto px-4 py-8 page-enter">
         <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-zinc-500 mb-6 hover:text-zinc-300 transition-colors">
@@ -104,7 +104,7 @@ export default function DisputePage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
 
-        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm shadow-sm p-6">
           <h1 className="text-xl font-black text-white mb-1">Raise a Dispute</h1>
           <p className="text-sm text-zinc-500 mb-6">Order: <span className="font-semibold text-zinc-300">{order.title}</span></p>
 
@@ -149,7 +149,7 @@ export default function DisputePage({ params }: { params: Promise<{ id: string }
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Explain exactly what happened, when it happened, and any evidence you have (e.g. photos, chat messages)..."
                   rows={5}
-                  className="w-full border border-white/[0.1] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none"
+                  className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 resize-none"
                 />
                 <p className={`text-xs mt-1 text-right ${description.length < 20 ? 'text-zinc-600' : 'text-green-400'}`}>
                   {description.length} characters {description.length < 20 ? `(${20 - description.length} more needed)` : ''}

@@ -49,7 +49,7 @@ export default async function BrowsePage({
   const { data: tailors } = await query.limit(30)
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
       <BrowseClient
         tailors={tailors || []}

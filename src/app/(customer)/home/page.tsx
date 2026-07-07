@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
-import { Ruler, Search, ShoppingBag, CheckCircle, Compass, Home, ArrowRight, Sparkles, Zap, Clock } from 'lucide-react'
+import { Ruler, Search, ShoppingBag, CheckCircle, Compass, Home, ArrowRight, Sparkles } from 'lucide-react'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/lib/utils'
 import type { Profile, Order } from '@/types'
 
@@ -77,7 +77,7 @@ export default function CustomerHome() {
   }, [])
 
   if (loading) return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
       <div className="flex justify-center py-24">
         <div className="w-10 h-10 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
@@ -89,12 +89,12 @@ export default function CustomerHome() {
   const activeOrders = orders.filter(o => !['delivered', 'completed', 'cancelled'].includes(o.status))
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
-      {/* Ambient background glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/3 -right-20 w-72 h-72 bg-fuchsia-600/8 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-80 h-64 bg-amber-600/6 rounded-full blur-3xl" />
+    <div className="min-h-screen">
+      {/* Soft ambient bg */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-violet-400/8 rounded-full blur-3xl" />
+        <div className="absolute top-1/3 -right-20 w-72 h-72 bg-violet-300/6 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 w-80 h-64 bg-amber-400/6 rounded-full blur-3xl" />
       </div>
 
       <Navbar />
@@ -104,17 +104,17 @@ export default function CustomerHome() {
         {/* Welcome bar */}
         <div className="flex items-center justify-between mb-6 fade-up">
           <div>
-            <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mb-0.5">Welcome back</p>
-            <h1 className="text-2xl font-bold text-white">{firstName} ✂️</h1>
+            <p className="text-xs text-zinc-400 font-medium uppercase tracking-widest mb-0.5">Welcome back</p>
+            <h1 className="text-2xl font-bold text-zinc-900">{firstName} ✂️</h1>
           </div>
           <Link href="/browse"
-            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:scale-[1.03] active:scale-[0.97]">
+            className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-lg shadow-violet-500/25 hover:scale-[1.03] active:scale-[0.97]">
             <Search size={14} /> Find Creative
           </Link>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-white/[0.04] rounded-2xl border border-white/[0.07] p-1 mb-6 fade-up-1">
+        <div className="flex gap-1 bg-zinc-100 rounded-2xl border border-zinc-200 p-1 mb-6 fade-up-1">
           {([
             { key: 'home',    label: 'Home',    icon: <Home size={14} /> },
             { key: 'orders',  label: 'Orders',  icon: <ShoppingBag size={14} />, badge: activeOrders.length },
@@ -123,8 +123,8 @@ export default function CustomerHome() {
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 relative ${
                 tab === t.key
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
-                  : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05]'
+                  ? 'bg-violet-600 text-white shadow-md shadow-violet-500/25'
+                  : 'text-zinc-500 hover:text-zinc-700 hover:bg-white'
               }`}>
               {t.icon} {t.label}
               {t.badge ? (
@@ -139,40 +139,35 @@ export default function CustomerHome() {
         {/* ── Home tab ── */}
         {tab === 'home' && (
           <div className="space-y-4">
-            {/* Measurements nudge */}
             {hasMeasurements === false && (
               <Link href="/profile#measurements"
-                className="flex items-center gap-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl px-5 py-4 hover:bg-amber-500/15 transition-all duration-200 group fade-up">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
-                  <Ruler size={18} className="text-amber-400" />
+                className="flex items-center gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 hover:bg-amber-100/60 transition-all duration-200 group fade-up">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Ruler size={18} className="text-amber-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-amber-300 text-sm">Save your measurements</p>
-                  <p className="text-xs text-amber-500 mt-0.5">Creatives use them automatically — no re-measuring</p>
+                  <p className="font-semibold text-amber-800 text-sm">Save your measurements</p>
+                  <p className="text-xs text-amber-600 mt-0.5">Creatives use them automatically — no re-measuring</p>
                 </div>
                 <ArrowRight size={16} className="text-amber-500 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
             {hasMeasurements === true && (
-              <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-5 py-3 fade-up">
-                <CheckCircle size={16} className="text-emerald-400 flex-shrink-0" />
-                <p className="text-sm text-emerald-300 font-medium">Measurements saved</p>
-                <Link href="/profile#measurements" className="ml-auto text-xs text-emerald-400 hover:text-emerald-300 underline underline-offset-2">Update</Link>
+              <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-5 py-3 fade-up">
+                <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
+                <p className="text-sm text-emerald-700 font-medium">Measurements saved</p>
+                <Link href="/profile#measurements" className="ml-auto text-xs text-emerald-600 hover:text-emerald-700 underline underline-offset-2">Update</Link>
               </div>
             )}
 
-            {/* Quick actions — image cards */}
+            {/* Quick action image cards */}
             <div className="grid grid-cols-2 gap-3">
               {QUICK_ACTIONS.map((action, i) => (
                 <Link key={action.href} href={action.href}
-                  className={`relative overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-4 group cursor-pointer shadow-xl ${action.glow} hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 fade-up-${i + 1}`}>
-                  {/* Background image */}
+                  className={`relative overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-4 group cursor-pointer shadow-lg ${action.glow} hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 fade-up-${i + 1}`}>
                   <img src={action.img} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  {/* Gradient overlay */}
                   <div className={`absolute inset-0 bg-gradient-to-t ${action.bg} opacity-70 group-hover:opacity-80 transition-opacity duration-300`} />
-                  {/* Shine sweep on hover */}
                   <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
-                  {/* Content */}
                   <div className="relative z-10">
                     <div className="text-white/90 mb-1.5">{action.icon}</div>
                     <p className="font-bold text-white text-sm leading-tight">{action.label}</p>
@@ -186,18 +181,18 @@ export default function CustomerHome() {
             {/* Active orders preview */}
             {activeOrders.length > 0 && (
               <div className="space-y-2 mt-2">
-                <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Active Orders</p>
+                <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">Active Orders</p>
                 {activeOrders.slice(0, 2).map(order => {
                   const creative = (order as Order & { tailor?: { business_name: string } }).tailor
                   return (
                     <Link key={order.id} href={`/orders/${order.id}`}
-                      className="flex items-center justify-between p-4 bg-white/[0.04] hover:bg-white/[0.07] rounded-2xl border border-white/[0.07] transition-all duration-200 group">
+                      className="flex items-center justify-between p-4 bg-white hover:bg-violet-50/40 rounded-2xl border border-zinc-200 hover:border-violet-200 transition-all duration-200 group shadow-sm">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center text-violet-400 font-bold text-sm flex-shrink-0">
+                        <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center text-violet-600 font-bold text-sm flex-shrink-0">
                           {creative?.business_name?.[0] || '✂'}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{order.title}</p>
+                          <p className="text-sm font-semibold text-zinc-900">{order.title}</p>
                           <p className="text-xs text-zinc-500">{creative?.business_name || 'Creative'}</p>
                         </div>
                       </div>
@@ -205,13 +200,13 @@ export default function CustomerHome() {
                         <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
-                        <ArrowRight size={14} className="text-zinc-600 group-hover:text-zinc-400 transition-colors" />
+                        <ArrowRight size={14} className="text-zinc-400 group-hover:text-zinc-600 transition-colors" />
                       </div>
                     </Link>
                   )
                 })}
                 {activeOrders.length > 2 && (
-                  <Link href="/orders" className="block text-center text-sm text-violet-400 hover:text-violet-300 py-2 transition-colors">
+                  <Link href="/orders" className="block text-center text-sm text-violet-600 hover:text-violet-700 py-2 transition-colors">
                     +{activeOrders.length - 2} more orders →
                   </Link>
                 )}
@@ -224,30 +219,30 @@ export default function CustomerHome() {
         {tab === 'orders' && (
           <div className="space-y-3">
             {orders.length === 0 ? (
-              <div className="text-center py-20 bg-white/[0.03] rounded-3xl border border-white/[0.07]">
+              <div className="text-center py-20 bg-white rounded-3xl border border-zinc-200 shadow-sm">
                 <div className="text-5xl mb-3">✂️</div>
-                <h3 className="font-bold text-white mb-1">No orders yet</h3>
+                <h3 className="font-bold text-zinc-900 mb-1">No orders yet</h3>
                 <p className="text-sm text-zinc-500 mb-5">Browse creatives and place your first order</p>
-                <Link href="/browse" className="inline-flex items-center gap-2 bg-violet-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-500 transition-colors text-sm shadow-lg shadow-violet-500/30">
+                <Link href="/browse" className="inline-flex items-center gap-2 bg-violet-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-violet-500 transition-colors text-sm shadow-lg shadow-violet-500/25">
                   <Search size={15} /> Find a Creative
                 </Link>
               </div>
             ) : (
               <>
                 {activeOrders.length > 0 && (
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Active ({activeOrders.length})</p>
+                  <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest px-1">Active ({activeOrders.length})</p>
                 )}
                 {orders.map(order => {
                   const creative = (order as Order & { tailor?: { business_name: string } }).tailor
                   return (
                     <Link key={order.id} href={`/orders/${order.id}`}
-                      className="flex items-center justify-between p-4 bg-white/[0.04] hover:bg-white/[0.07] rounded-2xl border border-white/[0.07] hover:border-violet-500/30 transition-all duration-200">
+                      className="flex items-center justify-between p-4 bg-white hover:bg-zinc-50 rounded-2xl border border-zinc-200 hover:border-violet-200 transition-all duration-200 shadow-sm">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-violet-500/20 rounded-xl flex items-center justify-center text-violet-400 font-bold text-sm flex-shrink-0">
+                        <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center text-violet-600 font-bold text-sm flex-shrink-0">
                           {creative?.business_name?.[0] || '✂'}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-white">{order.title}</p>
+                          <p className="text-sm font-semibold text-zinc-900">{order.title}</p>
                           <p className="text-xs text-zinc-500">{creative?.business_name || 'Creative'}</p>
                         </div>
                       </div>
@@ -255,7 +250,7 @@ export default function CustomerHome() {
                         <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${ORDER_STATUS_COLORS[order.status]}`}>
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
-                        {order.agreed_price && <p className="text-xs font-bold text-white mt-1">{formatCurrency(order.agreed_price)}</p>}
+                        {order.agreed_price && <p className="text-xs font-bold text-zinc-900 mt-1">{formatCurrency(order.agreed_price)}</p>}
                       </div>
                     </Link>
                   )
@@ -275,15 +270,15 @@ export default function CustomerHome() {
               { href: '/profile#measurements', emoji: null, label: 'My Measurements', sub: hasMeasurements ? 'Saved — tap to update' : 'Not set yet — add now', ruler: true },
             ].map((item, i) => (
               <Link key={item.href} href={item.href}
-                className={`flex items-center gap-4 bg-white/[0.04] hover:bg-white/[0.07] border border-white/[0.07] hover:border-violet-500/25 rounded-2xl p-5 transition-all duration-200 group fade-up-${i + 1}`}>
-                <div className="w-12 h-12 bg-violet-500/10 border border-violet-500/20 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                  {item.ruler ? <Ruler size={20} className="text-violet-400" /> : item.emoji}
+                className={`flex items-center gap-4 bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-violet-200 rounded-2xl p-5 transition-all duration-200 group shadow-sm fade-up-${i + 1}`}>
+                <div className="w-12 h-12 bg-violet-100 border border-violet-200 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                  {item.ruler ? <Ruler size={20} className="text-violet-600" /> : item.emoji}
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-white">{item.label}</p>
+                  <p className="font-bold text-zinc-900">{item.label}</p>
                   <p className="text-sm text-zinc-500 mt-0.5">{item.sub}</p>
                 </div>
-                <ArrowRight size={16} className="text-zinc-600 group-hover:text-zinc-300 group-hover:translate-x-1 transition-all" />
+                <ArrowRight size={16} className="text-zinc-400 group-hover:text-zinc-700 group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
           </div>

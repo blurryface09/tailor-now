@@ -130,7 +130,7 @@ function NewOrderContent() {
   }
 
   if (!tailorId) return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
       <div className="text-center py-20 text-zinc-500">
         No creative selected. <a href="/browse" className="text-violet-400 underline">Browse creatives</a>
@@ -139,7 +139,7 @@ function NewOrderContent() {
   )
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/8 rounded-full blur-3xl" />
       </div>
@@ -160,7 +160,7 @@ function NewOrderContent() {
           ))}
         </div>
 
-        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
           {/* Creative info */}
           {tailor && (
             <div className="flex items-center gap-3 p-3 bg-violet-500/10 border border-violet-500/20 rounded-xl mb-6">
@@ -168,7 +168,7 @@ function NewOrderContent() {
                 {tailor.business_name?.[0]}
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">{tailor.business_name}</p>
+                <p className="text-sm font-semibold text-zinc-900">{tailor.business_name}</p>
                 <p className="text-xs text-zinc-500">{tailor.city}, {tailor.state}</p>
               </div>
             </div>
@@ -177,7 +177,7 @@ function NewOrderContent() {
           {/* Step: Select service */}
           {step === 'service' && (
             <div>
-              <h2 className="text-lg font-bold text-white mb-4">What do you need?</h2>
+              <h2 className="text-lg font-bold text-zinc-900 mb-4">What do you need?</h2>
               <div className="space-y-3">
                 {services.map(s => (
                   <button key={s.id} onClick={() => setSelectedService(s)}
@@ -209,13 +209,13 @@ function NewOrderContent() {
           {/* Step: Order details */}
           {step === 'details' && (
             <div>
-              <h2 className="text-lg font-bold text-white mb-4">Order details</h2>
+              <h2 className="text-lg font-bold text-zinc-900 mb-4">Order details</h2>
               <div className="space-y-4">
                 <Input label="Order title" placeholder="e.g. Aso-oke suit for wedding" value={form.title}
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-1.5">Description</label>
-                  <textarea className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/60 min-h-[100px] transition-all"
+                  <textarea className="w-full rounded-xl bg-white border border-zinc-200 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/60 min-h-[100px] transition-all"
                     placeholder="Describe what you want in detail — style, occasion, colours, etc."
                     value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
                 </div>
@@ -258,7 +258,7 @@ function NewOrderContent() {
           {/* Step: Fabric */}
           {step === 'fabric' && (
             <div>
-              <h2 className="text-lg font-bold text-white mb-1">Fabric sourcing</h2>
+              <h2 className="text-lg font-bold text-zinc-900 mb-1">Fabric sourcing</h2>
               <p className="text-sm text-zinc-500 mb-5">TailorNow can source your fabric — or you can provide your own.</p>
 
               {/* Source choice */}
@@ -286,7 +286,7 @@ function NewOrderContent() {
                   <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
                     {[['', 'All'], ...Object.entries(FABRIC_TYPE_LABELS)].map(([val, label]) => (
                       <button key={val} onClick={() => setFabricFilter(val)}
-                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all border ${fabricFilter === val ? 'bg-amber-400 text-black border-amber-400' : 'bg-white/[0.04] border-white/[0.08] text-zinc-400'}`}>
+                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all border ${fabricFilter === val ? 'bg-amber-400 text-black border-amber-400' : 'bg-white/[0.04] border-zinc-100 text-zinc-400'}`}>
                         {label}
                       </button>
                     ))}
@@ -328,13 +328,13 @@ function NewOrderContent() {
                     <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl"
                       style={{ animation: 'fade-up 0.25s ease both' }}>
                       <div className="flex items-center justify-between mb-3">
-                        <p className="text-sm font-bold text-white">{selectedFabric.name}</p>
+                        <p className="text-sm font-bold text-zinc-900">{selectedFabric.name}</p>
                         <p className="text-xs text-zinc-500">min {selectedFabric.min_yards} yds</p>
                       </div>
                       <label className="block text-xs font-medium text-zinc-400 mb-1.5">How many yards do you need?</label>
                       <div className="flex items-center gap-3">
                         <input type="number" min={selectedFabric.min_yards} step="0.5"
-                          className="w-28 rounded-xl bg-white/[0.08] border border-amber-500/30 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/60 transition-all"
+                          className="w-28 rounded-xl bg-white border border-amber-300 px-4 py-2.5 text-sm text-zinc-900 focus:outline-none focus:border-amber-500/60 transition-all"
                           placeholder={String(selectedFabric.min_yards)}
                           value={fabricYards} onChange={e => setFabricYards(e.target.value)} />
                         <div className="flex-1">
@@ -375,7 +375,7 @@ function NewOrderContent() {
           {/* Step: Measurements */}
           {step === 'measurements' && (
             <div>
-              <h2 className="text-lg font-bold text-white mb-1">Your measurements</h2>
+              <h2 className="text-lg font-bold text-zinc-900 mb-1">Your measurements</h2>
               <p className="text-sm text-zinc-500 mb-4">These will be shared with the creative</p>
               {measurements ? (
                 <div className="grid grid-cols-2 gap-3 p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl mb-4">
@@ -398,7 +398,7 @@ function NewOrderContent() {
               )}
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Additional notes for your creative</label>
-                <textarea className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/60 min-h-[80px] transition-all"
+                <textarea className="w-full rounded-xl bg-white border border-zinc-200 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/60 min-h-[80px] transition-all"
                   placeholder="Any extra notes, fit preferences, special instructions…"
                   value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
               </div>
@@ -414,7 +414,7 @@ function NewOrderContent() {
           {/* Step: Your offer */}
           {step === 'payment' && (
             <div>
-              <h2 className="text-lg font-bold text-white mb-1">Make your offer</h2>
+              <h2 className="text-lg font-bold text-zinc-900 mb-1">Make your offer</h2>
               <p className="text-sm text-zinc-500 mb-5">Propose a tailoring price — the creative will accept or counter.</p>
 
               {selectedService && (
@@ -456,7 +456,7 @@ function NewOrderContent() {
           {/* Step: Confirm */}
           {step === 'confirm' && (
             <div>
-              <h2 className="text-lg font-bold text-white mb-4">Review & place order</h2>
+              <h2 className="text-lg font-bold text-zinc-900 mb-4">Review & place order</h2>
               <div className="space-y-0">
                 {[
                   { label: 'Service', value: selectedService?.title || 'Custom request' },
@@ -464,14 +464,14 @@ function NewOrderContent() {
                   { label: 'Delivery', value: form.delivery_type === 'pickup_delivery' ? 'Pickup & Delivery' : 'Visit Shop' },
                   { label: 'Deadline', value: form.deadline || 'Flexible' },
                 ].map(row => (
-                  <div key={row.label} className="flex gap-3 py-2.5 border-b border-white/[0.06]">
+                  <div key={row.label} className="flex gap-3 py-2.5 border-b border-zinc-100">
                     <span className="text-zinc-500 w-24 flex-shrink-0 text-sm">{row.label}</span>
                     <span className="text-white font-medium text-sm">{row.value}</span>
                   </div>
                 ))}
 
                 {/* Fabric summary */}
-                <div className="flex gap-3 py-2.5 border-b border-white/[0.06]">
+                <div className="flex gap-3 py-2.5 border-b border-zinc-100">
                   <span className="text-zinc-500 w-24 flex-shrink-0 text-sm">Fabric</span>
                   <div>
                     {fabricSource === 'tailornow' && selectedFabric ? (
@@ -496,7 +496,7 @@ function NewOrderContent() {
                   <p className="text-zinc-500 text-sm mb-2">Style refs</p>
                   <div className="flex gap-2 flex-wrap">
                     {styleRefs.map((url, i) => (
-                      <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/[0.08]" />
+                      <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-zinc-100" />
                     ))}
                   </div>
                 </div>
@@ -538,7 +538,7 @@ function NewOrderContent() {
 
 export default function NewOrderPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#09090B] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>}>
       <NewOrderContent />
     </Suspense>
   )

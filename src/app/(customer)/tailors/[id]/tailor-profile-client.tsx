@@ -95,7 +95,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
   const hasCover = coverImages.length > 0
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       {lightbox && <LightboxModal src={lightbox} onClose={() => setLightbox(null)} />}
 
       {/* ── Hero cover ─────────────────────────────────────────── */}
@@ -152,7 +152,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
 
       {/* ── Profile card ───────────────────────────────────────── */}
       <div className="max-w-2xl mx-auto px-4">
-        <div className="relative bg-white/[0.05] backdrop-blur-xl rounded-b-3xl border border-white/[0.08] border-t-0 pb-5 px-5 mb-0 shadow-[0_8px_32px_rgba(109,40,217,0.08)]">
+        <div className="relative bg-white rounded-b-3xl border border-zinc-200 border-t-0 shadow-sm pb-5 px-5 mb-0 shadow-[0_8px_32px_rgba(109,40,217,0.08)]">
           {/* Avatar — overlaps cover */}
           <div className="relative -mt-14 mb-3 flex items-end justify-between">
             <div className="relative flex-shrink-0">
@@ -177,7 +177,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
             <div className="flex gap-2 mb-1">
               {isOwner ? (
                 <Link href="/tailor/profile"
-                  className="flex items-center gap-1.5 px-4 py-2 border-2 border-white/[0.1] text-zinc-300 rounded-full text-sm font-semibold hover:border-violet-300 hover:text-violet-400 transition-colors">
+                  className="flex items-center gap-1.5 px-4 py-2 border-2 border-zinc-200 text-zinc-600 rounded-full text-sm font-semibold hover:border-violet-300 hover:text-violet-600 transition-colors">
                   <Pencil size={14} /> Edit
                 </Link>
               ) : (
@@ -188,13 +188,13 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                     className={`flex items-center gap-1.5 px-3 py-2 border-2 rounded-full text-sm font-semibold transition-all ${
                       liked
                         ? 'border-rose-500/60 bg-rose-500/10 text-rose-400'
-                        : 'border-white/[0.1] text-zinc-500 hover:border-rose-500/50 hover:text-rose-400'
+                        : 'border-zinc-200 text-zinc-500 hover:border-rose-500/50 hover:text-rose-500'
                     }`}>
                     <Heart size={14} className={liked ? 'fill-rose-500' : ''} />
                     <span>{likesCount > 0 ? likesCount : ''}</span>
                   </button>
                   <Link href={`/chat?tailor=${tailor.id}`}
-                    className="flex items-center gap-1.5 px-4 py-2 border-2 border-white/[0.1] text-zinc-300 rounded-full text-sm font-semibold hover:border-violet-400 hover:text-violet-400 transition-colors">
+                    className="flex items-center gap-1.5 px-4 py-2 border-2 border-zinc-200 text-zinc-600 rounded-full text-sm font-semibold hover:border-violet-400 hover:text-violet-600 transition-colors">
                     <MessageSquare size={14} /> Message
                   </Link>
                   <Link href={`/orders/new?tailor=${tailor.id}`}
@@ -209,7 +209,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
           {/* Name & verification */}
           <div className="mb-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-xl font-bold text-white">{tailor.business_name}</h1>
+              <h1 className="text-xl {font-bold text-zinc-900">{tailor.business_name}</h1>
               {tailor.is_verified && (
                 <BadgeCheck size={20} className="text-violet-600 flex-shrink-0" />
               )}
@@ -267,25 +267,25 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
           )}
 
           {/* Stats row — like Twitter */}
-          <div className="flex gap-5 text-sm border-t border-white/[0.08] pt-4">
+          <div className="flex gap-5 text-sm border-t border-zinc-100 pt-4">
             <div className="text-center">
-              <div className="font-bold text-white">{hasOrders ? tailor.total_orders : 0}</div>
+              <div className="{font-bold text-zinc-900">{hasOrders ? tailor.total_orders : 0}</div>
               <div className="text-xs text-zinc-600">Orders</div>
             </div>
             <div className="text-center">
-              <div className="font-bold text-white flex items-center gap-1 justify-center">
+              <div className="font-bold text-zinc-900 flex items-center gap-1 justify-center">
                 <Star size={13} className="text-amber-400 fill-amber-400" />
                 {hasRating ? tailor.avg_rating.toFixed(1) : '—'}
               </div>
               <div className="text-xs text-zinc-600">{tailor.total_reviews} reviews</div>
             </div>
             <div className="text-center">
-              <div className="font-bold text-white">{portfolio.length}</div>
+              <div className="{font-bold text-zinc-900">{portfolio.length}</div>
               <div className="text-xs text-zinc-600">Portfolio</div>
             </div>
             {hasOrders && (
               <div className="text-center">
-                <div className="font-bold text-white">{Math.round(tailor.completion_rate || 0)}%</div>
+                <div className="{font-bold text-zinc-900">{Math.round(tailor.completion_rate || 0)}%</div>
                 <div className="text-xs text-zinc-600">Completion</div>
               </div>
             )}
@@ -298,7 +298,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
         </div>
 
         {/* ── Tabs ───────────────────────────────────────────────── */}
-        <div className="flex border-b border-white/[0.1] bg-[#09090B]/80 backdrop-blur-xl sticky top-16 z-10">
+        <div className="flex border-b border-zinc-200 bg-white/95 backdrop-blur-xl sticky top-16 z-10">
           {(['portfolio', 'about', 'services', 'reviews'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={cn(
@@ -321,7 +321,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
             {portfolio.length === 0 ? (
               isOwner ? (
                 <Link href="/tailor/portfolio"
-                  className="flex flex-col items-center justify-center py-20 bg-white/[0.05] backdrop-blur-xl rounded-2xl border-2 border-dashed border-white/[0.1] hover:border-violet-300 hover:bg-violet-500/10 transition-all group mt-1">
+                  className="flex flex-col items-center justify-center py-20 bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200 hover:border-violet-300 hover:bg-violet-50 transition-all group mt-1">
                   <div className="text-5xl mb-3">📸</div>
                   <p className="font-semibold text-zinc-300 group-hover:text-violet-300 mb-1">Add your design photos</p>
                   <p className="text-sm text-zinc-600 mb-4 text-center max-w-xs">Show your work — customers decide who to book based on what they see</p>
@@ -388,7 +388,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                 </div>
                 {isOwner && (
                   <Link href="/tailor/portfolio"
-                    className="flex items-center justify-center gap-2 mt-4 py-3 bg-white/[0.05] backdrop-blur-xl rounded-2xl border-2 border-dashed border-white/[0.1] hover:border-violet-300 hover:bg-violet-500/10 transition-all text-sm font-semibold text-zinc-500 hover:text-violet-700">
+                    className="flex items-center justify-center gap-2 mt-4 py-3 bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200 hover:border-violet-300 hover:bg-violet-50 transition-all text-sm font-semibold text-zinc-500 hover:text-violet-700">
                     + Add more photos
                   </Link>
                 )}
@@ -400,8 +400,8 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
         {/* ── About tab ─────────────────────────────────────────── */}
         {tab === 'about' && (
           <div className="py-4 space-y-3">
-            <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
-              <h2 className="font-bold text-white mb-3">About</h2>
+            <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5">
+              <h2 className="font-bold text-zinc-900 mb-3">About</h2>
               {tailor.bio ? (
                 <p className="text-zinc-400 leading-relaxed text-sm">{tailor.bio}</p>
               ) : isOwner ? (
@@ -418,8 +418,8 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
               )}
             </div>
 
-            <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
-              <h2 className="font-bold text-white mb-3">Details</h2>
+            <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5">
+              <h2 className="font-bold text-zinc-900 mb-3">Details</h2>
               <div className="space-y-2.5 text-sm">
                 <div className="flex items-center gap-2.5 text-zinc-300">
                   <MapPin size={15} className="text-violet-500 flex-shrink-0" />
@@ -464,8 +464,8 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
             </div>
 
             {(tailor.specialties || []).length > 0 && (
-              <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
-                <h2 className="font-bold text-white mb-3">Specialties</h2>
+              <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5">
+                <h2 className="font-bold text-zinc-900 mb-3">Specialties</h2>
                 <div className="flex flex-wrap gap-2">
                   {tailor.specialties.map(s => (
                     <span key={s} className="flex items-center gap-1.5 text-sm bg-violet-50 text-violet-400 px-3 py-2 rounded-xl font-medium border border-violet-500/20">
@@ -487,12 +487,12 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
               const done = items.filter(i => i.done).length
               if (done === items.length) return null
               return (
-                <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-violet-500/20 p-5">
+                <div className="bg-violet-50 rounded-2xl border border-violet-200 p-5">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-white text-sm">Complete your profile</h3>
+                    <h3 className="font-bold text-zinc-900 text-sm">Complete your profile</h3>
                     <span className="text-sm font-bold text-violet-700">{Math.round((done / items.length) * 100)}%</span>
                   </div>
-                  <div className="w-full h-1.5 bg-white/[0.06] rounded-full mb-3">
+                  <div className="w-full h-1.5 bg-zinc-100 rounded-full mb-3">
                     <div className="h-1.5 rounded-full bg-violet-600 transition-all duration-500" style={{ width: `${(done / items.length) * 100}%` }} />
                   </div>
                   <div className="space-y-1.5">
@@ -515,14 +515,14 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
             {services.length === 0 ? (
               isOwner ? (
                 <Link href="/tailor/pricing"
-                  className="flex flex-col items-center justify-center py-20 bg-white/[0.05] backdrop-blur-xl rounded-2xl border-2 border-dashed border-white/[0.1] hover:border-violet-300 hover:bg-violet-500/10 transition-all group">
+                  className="flex flex-col items-center justify-center py-20 bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200 hover:border-violet-300 hover:bg-violet-50 transition-all group">
                   <div className="text-5xl mb-3">💼</div>
                   <p className="font-semibold text-zinc-300 group-hover:text-violet-300 mb-1">List your services</p>
                   <p className="text-sm text-zinc-600 mb-4 text-center max-w-xs">Add your services with pricing</p>
                   <span className="bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-full">+ Add services</span>
                 </Link>
               ) : (
-                <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
+                <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5">
                   <p className="text-sm text-zinc-500 mb-4">Service pricing hasn't been listed yet. This creative specialises in:</p>
                   {(tailor.specialties || []).length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 mb-5">
@@ -544,12 +544,12 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
               )
             ) : (
               services.map((service) => (
-                <div key={service.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 hover:border-violet-500/30 hover:shadow-sm transition-all">
+                <div key={service.id} className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 hover:border-violet-500/30 hover:shadow-sm transition-all">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span className="text-xl">{SERVICE_ICONS[service.service_type]}</span>
-                        <h3 className="font-semibold text-white">{service.title}</h3>
+                        <h3 className="font-semibold text-zinc-900">{service.title}</h3>
                         <Badge variant="default">{SERVICE_LABELS[service.service_type]}</Badge>
                       </div>
                       {service.description && <p className="text-sm text-zinc-500 mb-2">{service.description}</p>}
@@ -578,13 +578,13 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
         {tab === 'reviews' && (
           <div className="py-4 space-y-3">
             {ratings.length === 0 ? (
-              <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] px-6 py-10 text-center">
+              <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm px-6 py-10 text-center">
                 <div className="flex justify-center gap-1.5 mb-4">
                   {[1,2,3,4,5].map(i => (
                     <Star key={i} size={30} className="text-amber-300 fill-amber-300" />
                   ))}
                 </div>
-                <h3 className="font-bold text-white text-lg mb-1.5">No reviews yet</h3>
+                <h3 className="font-bold text-zinc-900 text-lg mb-1.5">No reviews yet</h3>
                 <p className="text-sm text-zinc-600 max-w-xs mx-auto">
                   {isOwner
                     ? 'Complete your first order to start collecting reviews'
@@ -599,22 +599,22 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
               </div>
             ) : (
               <>
-                <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 flex items-center gap-5">
+                <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5 flex items-center gap-5">
                   <div className="text-center">
-                    <div className="text-4xl font-black text-white">{tailor.avg_rating.toFixed(1)}</div>
+                    <div className="text-4xl font-black text-zinc-900">{tailor.avg_rating.toFixed(1)}</div>
                     <StarRating value={Math.round(tailor.avg_rating)} readonly size="sm" />
                     <div className="text-xs text-zinc-600 mt-1">{ratings.length} review{ratings.length !== 1 ? 's' : ''}</div>
                   </div>
                 </div>
                 {ratings.map((rating) => (
-                  <div key={rating.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5">
+                  <div key={rating.id} className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center text-violet-400 font-semibold text-sm">
                           {rating.reviewer?.full_name?.[0]?.toUpperCase() || 'U'}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">{rating.reviewer?.full_name || 'Customer'}</p>
+                          <p className="text-sm font-medium text-zinc-900">{rating.reviewer?.full_name || 'Customer'}</p>
                           <p className="text-xs text-zinc-600">{formatDate(rating.created_at)}</p>
                         </div>
                       </div>

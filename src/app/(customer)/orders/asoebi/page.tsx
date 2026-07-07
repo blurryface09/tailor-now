@@ -71,7 +71,7 @@ export default function AseobiOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8 page-enter">
 
@@ -96,14 +96,14 @@ export default function AseobiOrderPage() {
           ))}
         </div>
 
-        <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 shadow-sm">
 
           {/* Step 1: Event details */}
           {step === 'details' && (
             <div className="space-y-4 fade-up">
               <div className="flex items-center gap-2 mb-2">
                 <Crown size={18} className="text-amber-500" />
-                <h2 className="text-lg font-bold text-white">Event details</h2>
+                <h2 className="text-lg font-bold text-zinc-900">Event details</h2>
               </div>
               <Input label="Event name" placeholder="e.g. Adaeze and Emeka's wedding" value={form.event_name}
                 onChange={e => setForm(f => ({ ...f, event_name: e.target.value }))} required />
@@ -112,7 +112,7 @@ export default function AseobiOrderPage() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Style description</label>
                 <textarea
-                  className="w-full rounded-xl border border-white/[0.1] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 min-h-[90px] transition-all"
+                  className="w-full rounded-xl border border-zinc-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 min-h-[90px] transition-all"
                   placeholder="Describe the style — blouse and wrapper, agbada, gown, etc. Include any photos or inspo links."
                   value={form.style_description}
                   onChange={e => setForm(f => ({ ...f, style_description: e.target.value }))}
@@ -138,7 +138,7 @@ export default function AseobiOrderPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Users size={18} className="text-violet-600" />
-                  <h2 className="text-lg font-bold text-white">Group members</h2>
+                  <h2 className="text-lg font-bold text-zinc-900">Group members</h2>
                 </div>
                 <span className="text-sm text-violet-600 font-semibold bg-violet-50 px-3 py-1 rounded-full">
                   {validMembers.length} added
@@ -147,7 +147,7 @@ export default function AseobiOrderPage() {
 
               <div className="space-y-3 mb-4 max-h-80 overflow-y-auto pr-1">
                 {members.map((m, i) => (
-                  <div key={i} className="p-4 bg-[#09090B] rounded-xl border border-white/[0.08] scale-in">
+                  <div key={i} className="p-4 bg-white rounded-xl border border-zinc-200 scale-in">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
                         Member {i + 1}
@@ -159,11 +159,11 @@ export default function AseobiOrderPage() {
                       )}
                     </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <input className="px-3 py-2 rounded-lg border border-white/[0.1] text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                      <input className="px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                         placeholder="Full name" value={m.name} onChange={e => updateMember(i, 'name', e.target.value)} />
-                      <input className="px-3 py-2 rounded-lg border border-white/[0.1] text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                      <input className="px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                         placeholder="Phone number" value={m.phone} onChange={e => updateMember(i, 'phone', e.target.value)} />
-                      <input className="col-span-2 px-3 py-2 rounded-lg border border-white/[0.1] text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
+                      <input className="col-span-2 px-3 py-2 rounded-lg border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 transition-all"
                         placeholder="Measurements (e.g. 36 bust, 32 waist)" value={m.measurements} onChange={e => updateMember(i, 'measurements', e.target.value)} />
                     </div>
                   </div>
@@ -201,7 +201,7 @@ export default function AseobiOrderPage() {
             <div className="fade-up">
               <div className="flex items-center gap-2 mb-4">
                 <Shirt size={18} className="text-violet-600" />
-                <h2 className="text-lg font-bold text-white">Review and place order</h2>
+                <h2 className="text-lg font-bold text-zinc-900">Review and place order</h2>
               </div>
 
               <div className="space-y-3 text-sm mb-5">
@@ -212,7 +212,7 @@ export default function AseobiOrderPage() {
                   { label: 'Event date', value: form.deadline || 'Flexible' },
                   { label: 'Total', value: totalPrice ? formatCurrency(totalPrice) : 'To be agreed' },
                 ].map(row => (
-                  <div key={row.label} className="flex gap-3 py-2 border-b border-white/[0.08]">
+                  <div key={row.label} className="flex gap-3 py-2 border-b border-zinc-100">
                     <span className="text-zinc-500 w-24 flex-shrink-0">{row.label}</span>
                     <span className="text-white font-semibold">{row.value}</span>
                   </div>

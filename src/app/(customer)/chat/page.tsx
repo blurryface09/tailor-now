@@ -17,24 +17,24 @@ type RoomWithProfiles = ChatRoom & { customer: Profile; tailor: Profile }
 function FraudWarning({ onDismiss, onCancel }: { onDismiss: () => void; onCancel: () => void }) {
   return (
     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-end justify-center z-20 p-4">
-      <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm bounce-in">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-sm bounce-in shadow-2xl border border-zinc-200">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <AlertTriangle size={20} className="text-red-600" />
           </div>
           <div>
-            <h3 className="font-bold text-white">Payment outside the app?</h3>
+            <h3 className="font-bold text-zinc-900">Payment outside the app?</h3>
             <p className="text-xs text-zinc-500">This looks like bank details</p>
           </div>
         </div>
-        <p className="text-sm text-zinc-400 mb-4 leading-relaxed">
+        <p className="text-sm text-zinc-600 mb-4 leading-relaxed">
           Sending bank account details may lead to losing your payment protection, dispute coverage, and order guarantee. Keep all payments inside TailorNow — you are protected.
         </p>
         <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 py-2.5 text-sm font-semibold text-zinc-400 bg-white/[0.06] rounded-xl hover:bg-white/[0.08] transition-colors">
+          <button onClick={onCancel} className="flex-1 py-2.5 text-sm font-semibold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors">
             Edit message
           </button>
-          <button onClick={onDismiss} className="flex-1 py-2.5 text-sm font-semibold text-red-600 bg-red-500/10 rounded-xl hover:bg-red-100 transition-colors">
+          <button onClick={onDismiss} className="flex-1 py-2.5 text-sm font-semibold text-red-600 bg-red-50 rounded-xl hover:bg-red-100 transition-colors">
             Send anyway
           </button>
         </div>
@@ -46,19 +46,19 @@ function FraudWarning({ onDismiss, onCancel }: { onDismiss: () => void; onCancel
 function ContactGateModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-20 p-4">
-      <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm bounce-in text-center">
+      <div className="bg-white rounded-2xl p-6 w-full max-w-sm bounce-in text-center shadow-2xl border border-zinc-200">
         <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Lock size={24} className="text-amber-600" />
         </div>
-        <h3 className="font-bold text-white mb-2">Place an order to chat directly</h3>
+        <h3 className="font-bold text-zinc-900 mb-2">Place an order to chat directly</h3>
         <p className="text-sm text-zinc-500 mb-5 leading-relaxed">
           Contact details unlock once payment is confirmed on an order. This keeps both you and the creative protected.
         </p>
         <div className="space-y-2">
-          <Link href="/orders/new" className="block w-full py-3 bg-violet-700 text-white text-sm font-bold rounded-xl hover:bg-violet-800 transition-colors">
+          <Link href="/orders/new" className="block w-full py-3 bg-violet-600 text-white text-sm font-bold rounded-xl hover:bg-violet-700 transition-colors">
             Place an order first
           </Link>
-          <button onClick={onClose} className="w-full py-2.5 text-sm text-zinc-500 hover:text-zinc-300 transition-colors">
+          <button onClick={onClose} className="w-full py-2.5 text-sm text-zinc-500 hover:text-zinc-700 transition-colors">
             Close
           </button>
         </div>
@@ -157,13 +157,8 @@ function ChatContent() {
       .insert({ room_id: room.id, sender_id: userId, content: content.trim() })
       .select('*, sender:profiles(*)')
       .single()
-    // Append immediately — don't rely solely on the realtime subscription, which
-    // requires chat_messages to be in the supabase_realtime publication (see
-    // supabase/realtime-chat-fix.sql). Without this, the sender's own message
-    // would only appear after a manual refresh.
     if (inserted) setMessages(m => [...m, inserted as MessageWithSender])
     await supabase.from('chat_rooms').update({ last_message: content.trim(), last_message_at: new Date().toISOString() }).eq('id', room.id)
-    // Notify the other party
     const recipientId = userId === room.customer_id ? room.tailor_id : room.customer_id
     const senderName = (userId === room.customer_id ? room.customer : room.tailor)?.full_name || 'Someone'
     await supabase.from('notifications').insert({
@@ -215,21 +210,21 @@ function ChatContent() {
   const otherDisplayName = otherIsAdmin ? 'TailorNow' : otherPerson?.full_name
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-4 flex gap-4" style={{ height: 'calc(100vh - 4rem)' }}>
 
         {/* Room list */}
-        <div className={cn('w-80 flex-shrink-0 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] flex flex-col overflow-hidden', activeRoom && 'hidden md:flex')}>
-          <div className="p-4 border-b border-white/[0.08] flex items-center justify-between">
-            <h2 className="font-bold text-white">Messages</h2>
-            <div className="flex items-center gap-1 text-xs text-green-400 bg-green-500/10 px-2.5 py-1 rounded-full font-medium">
+        <div className={cn('w-80 flex-shrink-0 bg-white rounded-2xl border border-zinc-200 shadow-sm flex flex-col overflow-hidden', activeRoom && 'hidden md:flex')}>
+          <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
+            <h2 className="font-bold text-zinc-900">Messages</h2>
+            <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 border border-green-200 px-2.5 py-1 rounded-full font-medium">
               <ShieldCheck size={11} /> Protected
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
             {rooms.length === 0 && (
-              <div className="text-center py-12 text-zinc-600 text-sm px-4">
+              <div className="text-center py-12 text-zinc-500 text-sm px-4">
                 No conversations yet. Browse tailors and start chatting!
               </div>
             )}
@@ -239,20 +234,20 @@ function ChatContent() {
               const displayName = otherIsAdmin ? 'TailorNow' : other?.full_name
               return (
                 <button key={room.id} onClick={() => setActiveRoom(room)}
-                  className={cn('w-full text-left p-4 hover:bg-white/[0.06] transition-colors border-b border-gray-50', activeRoom?.id === room.id && 'bg-violet-50 border-l-2 border-l-violet-600')}>
+                  className={cn('w-full text-left p-4 hover:bg-zinc-50 transition-colors border-b border-zinc-100', activeRoom?.id === room.id && 'bg-violet-50 border-l-2 border-l-violet-600')}>
                   <div className="flex items-center gap-3">
                     <div className={cn('w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0', otherIsAdmin ? 'bg-violet-700' : 'bg-gradient-to-br from-violet-400 to-violet-600')}>
                       {otherIsAdmin ? '✂' : other?.full_name?.[0]?.toUpperCase() || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+                        <p className="text-sm font-semibold text-zinc-900 truncate">{displayName}</p>
                         {otherIsAdmin && <BadgeCheck size={12} className="text-violet-600 flex-shrink-0" />}
                       </div>
-                      <p className="text-xs text-zinc-600 truncate">{room.last_message || 'No messages yet'}</p>
+                      <p className="text-xs text-zinc-500 truncate">{room.last_message || 'No messages yet'}</p>
                     </div>
                     {room.last_message_at && (
-                      <span className="text-xs text-zinc-600 flex-shrink-0">{formatRelativeTime(room.last_message_at)}</span>
+                      <span className="text-xs text-zinc-400 flex-shrink-0">{formatRelativeTime(room.last_message_at)}</span>
                     )}
                   </div>
                 </button>
@@ -262,18 +257,18 @@ function ChatContent() {
         </div>
 
         {/* Chat window */}
-        <div className={cn('flex-1 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] flex flex-col overflow-hidden relative', !activeRoom && 'hidden md:flex')}>
+        <div className={cn('flex-1 bg-white rounded-2xl border border-zinc-200 shadow-sm flex flex-col overflow-hidden relative', !activeRoom && 'hidden md:flex')}>
           {!activeRoom ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
               <div className="w-16 h-16 bg-violet-50 rounded-2xl flex items-center justify-center mb-4 text-3xl">💬</div>
-              <h3 className="text-lg font-bold text-white mb-2">Select a conversation</h3>
-              <p className="text-zinc-600 text-sm">or <Link href="/browse" className="text-violet-600 font-medium hover:underline">browse tailors</Link> to start one</p>
+              <h3 className="text-lg font-bold text-zinc-900 mb-2">Select a conversation</h3>
+              <p className="text-zinc-500 text-sm">or <Link href="/browse" className="text-violet-600 font-medium hover:underline">browse tailors</Link> to start one</p>
             </div>
           ) : (
             <>
               {/* Chat header */}
-              <div className="px-4 py-3 border-b border-white/[0.08] flex items-center gap-3 bg-white">
-                <button className="md:hidden p-1 hover:bg-white/[0.06] rounded-lg transition-colors" onClick={() => setActiveRoom(null)}>
+              <div className="px-4 py-3 border-b border-zinc-200 flex items-center gap-3 bg-white">
+                <button className="md:hidden p-1 hover:bg-zinc-100 rounded-lg transition-colors" onClick={() => setActiveRoom(null)}>
                   <ArrowLeft size={20} />
                 </button>
                 <div className={cn('w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm', otherIsAdmin ? 'bg-violet-700' : 'bg-gradient-to-br from-violet-400 to-violet-600')}>
@@ -281,12 +276,12 @@ function ChatContent() {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-bold text-white">{otherDisplayName}</p>
+                    <p className="text-sm font-bold text-zinc-900">{otherDisplayName}</p>
                     {otherIsAdmin && <BadgeCheck size={14} className="text-violet-600" />}
                   </div>
                   {otherIsAdmin
                     ? <p className="text-xs text-violet-600 font-medium">Official TailorNow Support</p>
-                    : <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-400 rounded-full" /><p className="text-xs text-green-500 font-medium">Online</p></div>
+                    : <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-400 rounded-full" /><p className="text-xs text-green-600 font-medium">Online</p></div>
                   }
                 </div>
                 <button
@@ -294,8 +289,8 @@ function ChatContent() {
                   className={cn(
                     'flex items-center gap-1.5 text-xs font-semibold border px-3 py-1.5 rounded-full transition-all',
                     hasDepositOrder
-                      ? 'text-violet-600 border-violet-500/30 hover:bg-violet-500/10'
-                      : 'text-zinc-600 border-white/[0.1] cursor-pointer hover:border-amber-500/30 hover:text-amber-600'
+                      ? 'text-violet-600 border-violet-300 hover:bg-violet-50'
+                      : 'text-zinc-500 border-zinc-200 cursor-pointer hover:border-amber-300 hover:text-amber-600'
                   )}
                 >
                   {hasDepositOrder ? <Phone size={12} /> : <Lock size={12} />}
@@ -304,15 +299,15 @@ function ChatContent() {
               </div>
 
               {/* Payment protection banner */}
-              <div className="bg-violet-50 border-b border-violet-500/20 px-4 py-2 flex items-center gap-2">
+              <div className="bg-violet-50 border-b border-violet-100 px-4 py-2 flex items-center gap-2">
                 <ShieldCheck size={13} className="text-violet-600 flex-shrink-0" />
-                <p className="text-xs text-violet-400 font-medium">
+                <p className="text-xs text-violet-700 font-medium">
                   All payments are protected. Pay through TailorNow only — never send money outside the app.
                 </p>
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#09090B]/30">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-zinc-50">
                 {messages.map(msg => {
                   const isMe = msg.sender_id === userId
                   const hasBankAlert = containsBankDetails(msg.content)
@@ -342,14 +337,14 @@ function ChatContent() {
                         )}
                         <div className={cn(
                           'px-4 py-2.5 rounded-2xl text-sm leading-relaxed',
-                          isMe ? 'bg-violet-700 text-white rounded-tr-sm' : 'bg-white text-white rounded-tl-sm shadow-sm border border-white/[0.08]',
-                          isAdmin && !isMe && 'bg-violet-50 border-violet-500/30',
-                          msg.message_type === 'contact' && 'bg-amber-500/10 border border-amber-500/20 text-amber-300 font-medium',
+                          isMe ? 'bg-violet-600 text-white rounded-tr-sm' : 'bg-white text-zinc-900 rounded-tl-sm shadow-sm border border-zinc-200',
+                          isAdmin && !isMe && 'bg-violet-50 border-violet-200 text-violet-900',
+                          msg.message_type === 'contact' && 'bg-amber-50 border border-amber-200 text-amber-700 font-medium',
                           hasBankAlert && 'ring-1 ring-red-300'
                         )}>
                           {msg.content}
                         </div>
-                        <span className="text-xs text-zinc-600 mt-0.5 px-1">{formatRelativeTime(msg.created_at)}</span>
+                        <span className="text-xs text-zinc-400 mt-0.5 px-1">{formatRelativeTime(msg.created_at)}</span>
                       </div>
                     </div>
                   )
@@ -358,9 +353,9 @@ function ChatContent() {
               </div>
 
               {/* Input */}
-              <form onSubmit={handleSend} className="p-4 border-t border-white/[0.08] flex gap-2 bg-white">
+              <form onSubmit={handleSend} className="p-4 border-t border-zinc-200 flex gap-2 bg-white">
                 <input
-                  className="flex-1 rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition-all"
+                  className="flex-1 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition-all"
                   placeholder="Type a message..."
                   value={text}
                   onChange={e => setText(e.target.value)}
@@ -398,7 +393,7 @@ function ChatContent() {
 
 export default function ChatPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#09090B] flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full" /></div>}>
       <ChatContent />
     </Suspense>
   )

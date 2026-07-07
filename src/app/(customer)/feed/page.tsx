@@ -113,7 +113,7 @@ function DemoProductCard({ post, idx }: { post: DemoProduct; idx: number }) {
   const priceLabel = formatPrice(post.price)
 
   return (
-    <div className="bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:border-violet-500/20 hover:shadow-2xl hover:shadow-violet-500/8 transition-all duration-300"
+    <div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden group hover:border-violet-200 hover:shadow-lg transition-all duration-300 shadow-sm"
       style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}>
       {/* Image */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
@@ -167,8 +167,8 @@ function DemoProductCard({ post, idx }: { post: DemoProduct; idx: number }) {
 
       {/* Card body */}
       <div className="px-4 pt-3.5 pb-4">
-        {post.title && <p className="font-bold text-white text-sm mb-1">{post.title}</p>}
-        <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{post.caption}</p>
+        {post.title && <p className="font-bold text-zinc-900 text-sm mb-1">{post.title}</p>}
+        <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">{post.caption}</p>
 
         {/* CTAs */}
         <div className="flex gap-2 mt-3.5">
@@ -177,20 +177,20 @@ function DemoProductCard({ post, idx }: { post: DemoProduct; idx: number }) {
             <ShoppingBag size={12} /> Order this fit
           </Link>
           <Link href="/browse"
-            className="flex items-center gap-1 bg-white/[0.07] hover:bg-violet-500/15 border border-white/[0.1] hover:border-violet-500/30 text-white/80 hover:text-violet-300 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
+            className="flex items-center gap-1 bg-zinc-50 hover:bg-violet-50 border border-zinc-200 hover:border-violet-300 text-zinc-700 hover:text-violet-600 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
             <Scissors size={11} /> Custom
           </Link>
           <Link href="/browse"
-            className="flex items-center gap-1 bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] text-white/80 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
+            className="flex items-center gap-1 bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
             <MessageSquare size={11} /> Chat
           </Link>
         </div>
       </div>
 
       {showComments && (
-        <div className="border-t border-white/[0.06] px-4 py-3">
-          <p className="text-xs text-zinc-600 text-center mb-2">Sign in to join the conversation</p>
-          <Link href="/login" className="block text-center text-xs text-violet-400 font-semibold">Sign in →</Link>
+        <div className="border-t border-zinc-100 px-4 py-3">
+          <p className="text-xs text-zinc-500 text-center mb-2">Sign in to join the conversation</p>
+          <Link href="/login" className="block text-center text-xs text-violet-600 font-semibold">Sign in →</Link>
         </div>
       )}
     </div>
@@ -205,7 +205,7 @@ function DemoInspoCard({ post, idx }: { post: DemoInspo; idx: number }) {
   const [likes, setLikes] = useState(post.likes)
 
   return (
-    <div className="bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:border-fuchsia-500/20 hover:shadow-xl hover:shadow-fuchsia-500/8 transition-all duration-300"
+    <div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden group hover:border-fuchsia-200 hover:shadow-lg transition-all duration-300 shadow-sm"
       style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}>
       <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
         <img src={post.image} alt="Inspiration" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
@@ -237,11 +237,11 @@ function DemoInspoCard({ post, idx }: { post: DemoInspo; idx: number }) {
         </div>
       </div>
       <div className="px-4 pt-3.5 pb-4">
-        <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{post.caption}</p>
+        <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">{post.caption}</p>
         <div className="flex items-center justify-between mt-3.5">
-          <span className="text-xs text-zinc-600">Just now</span>
+          <span className="text-xs text-zinc-400">Just now</span>
           <Link href="/browse"
-            className="flex items-center gap-1.5 text-xs font-bold text-fuchsia-400 hover:text-fuchsia-300 transition-colors">
+            className="flex items-center gap-1.5 text-xs font-bold text-fuchsia-600 hover:text-fuchsia-500 transition-colors">
             Find a creative <ArrowRight size={11} />
           </Link>
         </div>
@@ -293,12 +293,11 @@ function PostCard({
     setCommentText(''); setPosting(false); loadComments()
   }
 
-  const borderColor = isInspo ? 'border-fuchsia-500/20' : 'border-violet-500/20'
-  const shadowColor = isInspo ? 'hover:shadow-fuchsia-500/8' : 'hover:shadow-violet-500/8'
+  const borderColor = isInspo ? 'hover:border-fuchsia-200' : 'hover:border-violet-200'
 
   return (
     <div
-      className={`bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:${borderColor} hover:shadow-2xl ${shadowColor} transition-all duration-300`}
+      className={`bg-white border border-zinc-200 rounded-3xl overflow-hidden group ${borderColor} hover:shadow-lg transition-all duration-300 shadow-sm`}
       style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}
     >
       {post.image_urls.length > 0 && (
@@ -405,8 +404,8 @@ function PostCard({
 
       {/* Card body */}
       <div className="px-4 pt-3.5 pb-4">
-        {post.title && <p className="font-bold text-white text-sm mb-1">{post.title}</p>}
-        {captionBody && <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{captionBody}</p>}
+        {post.title && <p className="font-bold text-zinc-900 text-sm mb-1">{post.title}</p>}
+        {captionBody && <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">{captionBody}</p>}
 
         {isProduct && !isAdminPost ? (
           <div className="flex gap-2 mt-3.5">
@@ -415,12 +414,12 @@ function PostCard({
               <ShoppingBag size={12} /> Order this fit
             </Link>
             <Link href={`/orders/new?tailor=${post.creative_id}&custom=true`}
-              className="flex items-center gap-1 bg-white/[0.07] hover:bg-violet-500/15 border border-white/[0.1] hover:border-violet-500/30 text-white/80 hover:text-violet-300 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
+              className="flex items-center gap-1 bg-zinc-50 hover:bg-violet-50 border border-zinc-200 hover:border-violet-300 text-zinc-700 hover:text-violet-600 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
               <Scissors size={11} /> Custom
             </Link>
             {!isOwnPost && userId && (
               <button onClick={() => onFollow(creativeUserId, isFollowing)}
-                className={`flex items-center text-xs font-semibold px-3 py-2.5 rounded-2xl border transition-all ${isFollowing ? 'border-white/10 text-zinc-500 hover:text-red-400' : 'border-violet-500/30 text-violet-400 hover:bg-violet-500/10'}`}>
+                className={`flex items-center text-xs font-semibold px-3 py-2.5 rounded-2xl border transition-all ${isFollowing ? 'border-zinc-200 text-zinc-400 hover:text-red-500' : 'border-violet-300 text-violet-600 hover:bg-violet-50'}`}>
                 {isFollowing ? '✓' : '+'}
               </button>
             )}
@@ -442,17 +441,17 @@ function PostCard({
 
       {/* Comments */}
       {showComments && (
-        <div className="border-t border-white/[0.06] px-4 py-3">
+        <div className="border-t border-zinc-100 px-4 py-3">
           <div className="space-y-3 max-h-44 overflow-y-auto scrollbar-hide mb-3">
-            {comments.length === 0 && <p className="text-xs text-zinc-600 text-center py-2">No comments yet — be first!</p>}
+            {comments.length === 0 && <p className="text-xs text-zinc-500 text-center py-2">No comments yet — be first!</p>}
             {comments.map(c => (
               <div key={c.id} className="flex gap-2">
-                <div className="w-6 h-6 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 font-bold text-xs flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-bold text-xs flex-shrink-0">
                   {c.author?.full_name?.[0]?.toUpperCase() || 'U'}
                 </div>
                 <div>
-                  <span className="text-xs font-semibold text-white">{c.author?.full_name} </span>
-                  <span className="text-xs text-zinc-400">{c.content}</span>
+                  <span className="text-xs font-semibold text-zinc-900">{c.author?.full_name} </span>
+                  <span className="text-xs text-zinc-500">{c.content}</span>
                 </div>
               </div>
             ))}
@@ -460,18 +459,18 @@ function PostCard({
           {userId ? (
             <form onSubmit={submitComment} className="flex gap-2">
               <input
-                className="flex-1 text-sm bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500/50 transition-colors"
+                className="flex-1 text-sm bg-white border border-zinc-200 rounded-xl px-3 py-2 text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-violet-500/50 transition-colors"
                 placeholder="Add a comment…"
                 value={commentText}
                 onChange={e => setCommentText(e.target.value)}
               />
               <button type="submit" disabled={!commentText.trim() || posting}
-                className="p-2 text-violet-400 hover:bg-violet-500/10 rounded-xl transition-colors disabled:opacity-40">
+                className="p-2 text-violet-600 hover:bg-violet-50 rounded-xl transition-colors disabled:opacity-40">
                 <Send size={15} />
               </button>
             </form>
           ) : (
-            <Link href="/login" className="block text-center text-xs text-violet-400 font-semibold">Sign in to comment →</Link>
+            <Link href="/login" className="block text-center text-xs text-violet-600 font-semibold">Sign in to comment →</Link>
           )}
         </div>
       )}
@@ -636,12 +635,12 @@ export default function FeedPage() {
   const demoMixed = [...DEMO_PRODUCTS.slice(0, 2), DEMO_INSPOS[0], ...DEMO_PRODUCTS.slice(2), DEMO_INSPOS[1]]
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       {/* Ambient */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -right-20 w-72 h-72 bg-fuchsia-600/6 rounded-full blur-3xl" />
-        <div className="absolute bottom-32 left-1/4 w-60 h-60 bg-amber-600/5 rounded-full blur-3xl" />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-20 -left-32 w-80 h-80 bg-violet-400/8 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -right-20 w-72 h-72 bg-fuchsia-400/6 rounded-full blur-3xl" />
+        <div className="absolute bottom-32 left-1/4 w-60 h-60 bg-amber-400/5 rounded-full blur-3xl" />
       </div>
 
       <Navbar />
@@ -651,8 +650,8 @@ export default function FeedPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-white flex items-center gap-2">
-              <ShoppingBag size={18} className="text-amber-400" /> The Feed
+            <h1 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+              <ShoppingBag size={18} className="text-amber-500" /> The Feed
             </h1>
             <p className="text-xs text-zinc-500 mt-0.5">Shop outfits • Post inspos • Get made</p>
           </div>
@@ -663,11 +662,11 @@ export default function FeedPage() {
             </Link>
           ) : userId ? (
             <button onClick={() => setShowInspoModal(true)}
-              className="flex items-center gap-1.5 bg-fuchsia-600/20 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-fuchsia-300 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
+              className="flex items-center gap-1.5 bg-fuchsia-50 hover:bg-fuchsia-100 border border-fuchsia-300 text-fuchsia-600 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
               <Lightbulb size={13} /> Post inspo
             </button>
           ) : (
-            <Link href="/browse" className="text-xs font-semibold text-violet-400 hover:text-violet-300 border border-violet-500/20 px-3 py-1.5 rounded-full transition-colors">
+            <Link href="/browse" className="text-xs font-semibold text-violet-600 hover:text-violet-700 border border-violet-300 px-3 py-1.5 rounded-full transition-colors">
               Browse all →
             </Link>
           )}
@@ -682,7 +681,7 @@ export default function FeedPage() {
                   ? chip.value === 'inspo'
                     ? 'bg-fuchsia-600 text-white shadow-lg shadow-fuchsia-500/30'
                     : 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
-                  : 'bg-white/[0.05] text-zinc-400 border border-white/[0.08] hover:border-violet-500/30 hover:text-violet-300 hover:bg-violet-500/8'
+                  : 'bg-zinc-100 text-zinc-600 border border-zinc-200 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50'
               }`}>
               {chip.icon} {chip.label}
             </button>
@@ -705,11 +704,11 @@ export default function FeedPage() {
             {/* Demo showroom when empty */}
             {showDemos && (
               <>
-                <div className="flex items-center gap-3 bg-violet-500/8 border border-violet-500/15 rounded-2xl px-4 py-3">
-                  <Sparkles size={16} className="text-violet-400 flex-shrink-0" />
+                <div className="flex items-center gap-3 bg-violet-50 border border-violet-200 rounded-2xl px-4 py-3">
+                  <Sparkles size={16} className="text-violet-500 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-violet-300">Feed Preview</p>
-                    <p className="text-xs text-violet-500/70">Real products and inspos from the community will appear here</p>
+                    <p className="text-sm font-semibold text-violet-700">Feed Preview</p>
+                    <p className="text-xs text-violet-500">Real products and inspos from the community will appear here</p>
                   </div>
                 </div>
                 {demoMixed.map((p, i) =>
@@ -722,10 +721,10 @@ export default function FeedPage() {
 
             {/* Empty chip filter */}
             {activeChip && filteredPosts.length === 0 && (
-              <div className="text-center py-16 bg-white/[0.03] rounded-3xl border border-white/[0.07]">
+              <div className="text-center py-16 bg-white rounded-3xl border border-zinc-200 shadow-sm">
                 <div className="text-4xl mb-3">📸</div>
                 <p className="text-zinc-500 text-sm">Nothing here yet</p>
-                <button onClick={() => setActiveChip('')} className="mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors">
+                <button onClick={() => setActiveChip('')} className="mt-3 text-xs text-violet-600 hover:text-violet-700 transition-colors">
                   View all posts →
                 </button>
               </div>

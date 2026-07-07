@@ -4,10 +4,26 @@ import { Toaster } from 'react-hot-toast'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  title: 'TailorNow — Connect with Nigerian Fashion Creatives',
+  metadataBase: new URL('https://tailornow.shop'),
+  title: {
+    default: 'TailorNow — Connect with Nigerian Fashion Creatives',
+    template: '%s | TailorNow',
+  },
   description: 'Book skilled Nigerian fashion creatives for custom outfits, alterations, bridal wear, asoebi and more. Bargain prices, pay securely, track your order.',
-  keywords: 'tailor, fashion, custom outfit, alterations, asoebi, Nigeria, creative',
+  keywords: 'tailor, fashion, custom outfit, alterations, asoebi, Nigeria, creative, bridal wear, Lagos tailor',
   manifest: '/manifest.json',
+  alternates: {
+    canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+    },
+  },
   icons: {
     icon: '/icon-192.png',
     shortcut: '/icon-192.png',
@@ -20,12 +36,24 @@ export const metadata: Metadata = {
     siteName: 'TailorNow',
     locale: 'en_NG',
     type: 'website',
+    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'TailorNow' }],
   },
   twitter: {
     card: 'summary',
     title: 'TailorNow',
     description: 'Connect with Nigerian fashion creatives. Custom outfits, alterations, bridal wear.',
+    images: ['/icon-512.png'],
   },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'TailorNow',
+  url: 'https://tailornow.shop',
+  logo: 'https://tailornow.shop/icon-512.png',
+  description: 'Marketplace connecting customers with skilled Nigerian fashion creatives for custom outfits, alterations, bridal wear and asoebi.',
+  areaServed: 'NG',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -38,8 +66,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="TailorNow" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#7C3AED" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </head>
-      <body className="min-h-full bg-[#09090B] text-white font-sans">
+      <body className="min-h-full bg-zinc-50 text-zinc-900 font-sans">
         {children}
         <Script
           id="sw-register"

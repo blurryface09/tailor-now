@@ -37,7 +37,7 @@ export default async function HallOfFamePage() {
   const list = creatives.slice(3)
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen">
       <Navbar />
 
       {/* Hero */}
@@ -108,7 +108,7 @@ export default async function HallOfFamePage() {
 
                         <span className="text-3xl mb-1">{meta.medal}</span>
 
-                        <h3 className="font-bold text-white text-lg leading-tight">{c.business_name}</h3>
+                        <h3 className="font-bold text-zinc-900 text-lg leading-tight">{c.business_name}</h3>
                         {c.city && (
                           <p className="text-xs text-zinc-500 flex items-center justify-center gap-1 mt-1">
                             <MapPin size={11} /> {c.city}, {c.state}
@@ -141,7 +141,7 @@ export default async function HallOfFamePage() {
                         {(c.specialties ?? []).slice(0, 2).length > 0 && (
                           <div className="flex flex-wrap justify-center gap-1 mt-3">
                             {(c.specialties ?? []).slice(0, 2).map((s: string) => (
-                              <span key={s} className="text-[11px] bg-white/70 text-zinc-400 px-2 py-0.5 rounded-full border border-white/[0.1]">
+                              <span key={s} className="text-[11px] bg-white text-zinc-500 px-2 py-0.5 rounded-full border border-zinc-200">
                                 {SERVICE_LABELS[s as keyof typeof SERVICE_LABELS] ?? s}
                               </span>
                             ))}
@@ -156,12 +156,12 @@ export default async function HallOfFamePage() {
 
             {/* ── Ranked list #4–20 ── */}
             {list.length > 0 && (
-              <div className="bg-white/[0.05] backdrop-blur-xl rounded-3xl border border-white/[0.08] overflow-hidden">
-                <div className="px-6 py-4 border-b border-white/[0.08] flex items-center gap-2">
+              <div className="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-zinc-200 flex items-center gap-2">
                   <Trophy size={16} className="text-violet-600" />
-                  <h2 className="font-bold text-white">Top 20 Leaderboard</h2>
+                  <h2 className="font-bold text-zinc-900">Top 20 Leaderboard</h2>
                 </div>
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-zinc-100">
                   {list.map((c, i) => {
                     const rank = i + 4
                     const profile = (Array.isArray(c.profile) ? c.profile[0] : c.profile) as { full_name: string; avatar_url: string | null } | null
@@ -171,14 +171,14 @@ export default async function HallOfFamePage() {
 
                     return (
                       <Link key={c.id} href={`/tailors/${c.id}`}
-                        className="flex items-center gap-4 px-6 py-4 hover:bg-violet-500/10/50 transition-colors group">
+                        className="flex items-center gap-4 px-6 py-4 hover:bg-violet-50 transition-colors group">
                         {/* Rank */}
                         <div className="w-8 text-center flex-shrink-0">
                           <span className="text-lg font-bold text-zinc-600">#{rank}</span>
                         </div>
 
                         {/* Avatar */}
-                        <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white/[0.06]">
+                        <div className="relative w-12 h-12 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-zinc-200">
                           {avatar ? (
                             <Image src={avatar} alt={profile?.full_name ?? c.business_name} fill className="object-cover" />
                           ) : (
@@ -191,7 +191,7 @@ export default async function HallOfFamePage() {
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold text-white text-sm truncate group-hover:text-violet-400 transition-colors">
+                            <p className="font-semibold text-zinc-900 text-sm truncate group-hover:text-violet-600 transition-colors">
                               {c.business_name}
                             </p>
                             {c.is_founder && (
@@ -207,7 +207,7 @@ export default async function HallOfFamePage() {
                               </span>
                             )}
                             {(c.specialties ?? []).slice(0, 2).map((s: string) => (
-                              <span key={s} className="text-[10px] bg-white/[0.06] text-zinc-500 px-1.5 py-0.5 rounded-full">
+                              <span key={s} className="text-[10px] bg-zinc-100 text-zinc-500 px-1.5 py-0.5 rounded-full">
                                 {SERVICE_LABELS[s as keyof typeof SERVICE_LABELS] ?? s}
                               </span>
                             ))}
@@ -224,7 +224,7 @@ export default async function HallOfFamePage() {
                             <div className="text-[10px] text-zinc-600">{c.total_reviews ?? 0} reviews</div>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-semibold text-zinc-300">{c.total_orders ?? 0}</div>
+                            <div className="text-sm font-semibold text-zinc-700">{c.total_orders ?? 0}</div>
                             <div className="text-[10px] text-zinc-600">orders</div>
                           </div>
                           <span className={cn('text-xs font-medium px-2 py-1 rounded-full border', level.bg, level.color, level.border)}>
