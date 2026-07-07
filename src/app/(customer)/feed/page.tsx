@@ -1,202 +1,264 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { SERVICE_LABELS, formatRelativeTime } from '@/lib/utils'
-import { Heart, MessageSquare, Send, ChevronLeft, ChevronRight, MapPin, Star, CheckCircle, Scissors, Sparkles } from 'lucide-react'
+import {
+  Heart, MessageSquare, Send, ChevronLeft, ChevronRight,
+  MapPin, Star, CheckCircle, Scissors, Sparkles, Share2,
+  ShoppingBag, Lightbulb, Plus, X, Camera, ArrowRight,
+} from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import type { Post, PostComment, Profile, TailorProfile } from '@/types'
 
-const FEED_CHIPS = [
-  { label: 'All', value: '' },
-  { label: '🔥 Style of the Week', value: 'style_week' },
-  { label: '🎨 Alte Style', value: 'alte' },
-  { label: '👟 Street Wear', value: 'street' },
-  { label: '🌍 Ankara', value: 'ankara' },
-  { label: '💍 Bridal', value: 'bridal' },
-  { label: '✨ New Trends', value: 'trends' },
-  { label: '😂 Memes', value: 'memes' },
-]
-
-function extractCaptionTag(caption: string | null): { tag: string | null; body: string } {
-  if (!caption) return { tag: null, body: '' }
-  const match = caption.match(/^\[(.+?)\]\n([\s\S]*)$/)
-  if (match) return { tag: match[1], body: match[2] }
-  return { tag: null, body: caption }
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function formatPrice(price: number | null | undefined) {
+  if (!price) return null
+  return `₦${price.toLocaleString()}`
 }
 
-/* ── Stunning demo posts with real fashion work ─────────────── */
-const DEMO_POSTS = [
+function extractTag(caption: string | null): { tag: string | null; body: string } {
+  if (!caption) return { tag: null, body: '' }
+  const m = caption.match(/^\[(.+?)\]\n([\s\S]*)$/)
+  return m ? { tag: m[1], body: m[2] } : { tag: null, body: caption }
+}
+
+function sharePost(postId: string, title?: string | null) {
+  const url = `${window.location.origin}/p/${postId}`
+  if (navigator.share) {
+    navigator.share({ title: title || 'Check this out on TailorNow', url }).catch(() => null)
+  } else {
+    navigator.clipboard.writeText(url).then(() => toast.success('Link copied! 📋'))
+  }
+}
+
+// ── Filter chips ──────────────────────────────────────────────────────────────
+const CHIPS = [
+  { label: 'All', value: '', icon: '' },
+  { label: 'Products', value: 'product', icon: '🛍️' },
+  { label: 'Inspo', value: 'inspo', icon: '💡' },
+  { label: 'Ankara', value: 'ankara', icon: '🌍' },
+  { label: 'Bridal', value: 'bridal', icon: '💍' },
+  { label: 'Street', value: 'street', icon: '👟' },
+  { label: 'Alte', value: 'alte', icon: '🎨' },
+  { label: 'Trending', value: 'trends', icon: '🔥' },
+]
+
+// ── Demo posts ────────────────────────────────────────────────────────────────
+const DEMO_PRODUCTS = [
   {
-    id: 'demo-1',
-    imageUrl: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1000&fit=crop&q=85',
-    tag: '🔥 Style of the Week',
-    creative: 'Zara Couture Lagos',
-    city: 'Lagos',
-    caption: 'Bold, unapologetic, dripping in colour. This is what Nigerian fashion looks like when creatives are given full creative freedom. 🧵✨',
+    id: 'd1', post_type: 'product' as const,
+    title: 'Midnight Blue Co-ord Set',
+    price: 45000,
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&h=1000&fit=crop&q=85',
+    creative: 'Zara Couture Lagos', city: 'Lagos', rating: 4.9, tag: '🎨 Alte Style',
+    caption: 'Bold, unapologetic, dripping in colour. Full custom fit available — DM for your measurements.',
     likes: 312, comments: 41, isAdmin: true,
   },
   {
-    id: 'demo-2',
-    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1000&fit=crop&q=85',
-    tag: '💍 Bridal Couture',
-    creative: 'House of Adaeze',
-    city: 'Abuja',
-    caption: 'This bridal piece took 3 weeks to complete. Every bead, every stitch placed with intention. Your wedding look starts here. 🤍',
+    id: 'd2', post_type: 'product' as const,
+    title: 'Beaded Bridal Gown',
+    price: 280000,
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1000&fit=crop&q=85',
+    creative: 'House of Adaeze', city: 'Abuja', rating: 4.8, tag: '💍 Bridal',
+    caption: '3 weeks of handwork, every bead placed with intention. Your dream wedding look starts here.',
     likes: 521, comments: 68, isAdmin: false,
   },
   {
-    id: 'demo-3',
-    imageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=1000&fit=crop&q=85',
-    tag: '🌍 Ankara Season',
-    creative: 'Kente Republic',
-    city: 'Port Harcourt',
-    caption: 'Ankara never goes out of style. It evolves. 🧵 From ceremonies to street fashion — every thread carries culture.',
-    likes: 445, comments: 53, isAdmin: false,
-  },
-  {
-    id: 'demo-4',
-    imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1000&fit=crop&q=85',
-    tag: '✨ New Trends',
-    creative: 'StyleHaus by Temi',
-    city: 'Lagos',
-    caption: 'Power dressing, Lagos edition. You don\'t need Paris when you have Lagos creatives. 🔥',
+    id: 'd3', post_type: 'product' as const,
+    title: 'Power Suit – Tailored',
+    price: 65000,
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&h=1000&fit=crop&q=85',
+    creative: 'StyleHaus by Temi', city: 'Lagos', rating: 4.7, tag: '✨ New Trends',
+    caption: 'Power dressing, Lagos edition. You don\'t need Paris when you have Lagos creatives.',
     likes: 389, comments: 44, isAdmin: false,
   },
   {
-    id: 'demo-5',
-    imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=1000&fit=crop&q=85',
-    tag: '👗 Ready to Wear',
-    creative: 'Ade & Co Fabrics',
-    city: 'Ibadan',
-    caption: 'Comfort meets class. Our ready-to-wear line is now available for custom orders. DM to book. 📩',
-    likes: 278, comments: 32, isAdmin: false,
-  },
-  {
-    id: 'demo-6',
-    imageUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=1000&fit=crop&q=85',
-    tag: '🎨 Alte Style',
-    creative: 'Neon Needle Studio',
-    city: 'Lagos',
-    caption: 'Alte energy, traditional fabric. The intersection of old Nigeria and new Lagos. Are you ready? 🎨',
-    likes: 612, comments: 89, isAdmin: false,
+    id: 'd4', post_type: 'product' as const,
+    title: 'Ankara Two-Piece',
+    price: null,
+    image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=800&h=1000&fit=crop&q=85',
+    creative: 'Kente Republic', city: 'Port Harcourt', rating: 4.6, tag: '🌍 Ankara',
+    caption: 'Ankara never goes out of style. It evolves. From ceremonies to street — every thread carries culture.',
+    likes: 445, comments: 53, isAdmin: false,
   },
 ]
 
-function DemoPostCard({ post, liked, onLike }: {
-  post: typeof DEMO_POSTS[number]
-  liked: boolean
-  onLike: (id: string) => void
-}) {
-  const [showComment, setShowComment] = useState(false)
-  const [localLikes, setLocalLikes] = useState(post.likes)
-  const [isLiked, setIsLiked] = useState(liked)
+const DEMO_INSPOS = [
+  {
+    id: 'i1', post_type: 'inspo' as const,
+    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&h=1000&fit=crop&q=85',
+    user: 'Chinwe A.', caption: 'Looking for something like this for my introduction ceremony next month 🙏🏾 Who can make this?',
+    likes: 89, comments: 22,
+  },
+  {
+    id: 'i2', post_type: 'inspo' as const,
+    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&h=1000&fit=crop&q=85',
+    user: 'Adaora O.', caption: 'Saw this on Pinterest and I need it made in Aso-oke for my traditional wedding 👑',
+    likes: 134, comments: 31,
+  },
+]
 
-  const toggleLike = () => {
-    setIsLiked(v => !v)
-    setLocalLikes(v => isLiked ? v - 1 : v + 1)
-    onLike(post.id)
-  }
+// ── ProductCard ───────────────────────────────────────────────────────────────
+type DemoProduct = typeof DEMO_PRODUCTS[number]
+
+function DemoProductCard({ post, idx }: { post: DemoProduct; idx: number }) {
+  const [liked, setLiked] = useState(false)
+  const [likes, setLikes] = useState(post.likes)
+  const [showComments, setShowComments] = useState(false)
+  const priceLabel = formatPrice(post.price)
 
   return (
-    <div className="bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:border-violet-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/10">
+    <div className="bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:border-violet-500/20 hover:shadow-2xl hover:shadow-violet-500/8 transition-all duration-300"
+      style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}>
       {/* Image */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
-        <img
-          src={post.imageUrl}
-          alt={post.tag}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-        {/* Shine sweep */}
-        <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
+        <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
 
-        {/* Category pill */}
-        <div className="absolute top-3.5 left-3.5 bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-full">
-          {post.tag}
-        </div>
+        {/* Category chip */}
+        <div className="absolute top-3.5 left-3.5 bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-full">{post.tag}</div>
 
-        {/* Admin / TailorNow badge */}
-        {post.isAdmin && (
-          <div className="absolute top-3.5 right-3.5 bg-violet-600/80 backdrop-blur-md border border-violet-500/40 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-            <Scissors size={9} /> TailorNow
+        {/* Price badge */}
+        {priceLabel ? (
+          <div className="absolute top-3.5 right-3.5 bg-amber-400 text-black text-xs font-black px-3 py-1.5 rounded-full shadow-lg shadow-amber-500/40">
+            {priceLabel}
+          </div>
+        ) : (
+          <div className="absolute top-3.5 right-3.5 bg-white/10 backdrop-blur-md border border-white/20 text-white/70 text-[10px] font-semibold px-2.5 py-1.5 rounded-full">
+            Chat for price
           </div>
         )}
 
-        {/* Multi-image dots placeholder */}
-        <div className="absolute bottom-[72px] left-1/2 -translate-x-1/2 flex gap-1.5">
-          {[0, 1, 2].map(i => (
-            <div key={i} className={`rounded-full transition-all ${i === 0 ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40'}`} />
-          ))}
-        </div>
-
-        {/* Bottom overlay: actions + creative info */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-8">
+        {/* Bottom overlay */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-10">
           <div className="flex items-end justify-between">
             <div className="flex-1 min-w-0 pr-3">
-              {!post.isAdmin && (
+              {!post.isAdmin ? (
                 <>
-                  <p className="text-white font-bold text-sm leading-tight truncate">{post.creative}</p>
-                  <p className="text-white/50 text-xs flex items-center gap-1 mt-0.5"><MapPin size={9} />{post.city}</p>
+                  <p className="text-white font-bold text-sm truncate">{post.creative}</p>
+                  <p className="text-white/50 text-xs flex items-center gap-1 mt-0.5"><MapPin size={9} />{post.city} · ⭐ {post.rating}</p>
                 </>
+              ) : (
+                <span className="text-xs font-bold text-violet-400 flex items-center gap-1"><Sparkles size={10} /> TailorNow Pick</span>
               )}
             </div>
-            {/* Actions */}
             <div className="flex items-center gap-3">
-              <button onClick={toggleLike} className="flex flex-col items-center gap-0.5 group/like">
-                <Heart size={20} className={`transition-all duration-200 ${isLiked ? 'fill-red-500 text-red-500 scale-110' : 'text-white/80 group-hover/like:text-red-400'}`} />
-                <span className="text-[10px] text-white/60 font-medium">{localLikes}</span>
+              <button onClick={() => { setLiked(v => !v); setLikes(v => liked ? v - 1 : v + 1) }} className="flex flex-col items-center gap-0.5">
+                <Heart size={20} className={`transition-all duration-200 ${liked ? 'fill-red-500 text-red-500 scale-110' : 'text-white/80 hover:text-red-400'}`} />
+                <span className="text-[10px] text-white/60">{likes}</span>
               </button>
-              <button onClick={() => setShowComment(v => !v)} className="flex flex-col items-center gap-0.5 group/msg">
-                <MessageSquare size={20} className="text-white/80 group-hover/msg:text-violet-300 transition-colors" />
-                <span className="text-[10px] text-white/60 font-medium">{post.comments}</span>
+              <button onClick={() => setShowComments(v => !v)} className="flex flex-col items-center gap-0.5">
+                <MessageSquare size={20} className="text-white/80 hover:text-violet-300 transition-colors" />
+                <span className="text-[10px] text-white/60">{post.comments}</span>
+              </button>
+              <button onClick={() => sharePost(post.id, post.title)} className="flex flex-col items-center gap-0.5">
+                <Share2 size={18} className="text-white/80 hover:text-amber-400 transition-colors" />
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Caption + Book CTA */}
-      <div className="px-4 py-3.5">
-        <p className="text-sm text-zinc-300 leading-relaxed line-clamp-2">{post.caption}</p>
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-xs text-zinc-600">Just now</span>
-          {!post.isAdmin ? (
-            <Link href="/browse"
-              className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 shadow-lg shadow-amber-400/25">
-              <Scissors size={11} /> Book Now
-            </Link>
-          ) : (
-            <span className="text-xs font-bold text-violet-400 flex items-center gap-1"><Sparkles size={10} /> TailorNow Original</span>
-          )}
+      {/* Card body */}
+      <div className="px-4 pt-3.5 pb-4">
+        {post.title && <p className="font-bold text-white text-sm mb-1">{post.title}</p>}
+        <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{post.caption}</p>
+
+        {/* CTAs */}
+        <div className="flex gap-2 mt-3.5">
+          <Link href="/browse"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs py-2.5 rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-amber-500/25">
+            <ShoppingBag size={12} /> Order this fit
+          </Link>
+          <Link href="/browse"
+            className="flex items-center gap-1 bg-white/[0.07] hover:bg-violet-500/15 border border-white/[0.1] hover:border-violet-500/30 text-white/80 hover:text-violet-300 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
+            <Scissors size={11} /> Custom
+          </Link>
+          <Link href="/browse"
+            className="flex items-center gap-1 bg-white/[0.07] hover:bg-white/[0.12] border border-white/[0.1] text-white/80 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
+            <MessageSquare size={11} /> Chat
+          </Link>
         </div>
       </div>
 
-      {/* Comment section */}
-      {showComment && (
+      {showComments && (
         <div className="border-t border-white/[0.06] px-4 py-3">
           <p className="text-xs text-zinc-600 text-center mb-2">Sign in to join the conversation</p>
-          <Link href="/login" className="block text-center text-xs text-violet-400 font-semibold hover:text-violet-300 transition-colors">
-            Sign in →
-          </Link>
+          <Link href="/login" className="block text-center text-xs text-violet-400 font-semibold">Sign in →</Link>
         </div>
       )}
     </div>
   )
 }
 
-type CreativeWithProfile = TailorProfile & { profile: Profile }
+// ── InspoCard (demo) ──────────────────────────────────────────────────────────
+type DemoInspo = typeof DEMO_INSPOS[number]
 
-function PostCard({ post, userId, onLike, onFollow, following }: {
-  post: Post
-  userId: string | null
-  onLike: (postId: string, liked: boolean) => void
-  onFollow: (creativeUserId: string, isFollowing: boolean) => void
+function DemoInspoCard({ post, idx }: { post: DemoInspo; idx: number }) {
+  const [liked, setLiked] = useState(false)
+  const [likes, setLikes] = useState(post.likes)
+
+  return (
+    <div className="bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:border-fuchsia-500/20 hover:shadow-xl hover:shadow-fuchsia-500/8 transition-all duration-300"
+      style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
+        <img src={post.image} alt="Inspiration" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
+
+        {/* Inspo badge */}
+        <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 bg-fuchsia-500/20 backdrop-blur-md border border-fuchsia-500/30 text-fuchsia-300 text-xs font-bold px-3 py-1.5 rounded-full">
+          <Lightbulb size={10} /> Inspo
+        </div>
+
+        {/* Bottom overlay */}
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-10">
+          <div className="flex items-end justify-between">
+            <div className="flex-1 min-w-0 pr-3">
+              <p className="text-white font-bold text-sm">{post.user}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button onClick={() => { setLiked(v => !v); setLikes(v => liked ? v - 1 : v + 1) }} className="flex flex-col items-center gap-0.5">
+                <Heart size={20} className={`transition-all duration-200 ${liked ? 'fill-red-500 text-red-500 scale-110' : 'text-white/80 hover:text-red-400'}`} />
+                <span className="text-[10px] text-white/60">{likes}</span>
+              </button>
+              <button className="flex flex-col items-center gap-0.5">
+                <MessageSquare size={20} className="text-white/80 hover:text-violet-300 transition-colors" />
+                <span className="text-[10px] text-white/60">{post.comments}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="px-4 pt-3.5 pb-4">
+        <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{post.caption}</p>
+        <div className="flex items-center justify-between mt-3.5">
+          <span className="text-xs text-zinc-600">Just now</span>
+          <Link href="/browse"
+            className="flex items-center gap-1.5 text-xs font-bold text-fuchsia-400 hover:text-fuchsia-300 transition-colors">
+            Find a creative <ArrowRight size={11} />
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Real PostCard ─────────────────────────────────────────────────────────────
+function PostCard({
+  post, userId, onLike, onFollow, following, idx,
+}: {
+  post: Post; userId: string | null
+  onLike: (id: string, liked: boolean) => void
+  onFollow: (uid: string, isFollowing: boolean) => void
   following: Set<string>
+  idx: number
 }) {
   const supabase = createClient()
   const [showComments, setShowComments] = useState(false)
@@ -204,19 +266,21 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
   const [commentText, setCommentText] = useState('')
   const [posting, setPosting] = useState(false)
   const [imgIdx, setImgIdx] = useState(0)
+
+  const isProduct = (post.post_type ?? 'product') === 'product'
+  const isInspo = post.post_type === 'inspo'
   const isAdminPost = !post.creative_id
   const creativeUserId = post.creative?.user_id || post.user_id
   const isOwnPost = userId === post.user_id
   const isFollowing = following.has(creativeUserId)
   const authorName = isAdminPost ? 'TailorNow' : (post.creative?.business_name || post.author?.full_name)
-  const { tag: captionTag, body: captionBody } = extractCaptionTag(post.caption)
+  const { tag: captionTag, body: captionBody } = extractTag(post.caption)
+  const priceLabel = formatPrice(post.price)
 
   const loadComments = async () => {
     const { data } = await supabase.from('post_comments')
       .select('*, author:profiles(*)')
-      .eq('post_id', post.id)
-      .order('created_at', { ascending: true })
-      .limit(20)
+      .eq('post_id', post.id).order('created_at', { ascending: true }).limit(20)
     setComments(data || [])
   }
 
@@ -226,29 +290,52 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
     if (!commentText.trim()) return
     setPosting(true)
     await supabase.from('post_comments').insert({ post_id: post.id, user_id: userId, content: commentText.trim() })
-    setCommentText('')
-    setPosting(false)
-    loadComments()
+    setCommentText(''); setPosting(false); loadComments()
   }
 
+  const borderColor = isInspo ? 'border-fuchsia-500/20' : 'border-violet-500/20'
+  const shadowColor = isInspo ? 'hover:shadow-fuchsia-500/8' : 'hover:shadow-violet-500/8'
+
   return (
-    <div className="bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:border-violet-500/25 transition-all duration-300 hover:shadow-2xl hover:shadow-violet-500/10">
+    <div
+      className={`bg-white/[0.04] border border-white/[0.07] rounded-3xl overflow-hidden group hover:${borderColor} hover:shadow-2xl ${shadowColor} transition-all duration-300`}
+      style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}
+    >
       {post.image_urls.length > 0 && (
         <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
           <img
             src={post.image_urls[imgIdx]}
-            alt={captionBody || 'Creative work'}
+            alt={post.title || captionBody || 'Post'}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
 
-          {/* Category badge */}
-          {(captionTag || post.service_type) && (
+          {/* Category / inspo badge */}
+          {isInspo ? (
+            <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5 bg-fuchsia-500/20 backdrop-blur-md border border-fuchsia-500/30 text-fuchsia-300 text-xs font-bold px-3 py-1.5 rounded-full">
+              <Lightbulb size={10} /> Inspo
+            </div>
+          ) : (captionTag || post.service_type) ? (
             <div className="absolute top-3.5 left-3.5 bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-bold px-3 py-1.5 rounded-full">
               {captionTag || SERVICE_LABELS[post.service_type!]}
             </div>
+          ) : null}
+
+          {/* Price badge (products only) */}
+          {isProduct && (
+            priceLabel ? (
+              <div className="absolute top-3.5 right-3.5 bg-amber-400 text-black text-xs font-black px-3 py-1.5 rounded-full shadow-lg shadow-amber-500/40 animate-[bounce-in_0.3s_ease]">
+                {priceLabel}
+              </div>
+            ) : (
+              <div className="absolute top-3.5 right-3.5 bg-white/10 backdrop-blur-md border border-white/20 text-white/70 text-[10px] font-semibold px-2.5 py-1.5 rounded-full">
+                Chat for price
+              </div>
+            )
           )}
+
+          {/* Admin badge */}
           {isAdminPost && (
             <div className="absolute top-3.5 right-3.5 bg-violet-600/80 backdrop-blur-md border border-violet-500/40 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
               <Scissors size={9} /> TailorNow
@@ -268,7 +355,7 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
                   <ChevronRight size={14} />
                 </button>
               )}
-              <div className="absolute bottom-[72px] left-1/2 -translate-x-1/2 flex gap-1.5">
+              <div className="absolute bottom-[80px] left-1/2 -translate-x-1/2 flex gap-1.5">
                 {post.image_urls.map((_, i) => (
                   <div key={i} className={`rounded-full transition-all ${i === imgIdx ? 'w-4 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/40'}`} />
                 ))}
@@ -276,25 +363,39 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
             </>
           )}
 
-          {/* Bottom overlay */}
-          <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-8">
+          {/* Bottom overlay: author + actions */}
+          <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-10">
             <div className="flex items-end justify-between">
               <div className="flex-1 min-w-0 pr-3">
                 {!isAdminPost && (
                   <>
-                    <Link href={`/tailors/${post.creative_id}`} className="text-white font-bold text-sm hover:text-violet-300 transition-colors truncate block">{authorName}</Link>
-                    {post.creative?.city && <p className="text-white/50 text-xs flex items-center gap-1 mt-0.5"><MapPin size={9} />{post.creative.city}</p>}
+                    {isProduct ? (
+                      <Link href={`/tailors/${post.creative_id}`} className="text-white font-bold text-sm hover:text-violet-300 transition-colors truncate block">
+                        {authorName}
+                      </Link>
+                    ) : (
+                      <p className="text-white font-bold text-sm truncate">{post.author?.full_name || authorName}</p>
+                    )}
+                    {post.creative?.city && (
+                      <p className="text-white/50 text-xs flex items-center gap-1 mt-0.5">
+                        <MapPin size={9} />{post.creative.city}
+                        {post.creative.avg_rating && ` · ⭐ ${post.creative.avg_rating.toFixed(1)}`}
+                      </p>
+                    )}
                   </>
                 )}
               </div>
               <div className="flex items-center gap-3">
                 <button onClick={() => onLike(post.id, post.liked_by_me || false)} className="flex flex-col items-center gap-0.5 group/like">
                   <Heart size={20} className={`transition-all duration-200 ${post.liked_by_me ? 'fill-red-500 text-red-500 scale-110' : 'text-white/80 group-hover/like:text-red-400'}`} />
-                  <span className="text-[10px] text-white/60 font-medium">{post.likes_count}</span>
+                  <span className="text-[10px] text-white/60">{post.likes_count}</span>
                 </button>
                 <button onClick={() => { if (!showComments) loadComments(); setShowComments(v => !v) }} className="flex flex-col items-center gap-0.5 group/msg">
                   <MessageSquare size={20} className="text-white/80 group-hover/msg:text-violet-300 transition-colors" />
-                  <span className="text-[10px] text-white/60 font-medium">{post.comments_count}</span>
+                  <span className="text-[10px] text-white/60">{post.comments_count}</span>
+                </button>
+                <button onClick={() => sharePost(post.id, post.title)} className="flex flex-col items-center gap-0.5 group/share">
+                  <Share2 size={18} className="text-white/80 group-hover/share:text-amber-400 transition-colors" />
                 </button>
               </div>
             </div>
@@ -302,36 +403,47 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
         </div>
       )}
 
-      {/* Caption + Book CTA */}
-      <div className="px-4 py-3.5">
-        {captionBody && <p className="text-sm text-zinc-300 leading-relaxed line-clamp-2">{captionBody}</p>}
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-xs text-zinc-600">{formatRelativeTime(post.created_at)}</span>
-          {isAdminPost ? (
+      {/* Card body */}
+      <div className="px-4 pt-3.5 pb-4">
+        {post.title && <p className="font-bold text-white text-sm mb-1">{post.title}</p>}
+        {captionBody && <p className="text-sm text-zinc-400 leading-relaxed line-clamp-2">{captionBody}</p>}
+
+        {isProduct && !isAdminPost ? (
+          <div className="flex gap-2 mt-3.5">
+            <Link href={`/orders/new?tailor=${post.creative_id}${post.id ? `&post=${post.id}` : ''}`}
+              className="flex-1 flex items-center justify-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs py-2.5 rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-amber-500/25">
+              <ShoppingBag size={12} /> Order this fit
+            </Link>
+            <Link href={`/orders/new?tailor=${post.creative_id}&custom=true`}
+              className="flex items-center gap-1 bg-white/[0.07] hover:bg-violet-500/15 border border-white/[0.1] hover:border-violet-500/30 text-white/80 hover:text-violet-300 font-semibold text-xs px-3.5 py-2.5 rounded-2xl transition-all">
+              <Scissors size={11} /> Custom
+            </Link>
+            {!isOwnPost && userId && (
+              <button onClick={() => onFollow(creativeUserId, isFollowing)}
+                className={`flex items-center text-xs font-semibold px-3 py-2.5 rounded-2xl border transition-all ${isFollowing ? 'border-white/10 text-zinc-500 hover:text-red-400' : 'border-violet-500/30 text-violet-400 hover:bg-violet-500/10'}`}>
+                {isFollowing ? '✓' : '+'}
+              </button>
+            )}
+          </div>
+        ) : isInspo ? (
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-xs text-zinc-600">{formatRelativeTime(post.created_at)}</span>
+            <Link href="/browse" className="flex items-center gap-1.5 text-xs font-bold text-fuchsia-400 hover:text-fuchsia-300 transition-colors">
+              Find a creative <ArrowRight size={11} />
+            </Link>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between mt-3">
+            <span className="text-xs text-zinc-600">{formatRelativeTime(post.created_at)}</span>
             <span className="text-xs font-bold text-violet-400 flex items-center gap-1"><Sparkles size={10} /> TailorNow Original</span>
-          ) : (
-            <div className="flex items-center gap-2">
-              {!isOwnPost && userId && (
-                <button onClick={() => onFollow(creativeUserId, isFollowing)}
-                  className={`text-xs font-semibold transition-colors ${isFollowing ? 'text-zinc-500 hover:text-red-400' : 'text-violet-400 hover:text-violet-300'}`}>
-                  {isFollowing ? 'Following' : '+ Follow'}
-                </button>
-              )}
-              {post.creative_id && (
-                <Link href={`/orders/new?tailor=${post.creative_id}`}
-                  className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs px-4 py-2 rounded-full transition-all duration-200 hover:scale-105 shadow-lg shadow-amber-400/25">
-                  <Scissors size={11} /> Book Now
-                </Link>
-              )}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Comments drawer */}
+      {/* Comments */}
       {showComments && (
         <div className="border-t border-white/[0.06] px-4 py-3">
-          <div className="space-y-3 max-h-40 overflow-y-auto mb-3">
+          <div className="space-y-3 max-h-44 overflow-y-auto scrollbar-hide mb-3">
             {comments.length === 0 && <p className="text-xs text-zinc-600 text-center py-2">No comments yet — be first!</p>}
             {comments.map(c => (
               <div key={c.id} className="flex gap-2">
@@ -345,7 +457,7 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
               </div>
             ))}
           </div>
-          {userId && (
+          {userId ? (
             <form onSubmit={submitComment} className="flex gap-2">
               <input
                 className="flex-1 text-sm bg-white/[0.06] border border-white/[0.1] rounded-xl px-3 py-2 text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500/50 transition-colors"
@@ -358,6 +470,8 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
                 <Send size={15} />
               </button>
             </form>
+          ) : (
+            <Link href="/login" className="block text-center text-xs text-violet-400 font-semibold">Sign in to comment →</Link>
           )}
         </div>
       )}
@@ -365,46 +479,95 @@ function PostCard({ post, userId, onLike, onFollow, following }: {
   )
 }
 
-function CreativeCard({ creative, index }: { creative: CreativeWithProfile; index: number }) {
-  const GRADIENTS = ['from-violet-600 to-purple-800', 'from-fuchsia-600 to-violet-700', 'from-indigo-600 to-violet-700', 'from-purple-600 to-fuchsia-700', 'from-violet-700 to-indigo-800']
-  const gradient = GRADIENTS[index % GRADIENTS.length]
+// ── Post Inspo Modal ──────────────────────────────────────────────────────────
+function InspoModal({ userId, onClose, onPosted }: {
+  userId: string; onClose: () => void; onPosted: () => void
+}) {
+  const supabase = createClient()
+  const [images, setImages] = useState<string[]>([])
+  const [caption, setCaption] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (images.length === 0) { toast.error('Add at least one photo'); return }
+    setSaving(true)
+    const { error } = await supabase.from('posts').insert({
+      user_id: userId,
+      creative_id: null,
+      caption: caption.trim() || null,
+      image_urls: images,
+      post_type: 'inspo',
+    })
+    setSaving(false)
+    if (error) { toast.error(error.message); return }
+    toast.success('Inspo posted! 🎉')
+    onPosted()
+    onClose()
+  }
+
   return (
-    <Link href={`/tailors/${creative.id}`}
-      className="group bg-white/[0.04] border border-white/[0.07] hover:border-violet-500/30 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/10 hover:-translate-y-0.5">
-      <div className={`h-20 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0)', backgroundSize: '14px 14px' }} />
-        <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-12" />
-      </div>
-      <div className="px-3.5 pb-3.5 -mt-5">
-        <div className="w-10 h-10 rounded-xl bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center text-violet-400 font-bold text-base mb-2 shadow-lg">
-          {creative.business_name?.[0]?.toUpperCase()}
+    <div className="fixed inset-0 z-50 flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg bg-[#0e0e10] border border-white/[0.09] rounded-t-3xl p-6 shadow-2xl"
+        style={{ animation: 'fade-up 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
+        {/* Handle */}
+        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5" />
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="font-bold text-white text-lg flex items-center gap-2"><Lightbulb size={18} className="text-fuchsia-400" /> Post your inspo</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Share a style you love — creatives can make it for you</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 text-zinc-500 hover:text-white hover:bg-white/[0.08] rounded-lg transition-colors">
+            <X size={18} />
+          </button>
         </div>
-        <p className="font-bold text-sm text-white group-hover:text-violet-300 truncate transition-colors">{creative.business_name}</p>
-        <p className="text-xs text-zinc-500 flex items-center gap-1 mt-0.5"><MapPin size={9} />{creative.city}</p>
-        {creative.is_verified && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-violet-400 font-medium mt-1">
-            <CheckCircle size={9} /> Verified
-          </span>
-        )}
-        <div className="flex items-center gap-1 mt-1.5">
-          <Star size={10} className="text-amber-400 fill-amber-400" />
-          <span className="text-xs font-semibold text-zinc-400">{creative.avg_rating?.toFixed(1) || 'New'}</span>
-        </div>
+        <form onSubmit={submit} className="space-y-4">
+          <ImageUpload
+            bucket="portfolio"
+            folder={`inspo/${userId}`}
+            value={images}
+            onChange={setImages}
+            maxFiles={4}
+            label="Photos"
+            hint="Screenshot, Pinterest save, anything you love"
+          />
+          <div>
+            <textarea
+              className="w-full rounded-2xl bg-white/[0.06] border border-white/[0.1] px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-fuchsia-500/50 transition-all resize-none"
+              rows={3}
+              placeholder="What do you love about this look? What occasion is it for?"
+              value={caption}
+              onChange={e => setCaption(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-3">
+            <button type="button" onClick={onClose}
+              className="flex-1 py-3 rounded-2xl border border-white/[0.1] text-zinc-400 hover:text-white transition-colors text-sm font-medium">
+              Cancel
+            </button>
+            <button type="submit" disabled={images.length === 0 || saving}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-fuchsia-600 hover:bg-fuchsia-500 disabled:opacity-50 text-white font-bold transition-all shadow-lg shadow-fuchsia-500/30 text-sm">
+              {saving ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" /> : <><Lightbulb size={15} /> Post Inspo</>}
+            </button>
+          </div>
+        </form>
       </div>
-    </Link>
+    </div>
   )
 }
 
+// ── Main Feed Page ────────────────────────────────────────────────────────────
 export default function FeedPage() {
   const supabase = createClient()
+  const router = useRouter()
   const [posts, setPosts] = useState<Post[]>([])
-  const [creatives, setCreatives] = useState<CreativeWithProfile[]>([])
   const [userId, setUserId] = useState<string | null>(null)
+  const [isCreative, setIsCreative] = useState(false)
   const [following, setFollowing] = useState<Set<string>>(new Set())
-  const [likedDemos, setLikedDemos] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
   const [activeChip, setActiveChip] = useState('')
-  const [view, setView] = useState<'feed' | 'discover'>('feed')
+  const [showInspoModal, setShowInspoModal] = useState(false)
 
   useEffect(() => { init() }, [])
 
@@ -412,35 +575,39 @@ export default function FeedPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       setUserId(user.id)
-      const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', user.id)
-      setFollowing(new Set((follows || []).map(f => f.following_id)))
+      const [followsRes, creativeRes] = await Promise.all([
+        supabase.from('follows').select('following_id').eq('follower_id', user.id),
+        supabase.from('tailor_profiles').select('id').eq('user_id', user.id).maybeSingle(),
+      ])
+      setFollowing(new Set((followsRes.data || []).map((f: any) => f.following_id)))
+      setIsCreative(!!creativeRes.data)
     }
-    const [postsResult, creativesResult] = await Promise.all([
-      supabase.from('posts').select('*, author:profiles!posts_user_id_fkey(*), creative:tailor_profiles(*, user_id, business_name, city, state)')
-        .order('created_at', { ascending: false }).limit(40),
-      supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('is_active', true).eq('is_verified', true)
-        .order('avg_rating', { ascending: false }).limit(12),
-    ])
-    if (postsResult.data && user) {
+    const { data: postsData } = await supabase
+      .from('posts')
+      .select('*, author:profiles!posts_user_id_fkey(*), creative:tailor_profiles(*, user_id, business_name, city, state, avg_rating)')
+      .order('created_at', { ascending: false })
+      .limit(40)
+    if (postsData && user) {
       const { data: liked } = await supabase.from('post_likes').select('post_id').eq('user_id', user.id)
-      const likedSet = new Set((liked || []).map(l => l.post_id))
-      setPosts(postsResult.data.map(p => ({ ...p, liked_by_me: likedSet.has(p.id) })))
+      const likedSet = new Set((liked || []).map((l: any) => l.post_id))
+      setPosts(postsData.map((p: any) => ({ ...p, liked_by_me: likedSet.has(p.id) })))
     } else {
-      setPosts(postsResult.data || [])
+      setPosts(postsData || [])
     }
-    setCreatives(creativesResult.data || [])
     setLoading(false)
   }
 
   const handleLike = async (postId: string, liked: boolean) => {
     if (!userId) { toast.error('Sign in to like posts'); return }
-    setPosts(prev => prev.map(p => p.id === postId ? { ...p, liked_by_me: !liked, likes_count: liked ? p.likes_count - 1 : p.likes_count + 1 } : p))
+    setPosts(prev => prev.map(p => p.id === postId
+      ? { ...p, liked_by_me: !liked, likes_count: liked ? p.likes_count - 1 : p.likes_count + 1 }
+      : p))
     if (liked) await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
     else await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
   }
 
   const handleFollow = async (creativeUserId: string, isFollowing: boolean) => {
-    if (!userId) { toast.error('Sign in to follow creatives'); return }
+    if (!userId) { toast.error('Sign in to follow'); return }
     if (isFollowing) {
       await supabase.from('follows').delete().eq('follower_id', userId).eq('following_id', creativeUserId)
       setFollowing(prev => { const s = new Set(prev); s.delete(creativeUserId); return s })
@@ -451,149 +618,136 @@ export default function FeedPage() {
     }
   }
 
-  const filteredPosts = activeChip
-    ? posts.filter(p => {
-        const { tag } = extractCaptionTag(p.caption)
-        if (tag) {
-          const t = tag.toLowerCase()
-          if (activeChip === 'style_week') return t.includes('style of the week')
-          if (activeChip === 'alte') return t.includes('alte')
-          if (activeChip === 'street') return t.includes('street')
-          if (activeChip === 'ankara') return t.includes('ankara')
-          if (activeChip === 'bridal') return t.includes('bridal') || p.service_type === 'bridal'
-          if (activeChip === 'trends') return t.includes('trend')
-          if (activeChip === 'memes') return t.includes('meme')
-        }
-        if (activeChip === 'bridal' && p.service_type === 'bridal') return true
-        return false
-      })
-    : posts
+  const filteredPosts = posts.filter(p => {
+    if (!activeChip) return true
+    if (activeChip === 'product') return (p.post_type ?? 'product') === 'product'
+    if (activeChip === 'inspo') return p.post_type === 'inspo'
+    const { tag } = extractTag(p.caption)
+    const t = (tag || '').toLowerCase()
+    if (activeChip === 'ankara') return t.includes('ankara') || p.service_type === 'ankara'
+    if (activeChip === 'bridal') return t.includes('bridal') || p.service_type === 'bridal'
+    if (activeChip === 'street') return t.includes('street')
+    if (activeChip === 'alte') return t.includes('alte')
+    if (activeChip === 'trends') return t.includes('trend')
+    return false
+  })
 
-  const showDemos = filteredPosts.length === 0 && !activeChip
+  const showDemos = posts.length === 0 && !activeChip
+  const demoMixed = [...DEMO_PRODUCTS.slice(0, 2), DEMO_INSPOS[0], ...DEMO_PRODUCTS.slice(2), DEMO_INSPOS[1]]
 
   return (
     <div className="min-h-screen bg-[#09090B]">
-      {/* Ambient glows */}
+      {/* Ambient */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-20 -left-32 w-80 h-80 bg-violet-600/8 rounded-full blur-3xl" />
         <div className="absolute top-1/2 -right-20 w-72 h-72 bg-fuchsia-600/6 rounded-full blur-3xl" />
+        <div className="absolute bottom-32 left-1/4 w-60 h-60 bg-amber-600/5 rounded-full blur-3xl" />
       </div>
 
       <Navbar />
 
-      <div className="relative max-w-lg mx-auto px-4 py-5">
+      <div className="relative max-w-lg mx-auto px-4 py-5 pb-28">
+
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-bold text-white flex items-center gap-2">
-              <Sparkles size={18} className="text-violet-400" /> Creative Showroom
+              <ShoppingBag size={18} className="text-amber-400" /> The Feed
             </h1>
-            <p className="text-xs text-zinc-500 mt-0.5">Discover work • Book a creative • Look amazing</p>
+            <p className="text-xs text-zinc-500 mt-0.5">Shop outfits • Post inspos • Get made</p>
           </div>
-          <Link href="/browse" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors border border-violet-500/20 px-3 py-1.5 rounded-full hover:border-violet-500/40">
-            Browse all →
-          </Link>
+          {userId && isCreative ? (
+            <Link href="/tailor/posts"
+              className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition-all shadow-lg shadow-violet-500/25">
+              <Plus size={13} /> Post
+            </Link>
+          ) : userId ? (
+            <button onClick={() => setShowInspoModal(true)}
+              className="flex items-center gap-1.5 bg-fuchsia-600/20 hover:bg-fuchsia-600/30 border border-fuchsia-500/30 text-fuchsia-300 font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
+              <Lightbulb size={13} /> Post inspo
+            </button>
+          ) : (
+            <Link href="/browse" className="text-xs font-semibold text-violet-400 hover:text-violet-300 border border-violet-500/20 px-3 py-1.5 rounded-full transition-colors">
+              Browse all →
+            </Link>
+          )}
         </div>
 
-        {/* View toggle */}
-        <div className="flex gap-1 bg-white/[0.04] rounded-2xl border border-white/[0.07] p-1 mb-4">
-          <button onClick={() => setView('feed')}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${view === 'feed' ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05]'}`}>
-            ✨ Showroom
-          </button>
-          <button onClick={() => setView('discover')}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${view === 'discover' ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.05]'}`}>
-            🔍 Discover
-          </button>
-        </div>
-
-        {/* Style chips */}
+        {/* Filter chips */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 mb-5">
-          {FEED_CHIPS.map(chip => (
+          {CHIPS.map(chip => (
             <button key={chip.value} onClick={() => setActiveChip(chip.value)}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
+              className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 ${
                 activeChip === chip.value
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
-                  : 'bg-white/[0.05] text-zinc-400 border border-white/[0.08] hover:border-violet-500/30 hover:text-violet-300 hover:bg-violet-500/10'
+                  ? chip.value === 'inspo'
+                    ? 'bg-fuchsia-600 text-white shadow-lg shadow-fuchsia-500/30'
+                    : 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
+                  : 'bg-white/[0.05] text-zinc-400 border border-white/[0.08] hover:border-violet-500/30 hover:text-violet-300 hover:bg-violet-500/8'
               }`}>
-              {chip.label}
+              {chip.icon} {chip.label}
             </button>
           ))}
         </div>
 
+        {/* Feed */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="w-10 h-10 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
-            <p className="text-zinc-600 text-sm">Loading showroom…</p>
-          </div>
-        ) : view === 'discover' ? (
-          <div>
-            <p className="text-sm font-bold text-white mb-3">Verified Creatives</p>
-            {creatives.length === 0 ? (
-              <div className="text-center py-16 bg-white/[0.03] rounded-3xl border border-white/[0.07]">
-                <div className="text-4xl mb-3">🔍</div>
-                <p className="text-zinc-500 text-sm">No creatives yet — check back soon</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {creatives.map((c, i) => <CreativeCard key={c.id} creative={c} index={i} />)}
-              </div>
-            )}
+            <p className="text-zinc-600 text-sm">Loading the feed…</p>
           </div>
         ) : (
           <div className="space-y-5">
             {/* Real posts */}
-            {filteredPosts.map(post => (
-              <PostCard key={post.id} post={post} userId={userId} onLike={handleLike} onFollow={handleFollow} following={following} />
+            {filteredPosts.map((post, i) => (
+              <PostCard key={post.id} post={post} userId={userId} onLike={handleLike} onFollow={handleFollow} following={following} idx={i} />
             ))}
 
-            {/* Demo showroom posts when no real posts exist */}
+            {/* Demo showroom when empty */}
             {showDemos && (
               <>
-                <div className="flex items-center gap-3 bg-violet-500/10 border border-violet-500/20 rounded-2xl px-4 py-3">
-                  <Scissors size={16} className="text-violet-400 flex-shrink-0" />
+                <div className="flex items-center gap-3 bg-violet-500/8 border border-violet-500/15 rounded-2xl px-4 py-3">
+                  <Sparkles size={16} className="text-violet-400 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-semibold text-violet-300">Showroom Preview</p>
-                    <p className="text-xs text-violet-500">Real creative work will appear here as creatives join and post</p>
+                    <p className="text-sm font-semibold text-violet-300">Feed Preview</p>
+                    <p className="text-xs text-violet-500/70">Real products and inspos from the community will appear here</p>
                   </div>
                 </div>
-                {DEMO_POSTS.map(p => (
-                  <DemoPostCard
-                    key={p.id}
-                    post={p}
-                    liked={likedDemos.has(p.id)}
-                    onLike={(id) => setLikedDemos(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s })}
-                  />
-                ))}
+                {demoMixed.map((p, i) =>
+                  p.post_type === 'inspo'
+                    ? <DemoInspoCard key={p.id} post={p as DemoInspo} idx={i} />
+                    : <DemoProductCard key={p.id} post={p as DemoProduct} idx={i} />
+                )}
               </>
             )}
 
-            {/* Empty chip filter state */}
+            {/* Empty chip filter */}
             {activeChip && filteredPosts.length === 0 && (
               <div className="text-center py-16 bg-white/[0.03] rounded-3xl border border-white/[0.07]">
                 <div className="text-4xl mb-3">📸</div>
-                <p className="text-zinc-500 text-sm">No posts in this category yet</p>
+                <p className="text-zinc-500 text-sm">Nothing here yet</p>
                 <button onClick={() => setActiveChip('')} className="mt-3 text-xs text-violet-400 hover:text-violet-300 transition-colors">
                   View all posts →
                 </button>
               </div>
             )}
-
-            {/* Discover strip */}
-            {creatives.length > 0 && showDemos && (
-              <div className="mt-2 pt-2 border-t border-white/[0.06]">
-                <p className="text-sm font-bold text-white mb-3">Verified creatives to follow</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {creatives.slice(0, 4).map((c, i) => <CreativeCard key={c.id} creative={c} index={i} />)}
-                </div>
-                <Link href="/browse" className="flex items-center justify-center mt-4 text-sm text-violet-400 font-semibold hover:text-violet-300 transition-colors">
-                  Browse all creatives →
-                </Link>
-              </div>
-            )}
           </div>
         )}
       </div>
+
+      {/* Floating Post button (guests) */}
+      {!userId && (
+        <div className="fixed bottom-6 right-5 z-40">
+          <Link href="/signup"
+            className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-black font-black text-sm px-5 py-3.5 rounded-2xl shadow-2xl shadow-amber-500/40 transition-all hover:scale-[1.04] active:scale-[0.97]">
+            <Camera size={16} /> Get started free
+          </Link>
+        </div>
+      )}
+
+      {/* Inspo modal */}
+      {showInspoModal && userId && (
+        <InspoModal userId={userId} onClose={() => setShowInspoModal(false)} onPosted={init} />
+      )}
     </div>
   )
 }

@@ -201,6 +201,10 @@ export interface Post {
   likes_count: number
   comments_count: number
   created_at: string
+  post_type: 'product' | 'inspo'
+  price?: number | null
+  title?: string | null
+  is_available?: boolean
   author?: Profile
   creative?: TailorProfile
   liked_by_me?: boolean
