@@ -156,8 +156,8 @@ function CameraRig({ strength }: { strength: number }) {
 }
 
 /* ─── Full scene ─────────────────────────────────────────────── */
-function Scene({ variant }: { variant: 'full' | 'subtle' }) {
-  const s = variant === 'subtle' ? 0.72 : 1
+function Scene({ variant }: { variant: 'full' | 'subtle' | 'light' }) {
+  const s = variant === 'subtle' ? 0.72 : variant === 'light' ? 0.85 : 1
 
   const rings: Parameters<typeof Ring>[0][] = [
     { pos: [-6.5, 2.5, -3], rot: [0.5, 0.2, 0.1], scale: 1.5 * s, color: '#7C3AED', emissive: '#6D28D9', speed: 0.5, phase: 0.0 },
@@ -193,8 +193,8 @@ function Scene({ variant }: { variant: 'full' | 'subtle' }) {
       <pointLight       position={[-4, 3, 0]}   intensity={2.0} color="#7C3AED" />
       <pointLight       position={[ 4,-2, 0]}   intensity={2.0} color="#F59E0B" />
 
-      <CameraRig strength={variant === 'subtle' ? 1.0 : 1.8} />
-      <StarField count={variant === 'subtle' ? 140 : 260} />
+      <CameraRig strength={variant === 'subtle' ? 1.0 : variant === 'light' ? 1.2 : 1.8} />
+      <StarField count={variant === 'subtle' ? 140 : variant === 'light' ? 120 : 260} />
       {variant === 'full' && <WavingCloth />}
 
       {rings.map((r, i)    => <Ring    key={`r${i}`} {...r} />)}
@@ -203,8 +203,8 @@ function Scene({ variant }: { variant: 'full' | 'subtle' }) {
 
       <EffectComposer>
         <Bloom
-          intensity={variant === 'full' ? 1.4 : 0.9}
-          luminanceThreshold={0.2}
+          intensity={variant === 'full' ? 1.4 : variant === 'light' ? 0.25 : 0.9}
+          luminanceThreshold={variant === 'light' ? 0.6 : 0.2}
           luminanceSmoothing={0.6}
           mipmapBlur
         />
@@ -214,7 +214,7 @@ function Scene({ variant }: { variant: 'full' | 'subtle' }) {
 }
 
 /* ─── Export ─────────────────────────────────────────────────── */
-export function ThreeBackground({ variant = 'full' }: { variant?: 'full' | 'subtle' }) {
+export function ThreeBackground({ variant = 'full' }: { variant?: 'full' | 'subtle' | 'light' }) {
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} aria-hidden="true">
       <Canvas

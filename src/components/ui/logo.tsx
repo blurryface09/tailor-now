@@ -69,7 +69,7 @@ export function Logo({ size = 'md', variant = 'icon', className, animated = fals
   }
   const s = sizes[size]
   const tailorColor = dark ? 'text-violet-300' : 'text-violet-700'
-  const nowColor    = dark ? 'text-white'       : 'text-white'
+  const nowColor    = dark ? 'text-white'       : 'text-zinc-800'
 
   if (variant === 'icon') {
     return <ScissorsIcon width={s.scissors} dark={dark} animated={animated} />
