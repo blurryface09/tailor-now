@@ -624,7 +624,7 @@ export default function FeedPage() {
     if (activeChip === 'inspo') return p.post_type === 'inspo'
     const { tag } = extractTag(p.caption)
     const t = (tag || '').toLowerCase()
-    if (activeChip === 'ankara') return t.includes('ankara') || p.service_type === 'ankara'
+    if (activeChip === 'ankara') return t.includes('ankara') || (p.service_type as string) === 'ankara'
     if (activeChip === 'bridal') return t.includes('bridal') || p.service_type === 'bridal'
     if (activeChip === 'street') return t.includes('street')
     if (activeChip === 'alte') return t.includes('alte')
