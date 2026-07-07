@@ -271,6 +271,13 @@ button:focus-visible, a:focus-visible {
   50%       { transform: scale(1.6); opacity: 0.2; }
 }
 
+/* ── Vertical-only float (no rotate, for UI cards) ──────── */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+.float-y { animation: float-y 4s ease-in-out infinite; }
+
 /* ── Scissors pivot animation (background versions) ─────── */
 @keyframes tn-snip {
   0%, 100% { transform: rotate(0deg); }
