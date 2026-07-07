@@ -21,6 +21,7 @@ const ADMIN_LINKS = [
   { href: '/admin/disputes',        icon: <AlertTriangle size={14} />,   label: 'Disputes' },
   { href: '/admin/payouts',         icon: <TrendingUp size={14} />,      label: 'Payouts' },
   { href: '/admin/marketplace',     icon: <Store size={14} />,           label: 'Marketplace' },
+  { href: '/admin/fabrics',         icon: <Package size={14} />,         label: 'Fabrics' },
   { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Creative' },
   { href: '/admin/broadcast',       icon: <Radio size={14} />,           label: 'Broadcast' },
   { href: '/admin/feed',            icon: <ImageIcon size={14} />,       label: 'Feed Posts' },
@@ -139,6 +140,10 @@ export function Navbar() {
                 'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
                 isActive('/browse') ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
               )}>Find Creatives</Link>
+              <Link href="/fabrics" className={cn(
+                'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
+                isActive('/fabrics') ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+              )}>🧵 Fabrics</Link>
               <Link href="/hall-of-fame" className={cn(
                 'px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200',
                 isActive('/hall-of-fame') ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'

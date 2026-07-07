@@ -57,6 +57,9 @@ export default async function AdminDashboard() {
             <Link href="/admin/reviews" className="bg-white/[0.05] backdrop-blur-xl border border-amber-500/20 text-amber-400 text-sm px-4 py-2 rounded-xl hover:bg-amber-500/10 transition-colors">
               Reviews
             </Link>
+            <Link href="/admin/fabrics" className="bg-white/[0.05] backdrop-blur-xl border border-amber-500/30 text-amber-400 text-sm px-4 py-2 rounded-xl hover:bg-amber-500/10 transition-colors">
+              Fabrics
+            </Link>
             <Link href="/admin/orders" className="bg-violet-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-violet-800 transition-colors">
               All Orders
             </Link>

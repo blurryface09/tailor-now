@@ -8,11 +8,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { SERVICE_LABELS, formatCurrency } from '@/lib/utils'
+import { FABRIC_TYPE_LABELS } from '@/types'
 import toast from 'react-hot-toast'
-import type { TailorProfile, TailorService, Measurements, Profile } from '@/types'
-import { MapPin, ChevronRight } from 'lucide-react'
+import type { TailorProfile, TailorService, Measurements, Profile, Fabric } from '@/types'
+import { MapPin, ChevronRight, Package, Scissors, CheckCircle2 } from 'lucide-react'
 
-type Step = 'service' | 'details' | 'measurements' | 'payment' | 'confirm'
+type Step = 'service' | 'details' | 'fabric' | 'measurements' | 'payment' | 'confirm'
 
 function NewOrderContent() {
   const router = useRouter()
@@ -29,6 +30,15 @@ function NewOrderContent() {
   const [selectedService, setSelectedService] = useState<TailorService | null>(null)
   const [customPrice, setCustomPrice] = useState('')
   const [styleRefs, setStyleRefs] = useState<string[]>([])
+
+  // fabric step
+  const [fabrics, setFabrics] = useState<Fabric[]>([])
+  const [fabricsLoading, setFabricsLoading] = useState(false)
+  const [fabricSource, setFabricSource] = useState<'tailornow' | 'customer_own'>('customer_own')
+  const [selectedFabric, setSelectedFabric] = useState<Fabric | null>(null)
+  const [fabricYards, setFabricYards] = useState('')
+  const [fabricFilter, setFabricFilter] = useState('')
+
   const [form, setForm] = useState({
     title: '', description: '', delivery_type: 'pickup_delivery',
     pickup_address: '', delivery_address: '', deadline: '', notes: '',
@@ -40,7 +50,7 @@ function NewOrderContent() {
       supabase.from('tailor_profiles').select('*, profile:profiles(*)').eq('id', tailorId).single(),
       supabase.from('tailor_services').select('*').eq('tailor_id', tailorId).eq('is_active', true),
       supabase.auth.getUser().then(async ({ data: { user } }) => {
-        if (!user) return { data: null, error: null }
+        if (!user) return { data: null }
         return supabase.from('measurements').select('*').eq('user_id', user.id).single()
       }),
     ]).then(([{ data: t }, { data: s }, mResult]) => {
@@ -50,6 +60,26 @@ function NewOrderContent() {
       if (serviceId) setSelectedService(s?.find(x => x.id === serviceId) || null)
     })
   }, [tailorId, serviceId])
+
+  const loadFabrics = async () => {
+    setFabricsLoading(true)
+    const { data } = await supabase.from('fabrics').select('*').eq('is_available', true).order('fabric_type')
+    setFabrics(data || [])
+    setFabricsLoading(false)
+  }
+
+  const goToFabric = () => {
+    setStep('fabric')
+    if (fabrics.length === 0) loadFabrics()
+  }
+
+  const fabricCost = selectedFabric && fabricYards
+    ? selectedFabric.price_per_yard * parseFloat(fabricYards || '0')
+    : 0
+
+  const displayedFabrics = fabricFilter
+    ? fabrics.filter(f => f.fabric_type === fabricFilter)
+    : fabrics
 
   const handleSubmit = async () => {
     setLoading(true)
@@ -73,6 +103,9 @@ function NewOrderContent() {
       deadline: form.deadline || null,
       notes: form.notes || null,
       style_reference_urls: styleRefs,
+      fabric_source: fabricSource,
+      fabric_id: fabricSource === 'tailornow' && selectedFabric ? selectedFabric.id : null,
+      fabric_yards: fabricSource === 'tailornow' && fabricYards ? parseFloat(fabricYards) : null,
       status: 'pending',
     }).select().single()
 
@@ -89,32 +122,49 @@ function NewOrderContent() {
     setLoading(false)
   }
 
-  const steps: Step[] = ['service', 'details', 'measurements', 'payment', 'confirm']
+  const steps: Step[] = ['service', 'details', 'fabric', 'measurements', 'payment', 'confirm']
   const stepIndex = steps.indexOf(step)
+  const stepLabels: Record<Step, string> = {
+    service: 'Service', details: 'Details', fabric: 'Fabric',
+    measurements: 'Fit', payment: 'Offer', confirm: 'Confirm',
+  }
 
-  if (!tailorId) return <div className="min-h-screen bg-[#09090B]"><Navbar /><div className="text-center py-20 text-zinc-500">No creative selected. <a href="/browse" className="text-violet-400 underline">Browse creatives</a></div></div>
+  if (!tailorId) return (
+    <div className="min-h-screen bg-[#09090B]">
+      <Navbar />
+      <div className="text-center py-20 text-zinc-500">
+        No creative selected. <a href="/browse" className="text-violet-400 underline">Browse creatives</a>
+      </div>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-[#09090B]">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/8 rounded-full blur-3xl" />
+      </div>
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Progress */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
           {steps.map((s, i) => (
-            <div key={s} className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${i <= stepIndex ? 'bg-violet-700 text-white' : 'bg-white/[0.08] text-zinc-500'}`}>
-                {i < stepIndex ? '✓' : i + 1}
+            <div key={s} className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex flex-col items-center gap-1">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${i < stepIndex ? 'bg-violet-700 text-white' : i === stepIndex ? 'bg-violet-600 text-white ring-2 ring-violet-400/40' : 'bg-white/[0.08] text-zinc-500'}`}>
+                  {i < stepIndex ? '✓' : i + 1}
+                </div>
+                <span className={`text-[9px] font-semibold transition-colors ${i === stepIndex ? 'text-violet-400' : 'text-zinc-600'}`}>{stepLabels[s]}</span>
               </div>
-              {i < steps.length - 1 && <div className={`h-0.5 w-8 transition-colors ${i < stepIndex ? 'bg-violet-700' : 'bg-white/[0.08]'}`} />}
+              {i < steps.length - 1 && <div className={`h-0.5 w-6 mb-4 transition-colors flex-shrink-0 ${i < stepIndex ? 'bg-violet-700' : 'bg-white/[0.08]'}`} />}
             </div>
           ))}
         </div>
 
         <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
-          {/* Tailor info */}
+          {/* Creative info */}
           {tailor && (
-            <div className="flex items-center gap-3 p-3 bg-violet-50 rounded-xl mb-6">
-              <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center text-violet-400 font-bold">
+            <div className="flex items-center gap-3 p-3 bg-violet-500/10 border border-violet-500/20 rounded-xl mb-6">
+              <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center text-violet-400 font-bold text-lg">
                 {tailor.business_name?.[0]}
               </div>
               <div>
@@ -131,21 +181,21 @@ function NewOrderContent() {
               <div className="space-y-3">
                 {services.map(s => (
                   <button key={s.id} onClick={() => setSelectedService(s)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedService?.id === s.id ? 'border-violet-600 bg-violet-50' : 'border-white/[0.1] hover:border-gray-300'}`}>
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedService?.id === s.id ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium text-white">{s.title}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">{SERVICE_LABELS[s.service_type]} • {s.min_days}–{s.max_days} days</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">{SERVICE_LABELS[s.service_type]} · {s.min_days}–{s.max_days} days</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-violet-700">{formatCurrency(s.base_price)}</p>
+                        <p className="font-bold text-violet-400">{formatCurrency(s.base_price)}</p>
                         {s.price_negotiable && <p className="text-xs text-zinc-600">Negotiable</p>}
                       </div>
                     </div>
                   </button>
                 ))}
                 <button onClick={() => setSelectedService(null)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${!selectedService ? 'border-violet-600 bg-violet-50' : 'border-white/[0.1] hover:border-gray-300'}`}>
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${!selectedService ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
                   <p className="font-medium text-white">Custom / Other request</p>
                   <p className="text-xs text-zinc-500 mt-0.5">Describe what you need and agree on price via chat</p>
                 </button>
@@ -165,25 +215,23 @@ function NewOrderContent() {
                   onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-1.5">Description</label>
-                  <textarea className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 min-h-[100px]"
-                    placeholder="Describe what you want in detail — fabric color, style, occasion, etc."
+                  <textarea className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/60 min-h-[100px] transition-all"
+                    placeholder="Describe what you want in detail — style, occasion, colours, etc."
                     value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-zinc-300 mb-2">Delivery preference</label>
                   <div className="grid grid-cols-2 gap-3">
                     {[{ val: 'pickup_delivery', label: '🚚 Pickup & Delivery', sub: 'We come to you' },
                       { val: 'visit_shop', label: '🏪 Visit Shop', sub: 'You go to them' }].map(opt => (
                       <button key={opt.val} onClick={() => setForm(f => ({ ...f, delivery_type: opt.val }))}
-                        className={`p-3 rounded-xl border-2 text-left transition-all ${form.delivery_type === opt.val ? 'border-violet-600 bg-violet-50' : 'border-white/[0.1] hover:border-gray-300'}`}>
-                        <p className="text-sm font-medium">{opt.label}</p>
+                        className={`p-3 rounded-xl border-2 text-left transition-all ${form.delivery_type === opt.val ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
+                        <p className="text-sm font-medium text-white">{opt.label}</p>
                         <p className="text-xs text-zinc-600">{opt.sub}</p>
                       </button>
                     ))}
                   </div>
                 </div>
-
                 {form.delivery_type === 'pickup_delivery' && (
                   <Input label="Pickup address" placeholder="Address to collect fabric from" icon={<MapPin size={16} />}
                     value={form.pickup_address} onChange={e => setForm(f => ({ ...f, pickup_address: e.target.value }))} />
@@ -192,20 +240,132 @@ function NewOrderContent() {
                   value={form.delivery_address} onChange={e => setForm(f => ({ ...f, delivery_address: e.target.value }))} />
                 <Input label="Deadline (optional)" type="date" value={form.deadline}
                   onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))} />
-
                 <ImageUpload
-                  bucket="order-refs"
-                  folder={`refs`}
-                  value={styleRefs}
-                  onChange={setStyleRefs}
-                  maxFiles={4}
-                  label="Style reference photos (optional)"
-                  hint="Upload inspiration photos — fabric patterns, style photos, magazine cuts, etc."
+                  bucket="order-refs" folder="refs" value={styleRefs} onChange={setStyleRefs}
+                  maxFiles={4} label="Style reference photos (optional)"
+                  hint="Upload inspiration photos — fabric patterns, style photos, magazine cuts…"
                 />
               </div>
               <div className="flex gap-3 mt-6">
                 <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('service')}>Back</Button>
-                <Button size="lg" className="flex-1" onClick={() => setStep('measurements')} disabled={!form.title || !form.description}>
+                <Button size="lg" className="flex-1" onClick={goToFabric} disabled={!form.title || !form.description}>
+                  Continue <ChevronRight size={16} />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step: Fabric */}
+          {step === 'fabric' && (
+            <div>
+              <h2 className="text-lg font-bold text-white mb-1">Fabric sourcing</h2>
+              <p className="text-sm text-zinc-500 mb-5">TailorNow can source your fabric — or you can provide your own.</p>
+
+              {/* Source choice */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <button onClick={() => setFabricSource('tailornow')}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all ${fabricSource === 'tailornow' ? 'border-amber-500 bg-amber-500/10' : 'border-white/[0.1] hover:border-amber-500/30'}`}>
+                  <div className="text-2xl mb-2">🧵</div>
+                  <p className="font-bold text-white text-sm">TailorNow sources it</p>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Pick from our quality-checked catalogue. We handle the rest.</p>
+                  {fabricSource === 'tailornow' && <div className="mt-2"><CheckCircle2 size={16} className="text-amber-400" /></div>}
+                </button>
+                <button onClick={() => { setFabricSource('customer_own'); setSelectedFabric(null); setFabricYards('') }}
+                  className={`p-4 rounded-2xl border-2 text-left transition-all ${fabricSource === 'customer_own' ? 'border-violet-500 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
+                  <div className="text-2xl mb-2">🛍️</div>
+                  <p className="font-bold text-white text-sm">I have my own fabric</p>
+                  <p className="text-xs text-zinc-500 mt-1 leading-relaxed">You provide the fabric — the creative just handles production.</p>
+                  {fabricSource === 'customer_own' && <div className="mt-2"><CheckCircle2 size={16} className="text-violet-400" /></div>}
+                </button>
+              </div>
+
+              {/* Catalogue picker */}
+              {fabricSource === 'tailornow' && (
+                <div style={{ animation: 'fade-up 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
+                  {/* Type filter */}
+                  <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
+                    {[['', 'All'], ...Object.entries(FABRIC_TYPE_LABELS)].map(([val, label]) => (
+                      <button key={val} onClick={() => setFabricFilter(val)}
+                        className={`flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold transition-all border ${fabricFilter === val ? 'bg-amber-400 text-black border-amber-400' : 'bg-white/[0.04] border-white/[0.08] text-zinc-400'}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {fabricsLoading ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {[1, 2, 3, 4].map(i => <div key={i} className="bg-white/[0.04] rounded-xl aspect-[4/3] animate-pulse" />)}
+                    </div>
+                  ) : displayedFabrics.length === 0 ? (
+                    <div className="text-center py-8 text-zinc-500 text-sm">No fabrics available yet — check back soon</div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1 scrollbar-none">
+                      {displayedFabrics.map(fabric => (
+                        <button key={fabric.id} onClick={() => setSelectedFabric(selectedFabric?.id === fabric.id ? null : fabric)}
+                          className={`text-left rounded-xl overflow-hidden border-2 transition-all ${selectedFabric?.id === fabric.id ? 'border-amber-500 shadow-lg shadow-amber-500/10' : 'border-white/[0.07] hover:border-amber-500/30'}`}>
+                          <div className="aspect-[4/3] overflow-hidden relative">
+                            {fabric.image_urls[0]
+                              ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover" />
+                              : <div className="w-full h-full bg-white/[0.05] flex items-center justify-center">🧵</div>
+                            }
+                            {selectedFabric?.id === fabric.id && (
+                              <div className="absolute inset-0 bg-amber-400/15 flex items-center justify-center">
+                                <CheckCircle2 size={24} className="text-amber-400 drop-shadow" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-2">
+                            <p className="font-semibold text-white text-xs truncate">{fabric.name}</p>
+                            <p className="text-amber-400 text-xs font-bold">₦{fabric.price_per_yard.toLocaleString()}/yd</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Yards input */}
+                  {selectedFabric && (
+                    <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl"
+                      style={{ animation: 'fade-up 0.25s ease both' }}>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-bold text-white">{selectedFabric.name}</p>
+                        <p className="text-xs text-zinc-500">min {selectedFabric.min_yards} yds</p>
+                      </div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1.5">How many yards do you need?</label>
+                      <div className="flex items-center gap-3">
+                        <input type="number" min={selectedFabric.min_yards} step="0.5"
+                          className="w-28 rounded-xl bg-white/[0.08] border border-amber-500/30 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/60 transition-all"
+                          placeholder={String(selectedFabric.min_yards)}
+                          value={fabricYards} onChange={e => setFabricYards(e.target.value)} />
+                        <div className="flex-1">
+                          {fabricYards && parseFloat(fabricYards) >= selectedFabric.min_yards ? (
+                            <div>
+                              <p className="text-xs text-zinc-500">Fabric cost</p>
+                              <p className="font-black text-amber-400 text-lg">₦{(selectedFabric.price_per_yard * parseFloat(fabricYards)).toLocaleString()}</p>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-zinc-600">Common: 3–4 yds for a dress, 5–6 yds for a suit</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {fabricSource === 'customer_own' && (
+                <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl text-sm text-violet-300"
+                  style={{ animation: 'fade-up 0.25s ease both' }}>
+                  <p className="font-semibold text-white mb-1">You're providing your own fabric</p>
+                  <p className="text-zinc-400 text-xs leading-relaxed">The creative will contact you to arrange fabric handover. You can add details in the notes during the next steps.</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-6">
+                <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('details')}>Back</Button>
+                <Button size="lg" className="flex-1"
+                  disabled={fabricSource === 'tailornow' && (!selectedFabric || !fabricYards || parseFloat(fabricYards) < (selectedFabric?.min_yards || 0))}
+                  onClick={() => setStep('measurements')}>
                   Continue <ChevronRight size={16} />
                 </Button>
               </div>
@@ -216,10 +376,9 @@ function NewOrderContent() {
           {step === 'measurements' && (
             <div>
               <h2 className="text-lg font-bold text-white mb-1">Your measurements</h2>
-              <p className="text-sm text-zinc-500 mb-4">These will be shared with the tailor</p>
-
+              <p className="text-sm text-zinc-500 mb-4">These will be shared with the creative</p>
               {measurements ? (
-                <div className="grid grid-cols-2 gap-3 p-4 bg-violet-50 rounded-xl mb-4">
+                <div className="grid grid-cols-2 gap-3 p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl mb-4">
                   {Object.entries({
                     Chest: measurements.chest, Waist: measurements.waist, Hips: measurements.hips,
                     Inseam: measurements.inseam, Shoulder: measurements.shoulder,
@@ -237,16 +396,14 @@ function NewOrderContent() {
                   <a href="/profile#measurements" className="text-sm text-violet-400 font-medium underline">Add measurements to your profile →</a>
                 </div>
               )}
-
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Additional notes for your creative</label>
-                <textarea className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 min-h-[80px]"
-                  placeholder="Any extra notes, fabric preferences, inspirations..."
+                <textarea className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500/60 min-h-[80px] transition-all"
+                  placeholder="Any extra notes, fit preferences, special instructions…"
                   value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} />
               </div>
-
               <div className="flex gap-3 mt-6">
-                <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('details')}>Back</Button>
+                <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('fabric')}>Back</Button>
                 <Button size="lg" className="flex-1" onClick={() => setStep('payment')}>
                   Continue <ChevronRight size={16} />
                 </Button>
@@ -258,35 +415,36 @@ function NewOrderContent() {
           {step === 'payment' && (
             <div>
               <h2 className="text-lg font-bold text-white mb-1">Make your offer</h2>
-              <p className="text-sm text-zinc-500 mb-5">Propose a price — the creative will accept or counter. You pay only after both agree.</p>
+              <p className="text-sm text-zinc-500 mb-5">Propose a tailoring price — the creative will accept or counter.</p>
 
               {selectedService && (
-                <div className="flex justify-between items-center p-3 bg-violet-50 rounded-xl mb-4 text-sm">
+                <div className="flex justify-between items-center p-3 bg-violet-500/10 border border-violet-500/20 rounded-xl mb-4 text-sm">
                   <span className="text-zinc-400">Creative&apos;s listed price</span>
-                  <span className="font-bold text-violet-700">{formatCurrency(selectedService.base_price)}</span>
+                  <span className="font-bold text-violet-400">{formatCurrency(selectedService.base_price)}</span>
+                </div>
+              )}
+
+              {fabricSource === 'tailornow' && selectedFabric && fabricCost > 0 && (
+                <div className="flex justify-between items-center p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl mb-4 text-sm">
+                  <span className="text-zinc-400">Fabric cost ({fabricYards} yds of {selectedFabric.name})</span>
+                  <span className="font-bold text-amber-400">+{formatCurrency(fabricCost)}</span>
                 </div>
               )}
 
               <div className="relative mb-2">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 font-medium text-sm">₦</span>
-                <input
-                  type="number"
-                  min="0"
+                <input type="number" min="0"
                   placeholder={selectedService ? String(selectedService.base_price) : 'e.g. 35000'}
-                  className="w-full pl-8 pr-4 py-3.5 rounded-xl border-2 border-white/[0.1] focus:border-violet-500 focus:outline-none text-lg font-semibold"
-                  value={customPrice}
-                  onChange={e => setCustomPrice(e.target.value)}
-                />
+                  className="w-full pl-8 pr-4 py-3.5 rounded-xl bg-white/[0.06] border-2 border-white/[0.1] focus:border-violet-500 focus:outline-none text-lg font-semibold text-white transition-all"
+                  value={customPrice} onChange={e => setCustomPrice(e.target.value)} />
               </div>
-              <p className="text-xs text-zinc-600 mb-6">
-                {selectedService?.price_negotiable ? 'Price is negotiable — feel free to make an offer.' : 'Leave blank to accept the listed price.'}
-              </p>
+              <p className="text-xs text-zinc-600 mb-4">This is your tailoring offer only — fabric cost is added separately.</p>
 
-              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-300 mb-4">
-                <strong>How it works:</strong> Your offer is sent to the creative. They'll accept, counter, or decline. Once you both agree — you pay securely via Paystack.
+              <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-300">
+                <strong>How it works:</strong> Your offer is sent to the creative. They&apos;ll accept, counter, or decline. Once you both agree — you pay securely via Paystack.
               </div>
 
-              <div className="flex gap-3 mt-2">
+              <div className="flex gap-3 mt-6">
                 <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('measurements')}>Back</Button>
                 <Button size="lg" className="flex-1" onClick={() => setStep('confirm')}>
                   Review Order <ChevronRight size={16} />
@@ -299,37 +457,68 @@ function NewOrderContent() {
           {step === 'confirm' && (
             <div>
               <h2 className="text-lg font-bold text-white mb-4">Review & place order</h2>
-              <div className="space-y-3 text-sm">
+              <div className="space-y-0">
                 {[
                   { label: 'Service', value: selectedService?.title || 'Custom request' },
                   { label: 'Description', value: form.description },
                   { label: 'Delivery', value: form.delivery_type === 'pickup_delivery' ? 'Pickup & Delivery' : 'Visit Shop' },
                   { label: 'Deadline', value: form.deadline || 'Flexible' },
                 ].map(row => (
-                  <div key={row.label} className="flex gap-3 py-2 border-b border-white/[0.08]">
-                    <span className="text-zinc-500 w-24 flex-shrink-0">{row.label}</span>
-                    <span className="text-white font-medium">{row.value}</span>
+                  <div key={row.label} className="flex gap-3 py-2.5 border-b border-white/[0.06]">
+                    <span className="text-zinc-500 w-24 flex-shrink-0 text-sm">{row.label}</span>
+                    <span className="text-white font-medium text-sm">{row.value}</span>
                   </div>
                 ))}
-                {styleRefs.length > 0 && (
-                  <div className="pt-2">
-                    <p className="text-zinc-500 mb-2">Style refs</p>
-                    <div className="flex gap-2 flex-wrap">
-                      {styleRefs.map((url, i) => (
-                        <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/[0.08]" />
-                      ))}
-                    </div>
+
+                {/* Fabric summary */}
+                <div className="flex gap-3 py-2.5 border-b border-white/[0.06]">
+                  <span className="text-zinc-500 w-24 flex-shrink-0 text-sm">Fabric</span>
+                  <div>
+                    {fabricSource === 'tailornow' && selectedFabric ? (
+                      <div className="flex items-center gap-2">
+                        {selectedFabric.image_urls[0] && (
+                          <img src={selectedFabric.image_urls[0]} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                        )}
+                        <div>
+                          <p className="text-white font-medium text-sm">{selectedFabric.name}</p>
+                          <p className="text-xs text-amber-400">{fabricYards} yds · ₦{fabricCost.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-white font-medium text-sm">Customer provides fabric</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {styleRefs.length > 0 && (
+                <div className="pt-3 pb-2">
+                  <p className="text-zinc-500 text-sm mb-2">Style refs</p>
+                  <div className="flex gap-2 flex-wrap">
+                    {styleRefs.map((url, i) => (
+                      <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-white/[0.08]" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Price summary */}
+              <div className="mt-4 space-y-2">
+                {fabricSource === 'tailornow' && selectedFabric && fabricCost > 0 && (
+                  <div className="flex items-center justify-between px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm">
+                    <span className="text-zinc-400">Fabric ({selectedFabric.name})</span>
+                    <span className="font-bold text-amber-400">₦{fabricCost.toLocaleString()}</span>
+                  </div>
+                )}
+                {(customPrice || selectedService?.base_price) && (
+                  <div className="flex items-center justify-between px-4 py-3 bg-violet-500/10 border border-violet-500/20 rounded-xl text-sm">
+                    <span className="text-zinc-400">Tailoring offer</span>
+                    <span className="font-bold text-violet-400">{formatCurrency(parseFloat(customPrice || String(selectedService?.base_price || 0)))}</span>
                   </div>
                 )}
               </div>
 
-              {customPrice || selectedService?.base_price ? (
-                <div className="mt-4 flex items-center justify-between p-4 bg-violet-50 border border-violet-500/20 rounded-xl text-sm">
-                  <span className="text-violet-700">Your offer</span>
-                  <span className="font-bold text-violet-700">{formatCurrency(parseFloat(customPrice || String(selectedService?.base_price || 0)))}</span>
-                </div>
-              ) : null}
-              <div className="mt-3 p-4 bg-amber-500/10 border border-amber-100 rounded-xl text-sm text-amber-300">
+              <div className="mt-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm text-amber-300">
                 No payment yet — you&apos;ll pay after the creative accepts your offer.
               </div>
 

@@ -138,10 +138,14 @@ export interface Order {
   actual_delivery: string | null
   style_reference_urls: string[]
   notes: string | null
+  fabric_id: string | null
+  fabric_source: 'tailornow' | 'customer_own'
+  fabric_yards: number | null
   created_at: string
   updated_at: string
   customer?: Profile
   tailor?: TailorProfile & { profile?: Profile }
+  fabric?: Fabric
 }
 
 export interface Rating {
@@ -208,6 +212,51 @@ export interface Post {
   author?: Profile
   creative?: TailorProfile
   liked_by_me?: boolean
+}
+
+export type FabricType =
+  | 'ankara'
+  | 'cotton'
+  | 'crepe'
+  | 'linen'
+  | 'silk'
+  | 'chiffon'
+  | 'asoebi'
+  | 'denim'
+  | 'wool'
+  | 'velvet'
+  | 'george'
+  | 'aso_oke'
+
+export const FABRIC_TYPE_LABELS: Record<FabricType, string> = {
+  ankara: 'Ankara',
+  cotton: 'Cotton',
+  crepe: 'Crepe',
+  linen: 'Linen',
+  silk: 'Silk',
+  chiffon: 'Chiffon',
+  asoebi: 'Aso-ebi',
+  denim: 'Denim',
+  wool: 'Wool',
+  velvet: 'Velvet',
+  george: 'George',
+  aso_oke: 'Aso-oke',
+}
+
+export interface Fabric {
+  id: string
+  name: string
+  fabric_type: FabricType
+  colors: string[]
+  pattern: string
+  image_urls: string[]
+  price_per_yard: number
+  yards_in_stock: number
+  min_yards: number
+  is_available: boolean
+  description: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface PostComment {
