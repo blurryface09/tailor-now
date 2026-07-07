@@ -3,9 +3,10 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } from '@/lib/utils'
+import { CREATIVE_SUPPORT_LABEL, CREATIVE_SUPPORT_URL } from '@/lib/support'
 import { isCreativeProfileComplete } from '@/lib/creative-completeness'
 import { calcScore, getLevel } from '@/lib/creative-score'
-import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, Image, UserCog, AlertCircle } from 'lucide-react'
+import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, ImageIcon, UserCog, AlertCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -128,16 +129,27 @@ export default async function TailorDashboard() {
         {/* Pending verification notice */}
         {!tailor.is_verified && (
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 mb-6">
-            <div className="flex items-start gap-3">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-start gap-3">
               <AlertCircle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-semibold text-amber-300 text-sm">Your profile is under review</p>
                 <p className="text-xs text-amber-400 mt-0.5">
                   Your profile has been submitted and is awaiting admin verification.
-                  Once approved, you'll appear in search results and customers can book you.
+                  Once approved, you&apos;ll appear in search results and customers can book you.
                   This usually takes 1–2 business days.
                 </p>
               </div>
+              </div>
+              <a
+                href={CREATIVE_SUPPORT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-black shadow-lg shadow-amber-900/20 transition-colors hover:bg-amber-300"
+              >
+                <MessageSquare size={16} />
+                {CREATIVE_SUPPORT_LABEL}
+              </a>
             </div>
           </div>
         )}
@@ -157,7 +169,7 @@ export default async function TailorDashboard() {
 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
             { href: '/tailor/orders', icon: <Package size={22} />, label: 'Manage Orders' },
-            { href: '/tailor/portfolio', icon: <Image size={22} />, label: 'Portfolio' },
+            { href: '/tailor/portfolio', icon: <ImageIcon size={22} />, label: 'Portfolio' },
             { href: '/tailor/pricing', icon: <Scissors size={22} />, label: 'Services & Pricing' },
             { href: '/tailor/profile', icon: <UserCog size={22} />, label: 'Edit Profile' },
           ].map(a => (

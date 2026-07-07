@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Logo } from '@/components/ui/logo'
 import { SERVICE_LABELS } from '@/lib/utils'
+import { CREATIVE_SUPPORT_LABEL, CREATIVE_SUPPORT_URL } from '@/lib/support'
 import { NIGERIAN_STATES, citiesForState, matchState, matchCity } from '@/lib/nigeria-locations'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
-import { CheckCircle, Camera, Upload, X, Navigation } from 'lucide-react'
+import { CheckCircle, Camera, Upload, X, Navigation, MessageCircle } from 'lucide-react'
 
 const SERVICE_ICONS: Record<string, string> = {
   custom_outfit: '👗', alterations: '✂️', bridal: '💍',
@@ -271,6 +272,26 @@ export default function TailorOnboarding() {
           Step {step + 1} of {STEPS.length} — <span className="font-medium text-zinc-300">{STEPS[step]}</span>
         </p>
 
+        <div className="mb-5 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-violet-200">Need help finishing onboarding?</p>
+              <p className="text-xs text-violet-300/80 mt-0.5">
+                Reach TailorNow support and we&apos;ll help you complete your creative profile.
+              </p>
+            </div>
+            <a
+              href={CREATIVE_SUPPORT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-900/20 transition-colors hover:bg-violet-500"
+            >
+              <MessageCircle size={16} />
+              {CREATIVE_SUPPORT_LABEL}
+            </a>
+          </div>
+        </div>
+
         <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6">
 
           {/* Step 0 — Business Info */}
@@ -451,7 +472,7 @@ export default function TailorOnboarding() {
             <div>
               <h2 className="font-bold text-white mb-1">Face verification photo</h2>
               <p className="text-sm text-zinc-500 mb-4">
-                A clear selfie holding a piece of paper with today's date.
+                A clear selfie holding a piece of paper with today&apos;s date.
                 Used only by admin for identity verification — never shown publicly.
               </p>
               <div className="flex items-start gap-4 mb-4">
@@ -497,7 +518,7 @@ export default function TailorOnboarding() {
                 )}
                 <ul className="text-xs text-zinc-500 space-y-1.5 pt-1">
                   <li>• Clear, well-lit selfie</li>
-                  <li>• Hold paper with today's date</li>
+                  <li>• Hold paper with today&apos;s date</li>
                   <li>• Face must be clearly visible</li>
                   <li>• Kept private — admin eyes only</li>
                 </ul>
@@ -546,7 +567,7 @@ export default function TailorOnboarding() {
             <div>
               <h2 className="font-bold text-white mb-1">Upload your work</h2>
               <p className="text-sm text-zinc-500 mb-4">
-                Add at least 2 photos of outfits you've made. This is the first thing customers see.
+                Add at least 2 photos of outfits you&apos;ve made. This is the first thing customers see.
               </p>
 
               {portfolioItems.length > 0 && (
