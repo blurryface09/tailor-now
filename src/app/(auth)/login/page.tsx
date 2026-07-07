@@ -1,12 +1,18 @@
 'use client'
 export const dynamic = 'force-dynamic'
 import { useState } from 'react'
+import nextDynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Logo } from '@/components/ui/logo'
 import toast from 'react-hot-toast'
 import { Mail, Lock, ArrowRight } from 'lucide-react'
+
+const ThreeBackground = nextDynamic(
+  () => import('@/components/three/ThreeBackground').then(m => m.ThreeBackground),
+  { ssr: false }
+)
 
 const FASHION_COLLAGE = [
   'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
@@ -36,6 +42,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#09090B] flex">
+      <ThreeBackground variant="subtle" />
       {/* Left — form */}
       <div className="flex-1 flex flex-col justify-center px-8 py-12 relative z-10">
         <div className="absolute -top-20 -left-20 w-80 h-80 bg-violet-600/12 rounded-full blur-3xl pointer-events-none" />

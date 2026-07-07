@@ -1,9 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/logo'
 import { ArrowRight, Star, CheckCircle, Zap, Users, Package, MapPin, MessageSquare } from 'lucide-react'
+
+const ThreeBackground = dynamic(
+  () => import('@/components/three/ThreeBackground').then(m => m.ThreeBackground),
+  { ssr: false }
+)
 
 // ── TiltCard — 3D perspective tilt on mouse move ──────────────────────────────
 function TiltCard({
@@ -151,6 +157,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#09090B] text-white overflow-x-hidden selection:bg-violet-500/30">
+      <ThreeBackground variant="full" />
 
       {/* ── Floating Navbar ──────────────────────────────────────────────────── */}
       <nav className="fixed top-0 z-50 w-full px-4 pt-3">
@@ -187,13 +194,7 @@ export default function LandingPage() {
         <div className="absolute top-1/2 right-1/4 w-[350px] h-[350px] rounded-full pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%)', transform: `translate(${mouse.x * -18}px, ${mouse.y * -18}px)`, transition: 'transform 0.7s ease-out' }} />
 
-        {/* Particle field */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {PARTICLES.map(p => (
-            <div key={p.id} className="absolute rounded-full"
-              style={{ left: p.left, top: p.top, width: p.size, height: p.size, background: p.color, opacity: parseFloat(p.opacity), animation: `float-r ${p.dur} ${p.delay} ease-in-out infinite` }} />
-          ))}
-        </div>
+        {/* Particles handled by Three.js background */}
 
         {/* Dot grid */}
         <div className="absolute inset-0 opacity-[0.022] pointer-events-none"

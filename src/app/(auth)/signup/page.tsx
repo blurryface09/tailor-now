@@ -1,12 +1,18 @@
 'use client'
 export const dynamic = 'force-dynamic'
 import { useState, Suspense } from 'react'
+import nextDynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Logo } from '@/components/ui/logo'
 import toast from 'react-hot-toast'
 import { Mail, Lock, User, Scissors, ShoppingBag, CheckCircle, ArrowRight } from 'lucide-react'
+
+const ThreeBackground = nextDynamic(
+  () => import('@/components/three/ThreeBackground').then(m => m.ThreeBackground),
+  { ssr: false }
+)
 
 function SignupContent() {
   const router = useRouter()
@@ -112,6 +118,7 @@ function SignupContent() {
 
   return (
     <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4 py-12 relative">
+      <ThreeBackground variant="subtle" />
       {/* Ambient glows */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
