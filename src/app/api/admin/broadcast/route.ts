@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { Resend } from 'resend'
+import { getResend, sendBatch } from '@/lib/email'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tailornow.shop'
 
 function broadcastHtml(name: string, body: string): string {
-  const bodyHtml = body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+  const bodyHtml = body
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>')
   return `
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:16px">
   <div style="background:linear-gradient(135deg,#7C3AED 0%,#6D28D9 100%);padding:24px 28px;border-radius:16px 16px 0 0;text-align:center">
@@ -29,35 +31,25 @@ function broadcastHtml(name: string, body: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  // Auth: must be admin
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (adminProfile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const resendKey = process.env.RESEND_API_KEY
-  if (!resendKey) {
+  if (!getResend()) {
     return NextResponse.json(
-      { error: 'Email is not connected yet. Add RESEND_API_KEY in Vercel, then redeploy.' },
+      { error: 'Email is not connected. Add RESEND_API_KEY in Vercel → Redeploy.' },
       { status: 503 }
     )
   }
 
-  const { subject, body, audience } = await req.json() as {
-    subject: string
-    body: string
-    audience: string
-  }
+  const { subject, body, audience } = await req.json() as { subject: string; body: string; audience: string }
   if (!subject?.trim() || !body?.trim()) {
     return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 })
   }
 
   const admin = createAdminClient()
-  const resend = new Resend(resendKey)
-  const from = process.env.RESEND_FROM_EMAIL || 'TailorNow <hello@tailornow.shop>'
-
-  // Fetch contacts (reuse same logic as /api/admin/contacts)
   const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
   const emailMap = new Map(authUsers.map(u => [u.id, u.email ?? null]))
 
@@ -83,26 +75,13 @@ export async function POST(req: NextRequest) {
 
   if (contacts.length === 0) return NextResponse.json({ sent: 0, errors: 0 })
 
-  // Batch send in chunks of 100 (Resend limit)
-  const CHUNK = 100
-  let sent = 0
-  let errors = 0
-
-  for (let i = 0; i < contacts.length; i += CHUNK) {
-    const chunk = contacts.slice(i, i + CHUNK)
-    const batch = chunk.map(c => ({
-      from,
-      to: [c.email],
+  const { sent, errors } = await sendBatch(
+    contacts.map(c => ({
+      to: c.email,
       subject,
       html: broadcastHtml(c.name, body),
     }))
-    const result = await resend.batch.send(batch).catch(() => null)
-    if (result?.data) {
-      sent += chunk.length
-    } else {
-      errors += chunk.length
-    }
-  }
+  )
 
   return NextResponse.json({ sent, errors })
 }

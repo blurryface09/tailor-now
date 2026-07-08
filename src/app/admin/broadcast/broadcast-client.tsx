@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { Mail, Phone, Download, Copy, Send, Users, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Mail, Phone, Download, Copy, Send, Users, CheckCircle, AlertCircle, Loader2, FlaskConical, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { ContactRow } from '@/app/api/admin/contacts/route'
 
@@ -13,6 +13,8 @@ const TABS: { key: Audience; label: string; desc: string }[] = [
   { key: 'tailors_all',     label: 'All Creatives',   desc: 'Verified + unverified creatives' },
 ]
 
+type TestResult = { ok: boolean; message?: string; error?: string; fix?: string; config?: { hasKey: boolean; fromAddress: string; sentTo?: string } }
+
 export function BroadcastClient() {
   const [audience, setAudience] = useState<Audience>('all')
   const [contacts, setContacts] = useState<ContactRow[]>([])
@@ -22,6 +24,23 @@ export function BroadcastClient() {
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [result, setResult] = useState<{ sent: number; errors: number } | null>(null)
+
+  const [testingEmail, setTestingEmail] = useState(false)
+  const [testResult, setTestResult] = useState<TestResult | null>(null)
+
+  async function handleTestEmail() {
+    setTestingEmail(true)
+    setTestResult(null)
+    try {
+      const res = await fetch('/api/admin/email/test', { method: 'POST' })
+      const data: TestResult = await res.json()
+      setTestResult(data)
+    } catch {
+      setTestResult({ ok: false, error: 'Network error — could not reach the test endpoint.' })
+    } finally {
+      setTestingEmail(false)
+    }
+  }
 
   const fetchContacts = useCallback(async (aud: Audience) => {
     setLoadingContacts(true)
@@ -132,10 +151,55 @@ export function BroadcastClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* ── Email compose ── */}
         <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-hidden">
-          <div className="flex items-center gap-2.5 px-5 py-4 border-b border-white/[0.08]">
-            <Mail size={16} className="text-violet-600" />
-            <h2 className="font-semibold text-white">Broadcast Email</h2>
+          <div className="flex items-center justify-between gap-2.5 px-5 py-4 border-b border-white/[0.08]">
+            <div className="flex items-center gap-2.5">
+              <Mail size={16} className="text-violet-600" />
+              <h2 className="font-semibold text-white">Broadcast Email</h2>
+            </div>
+            <button
+              onClick={handleTestEmail}
+              disabled={testingEmail}
+              className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-white/[0.1] text-zinc-400 hover:bg-white/[0.06] hover:text-white transition-all disabled:opacity-50"
+              title="Send a test email to yourself to verify Resend is working"
+            >
+              {testingEmail ? <Loader2 size={12} className="animate-spin" /> : <FlaskConical size={12} />}
+              Test email
+            </button>
           </div>
+
+          {/* Test email result */}
+          {testResult && (
+            <div className={`mx-5 mt-4 rounded-xl p-3.5 text-sm ${testResult.ok ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-start gap-2 flex-1">
+                  {testResult.ok
+                    ? <CheckCircle size={15} className="text-green-400 flex-shrink-0 mt-0.5" />
+                    : <AlertCircle size={15} className="text-red-400 flex-shrink-0 mt-0.5" />
+                  }
+                  <div>
+                    <p className={testResult.ok ? 'text-green-300' : 'text-red-300'}>
+                      {testResult.ok ? testResult.message : testResult.error}
+                    </p>
+                    {testResult.fix && (
+                      <p className="text-amber-300 mt-1.5 text-xs leading-relaxed">
+                        <strong>Fix:</strong> {testResult.fix}
+                      </p>
+                    )}
+                    {testResult.config && (
+                      <p className="text-zinc-500 mt-1 text-xs">
+                        From: {testResult.config.fromAddress}
+                        {testResult.config.sentTo && <> · To: {testResult.config.sentTo}</>}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button onClick={() => setTestResult(null)} className="text-zinc-600 hover:text-zinc-400 flex-shrink-0">
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="p-5 space-y-4">
             <div>
               <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1.5">
