@@ -71,16 +71,19 @@ function OrderDetailContent() {
     if (!order?.agreed_price) return
     setSendingCounter(true)
     await supabase.from('orders').update({ status: 'accepted', updated_at: new Date().toISOString() }).eq('id', id)
-    toast.success('Price accepted! Proceeding to payment...')
     const { data: { user } } = await supabase.auth.getUser()
     const res = await fetch('/api/payments/initialize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: id, amount: order.agreed_price, email: user?.email || '', type: 'full' }),
     })
-    const { authorization_url } = await res.json()
-    if (authorization_url) window.location.href = authorization_url
-    setSendingCounter(false)
+    const data = await res.json()
+    if (!res.ok || !data.authorization_url) {
+      toast.error(data.error || 'Could not start payment — please try again')
+      setSendingCounter(false)
+      return
+    }
+    window.location.href = data.authorization_url
   }
 
   const sendCounter = async () => {
@@ -109,9 +112,13 @@ function OrderDetailContent() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId: id, amount: order.agreed_price, email: user?.email || '', type: 'full' }),
     })
-    const { authorization_url } = await res.json()
-    if (authorization_url) window.location.href = authorization_url
-    setSendingCounter(false)
+    const data = await res.json()
+    if (!res.ok || !data.authorization_url) {
+      toast.error(data.error || 'Could not start payment — please try again')
+      setSendingCounter(false)
+      return
+    }
+    window.location.href = data.authorization_url
   }
 
   const confirmDelivery = async () => {
@@ -193,11 +200,11 @@ function OrderDetailContent() {
           <div className="grid grid-cols-2 gap-4 text-sm mb-4">
             <div>
               <p className="text-zinc-500">Creative</p>
-              <p className="font-medium text-white">{order.tailor?.business_name}</p>
+              <p className="font-medium text-zinc-900">{order.tailor?.business_name}</p>
             </div>
             <div>
               <p className="text-zinc-500">Placed</p>
-              <p className="font-medium text-white">{formatDate(order.created_at)}</p>
+              <p className="font-medium text-zinc-900">{formatDate(order.created_at)}</p>
             </div>
             {order.agreed_price && (
               <div>
@@ -208,7 +215,7 @@ function OrderDetailContent() {
             {order.deadline && (
               <div>
                 <p className="text-zinc-500">Deadline</p>
-                <p className="font-medium text-white flex items-center gap-1"><Clock size={13} />{formatDate(order.deadline)}</p>
+                <p className="font-medium text-zinc-900 flex items-center gap-1"><Clock size={13} />{formatDate(order.deadline)}</p>
               </div>
             )}
           </div>
@@ -250,7 +257,7 @@ function OrderDetailContent() {
         {/* Price negotiation card — visible while pending (no payment yet) */}
         {isCustomer && order.status === 'pending' && (
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-            <h2 className="font-bold text-white mb-4">Price negotiation</h2>
+            <h2 className="font-bold text-zinc-900 mb-4">Price negotiation</h2>
 
             {/* Customer's sent offer */}
             {order.customer_offer && (
@@ -307,7 +314,7 @@ function OrderDetailContent() {
           const { serviceCharge, totalCharged } = calculateServiceCharge(order.agreed_price)
           return (
             <div className="bg-violet-50 border border-violet-500/30 rounded-2xl p-6">
-              <h2 className="font-bold text-white mb-4">Ready to pay</h2>
+              <h2 className="font-bold text-violet-900 mb-4">Ready to pay</h2>
               <div className="space-y-2 text-sm mb-4">
                 <div className="flex justify-between text-zinc-400">
                   <span>Order price</span>
@@ -317,7 +324,7 @@ function OrderDetailContent() {
                   <span>Service charge (3%)</span>
                   <span>{formatCurrency(serviceCharge)}</span>
                 </div>
-                <div className="flex justify-between font-bold text-white border-t border-violet-500/30 pt-2">
+                <div className="flex justify-between font-bold text-violet-900 border-t border-violet-200 pt-2">
                   <span>Total</span>
                   <span className="text-violet-700">{formatCurrency(totalCharged)}</span>
                 </div>
@@ -331,7 +338,7 @@ function OrderDetailContent() {
 
         {/* Order tracking */}
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-          <h2 className="font-bold text-white mb-6">Order tracking</h2>
+          <h2 className="font-bold text-zinc-900 mb-6">Order tracking</h2>
           <div className="space-y-1">
             {TRACKING_STEPS.filter(s => !['cancelled', 'disputed'].includes(s.status)).map((s, i) => {
               const done = i < currentStepIdx
@@ -339,12 +346,12 @@ function OrderDetailContent() {
               return (
                 <div key={s.status} className="flex items-start gap-4">
                   <div className="flex flex-col items-center">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all ${done ? 'bg-violet-700 text-white' : active ? 'bg-violet-100 border-2 border-violet-700 text-violet-700' : 'bg-white/[0.06] text-zinc-600'}`}>
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm transition-all ${done ? 'bg-violet-700 text-white' : active ? 'bg-violet-100 border-2 border-violet-700 text-violet-700' : 'bg-zinc-100 text-zinc-400'}`}>
                       {done ? '✓' : s.icon}
                     </div>
-                    {i < TRACKING_STEPS.length - 2 && <div className={`w-0.5 h-6 mt-0.5 ${done ? 'bg-violet-700' : 'bg-white/[0.08]'}`} />}
+                    {i < TRACKING_STEPS.length - 2 && <div className={`w-0.5 h-6 mt-0.5 ${done ? 'bg-violet-700' : 'bg-zinc-200'}`} />}
                   </div>
-                  <div className={`pb-4 ${active ? 'text-violet-400 font-semibold' : done ? 'text-white' : 'text-zinc-600'}`}>
+                  <div className={`pb-4 ${active ? 'text-violet-600 font-semibold' : done ? 'text-zinc-900' : 'text-zinc-400'}`}>
                     <p className="text-sm leading-tight mt-2">{s.label}</p>
                     {active && <p className="text-xs text-violet-500 mt-0.5">{formatRelativeTime(order.updated_at)}</p>}
                   </div>
@@ -362,7 +369,7 @@ function OrderDetailContent() {
         {/* Payment details */}
         {order.agreed_price && (
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-            <h2 className="font-bold text-white mb-4">Payment</h2>
+            <h2 className="font-bold text-zinc-900 mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-zinc-500">Order price</span>
@@ -392,7 +399,7 @@ function OrderDetailContent() {
         {/* Rating */}
         {canRate && (
           <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-            <h2 className="font-bold text-white mb-1">
+            <h2 className="font-bold text-zinc-900 mb-1">
               Rate {isTailor ? 'this customer' : 'this creative'}
             </h2>
             <p className="text-sm text-zinc-500 mb-4">Your feedback helps build trust on the platform</p>
