@@ -36,13 +36,13 @@ export const metadata: Metadata = {
     siteName: 'TailorNow',
     locale: 'en_NG',
     type: 'website',
-    images: [{ url: '/icon-512.png', width: 512, height: 512, alt: 'TailorNow' }],
+    images: [{ url: '/api/og', width: 1200, height: 630, alt: 'TailorNow — Nigeria\'s Fashion Marketplace' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'TailorNow',
     description: 'Connect with Nigerian fashion creatives. Custom outfits, alterations, bridal wear.',
-    images: ['/icon-512.png'],
+    images: ['/api/og'],
   },
 }
 

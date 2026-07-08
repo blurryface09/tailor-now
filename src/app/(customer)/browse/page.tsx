@@ -1,10 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/navbar'
 import { BrowseClient } from './browse-client'
-import { redirect } from 'next/navigation'
 import { SERVICE_LABELS } from '@/lib/utils'
+import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Browse Fashion Creatives in Nigeria',
+  description: 'Find verified tailors, designers, bridal specialists and fashion creatives across Lagos, Abuja, Port Harcourt and all of Nigeria. Custom outfits, alterations, asoebi and more.',
+  alternates: { canonical: '/browse' },
+  openGraph: {
+    title: 'Browse Nigerian Fashion Creatives — TailorNow',
+    description: 'Verified tailors and designers across Nigeria. Custom fits, bridal, asoebi, alterations.',
+    url: 'https://tailornow.shop/browse',
+    images: [{ url: '/api/og?title=Browse+Fashion+Creatives&sub=Verified+tailors+%26+designers+across+Nigeria', width: 1200, height: 630 }],
+  },
+}
 
 export default async function BrowsePage({
   searchParams,
@@ -14,8 +26,7 @@ export default async function BrowsePage({
   const { service, city, state, q } = await searchParams
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  // Public page — no auth required so Google can crawl creatives
 
   let query = supabase
     .from('tailor_profiles')
