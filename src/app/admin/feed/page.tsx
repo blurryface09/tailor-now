@@ -103,12 +103,13 @@ export default function AdminFeedPage() {
   const saveEdit = async (post: Post & { author?: Profile }) => {
     const tag = extractTag(post.caption)
     const nextCaption = tag ? `[${tag}]\n${editCaption.trim()}` : editCaption.trim() || null
-    const { error } = await supabase
-      .from('posts')
-      .update({ title: editTitle.trim() || null, caption: nextCaption })
-      .eq('id', post.id)
-
-    if (error) { toast.error(error.message); return }
+    const res = await fetch('/api/admin/posts/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId: post.id, title: editTitle.trim() || null, caption: nextCaption }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { toast.error(data.error || 'Could not save'); return }
     setPosts(prev => prev.map(p => p.id === post.id ? { ...p, title: editTitle.trim() || null, caption: nextCaption } : p))
     setEditingPostId(null)
     toast.success('Post updated')
@@ -127,8 +128,12 @@ export default function AdminFeedPage() {
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Could not polish this image')
       const nextImages = [data.imageUrl as string, ...(post.image_urls || []).slice(1)]
-      const { error } = await supabase.from('posts').update({ image_urls: nextImages }).eq('id', post.id)
-      if (error) throw new Error(error.message)
+      const upd = await fetch('/api/admin/posts/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post.id, image_urls: nextImages }),
+      })
+      if (!upd.ok) throw new Error((await upd.json().catch(() => ({}))).error || 'Could not save polished image')
       setPosts(prev => prev.map(p => p.id === post.id ? { ...p, image_urls: nextImages } : p))
       toast.success('AI polished this post')
     } catch (error) {
@@ -152,11 +157,15 @@ export default function AdminFeedPage() {
 
       const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
       const nextImages = [publicUrl, ...(post.image_urls || []).slice(1)]
-      const { error } = await supabase.from('posts').update({ image_urls: nextImages }).eq('id', post.id)
-      if (error) throw new Error(error.message)
+      const upd = await fetch('/api/admin/posts/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: post.id, image_urls: nextImages }),
+      })
+      if (!upd.ok) throw new Error((await upd.json().catch(() => ({}))).error || 'Could not update post')
 
       setPosts(prev => prev.map(p => p.id === post.id ? { ...p, image_urls: nextImages } : p))
-      toast.success('Image replaced')
+      toast.success('Image replaced — live in feed')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not replace this image')
     } finally {
