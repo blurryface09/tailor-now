@@ -14,6 +14,7 @@ import Link from 'next/link'
 import {
   CheckCircle, Camera, Upload, X, Navigation, MessageCircle,
   Mail, Shield, Scissors, Clock, BadgeCheck, FileText, Star,
+  Sparkles,
 } from 'lucide-react'
 
 const SERVICE_ICONS: Record<string, string> = {
@@ -77,6 +78,8 @@ export default function TailorOnboarding() {
   // Step 8
   const [portfolioItems, setPortfolioItems] = useState<Array<{ id: string; image_url: string; title: string }>>([])
   const [portfolioForm, setPortfolioForm] = useState({ title: '', image_url: '' })
+  const [originalPortfolioImageUrl, setOriginalPortfolioImageUrl] = useState('')
+  const [polishingPortfolio, setPolishingPortfolio] = useState(false)
 
   // Step 9 — pledge
   const [pledges, setPledges] = useState({ delivery: false, honest: false, offplatform: false, conduct: false })
@@ -210,6 +213,32 @@ export default function TailorOnboarding() {
     setUploadFn(false)
   }
 
+  const polishPortfolioPhoto = async () => {
+    if (!portfolioForm.image_url) { toast.error('Upload a photo first'); return }
+    setPolishingPortfolio(true)
+    try {
+      const res = await fetch('/api/ai/polish-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: portfolioForm.image_url,
+          title: portfolioForm.title,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(data.error || 'Could not polish this photo')
+        return
+      }
+      setPortfolioForm(f => ({ ...f, image_url: data.imageUrl }))
+      toast.success('Showroom photo ready!')
+    } catch {
+      toast.error('Could not polish this photo. Please try again.')
+    } finally {
+      setPolishingPortfolio(false)
+    }
+  }
+
   const detectLocation = () => {
     if (!navigator.geolocation) { toast.error('Location not supported'); return }
     setDetecting(true)
@@ -326,6 +355,7 @@ export default function TailorOnboarding() {
     if (error) { toast.error(error.message); return }
     setPortfolioItems(p => [...p, data])
     setPortfolioForm({ title: '', image_url: '' })
+    setOriginalPortfolioImageUrl('')
   }
 
   if (loading) return (
@@ -978,13 +1008,44 @@ export default function TailorOnboarding() {
                 <div className="border border-zinc-200 rounded-2xl p-4 space-y-3 bg-zinc-50">
                   <p className="text-xs font-semibold text-zinc-600">Add a photo</p>
                   {portfolioForm.image_url ? (
-                    <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-zinc-200">
-                      <img src={portfolioForm.image_url} alt="" className="w-full h-full object-cover" />
-                      <button type="button"
-                        onClick={() => setPortfolioForm(f => ({ ...f, image_url: '' }))}
-                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
-                        <X size={11} />
-                      </button>
+                    <div className="flex gap-3">
+                      <div className="relative w-28 h-32 rounded-xl overflow-hidden border border-zinc-200 bg-white flex-shrink-0">
+                        <img src={portfolioForm.image_url} alt="" className="w-full h-full object-cover" />
+                        <button type="button"
+                          onClick={() => {
+                            setPortfolioForm(f => ({ ...f, image_url: '' }))
+                            setOriginalPortfolioImageUrl('')
+                          }}
+                          className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5">
+                          <X size={11} />
+                        </button>
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <div className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-1 text-[11px] font-bold text-violet-700">
+                          <Sparkles size={12} /> Showroom polish
+                        </div>
+                        <p className="text-xs leading-relaxed text-zinc-500">
+                          Make the photo look cleaner and sharper while keeping the original outfit design unchanged.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          <button type="button"
+                            onClick={polishPortfolioPhoto}
+                            disabled={polishingPortfolio || uploadingPortfolio}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-zinc-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60">
+                            {polishingPortfolio
+                              ? <span className="h-3 w-3 rounded-full border-2 border-white/70 border-t-transparent animate-spin" />
+                              : <Sparkles size={13} />}
+                            {polishingPortfolio ? 'Polishing...' : 'Polish for showroom'}
+                          </button>
+                          {originalPortfolioImageUrl && originalPortfolioImageUrl !== portfolioForm.image_url && (
+                            <button type="button"
+                              onClick={() => setPortfolioForm(f => ({ ...f, image_url: originalPortfolioImageUrl }))}
+                              className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-bold text-zinc-700">
+                              Use original
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <label className={`flex flex-col items-center justify-center w-24 h-24 border-2 border-dashed rounded-xl cursor-pointer transition-colors ${
@@ -999,11 +1060,14 @@ export default function TailorOnboarding() {
                           if (!file || !userId) return
                           const ext = file.name.split('.').pop() || 'jpg'
                           await uploadImage(file, `portfolio/${userId}/${Date.now()}.${ext}`,
-                            (url) => setPortfolioForm(f => ({
-                              ...f,
-                              image_url: url,
-                              title: f.title || `Portfolio photo ${portfolioItems.length + 1}`,
-                            })),
+                            (url) => {
+                              setOriginalPortfolioImageUrl(url)
+                              setPortfolioForm(f => ({
+                                ...f,
+                                image_url: url,
+                                title: f.title || `Portfolio photo ${portfolioItems.length + 1}`,
+                              }))
+                            },
                             setUploadingPortfolio)
                           e.target.value = ''
                         }} />

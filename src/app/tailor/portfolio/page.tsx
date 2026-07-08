@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { SERVICE_LABELS } from '@/lib/utils'
 import type { PortfolioItem } from '@/types'
 import toast from 'react-hot-toast'
-import { Plus, Trash2, Upload, X } from 'lucide-react'
+import { Plus, Sparkles, Trash2, Upload, X } from 'lucide-react'
 
 export default function PortfolioPage() {
   const supabase = createClient()
@@ -17,7 +17,14 @@ export default function PortfolioPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [polishing, setPolishing] = useState(false)
+  const [originalImageUrl, setOriginalImageUrl] = useState('')
   const [form, setForm] = useState({ title: '', description: '', service_type: '', image_url: '' })
+
+  const loadPortfolio = async (tid: string) => {
+    const { data } = await supabase.from('portfolio_items').select('*').eq('tailor_id', tid).order('created_at', { ascending: false })
+    setItems(data || [])
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -33,22 +40,44 @@ export default function PortfolioPage() {
     })
   }, [])
 
-  const loadPortfolio = async (tid: string) => {
-    const { data } = await supabase.from('portfolio_items').select('*').eq('tailor_id', tid).order('created_at', { ascending: false })
-    setItems(data || [])
-  }
-
   const uploadImage = async (file: File) => {
     if (!userId) return
     setUploading(true)
     const ext = file.name.split('.').pop()
     const path = `portfolio/${userId}/${Date.now()}.${ext}`
-    const { data, error } = await supabase.storage.from('portfolio').upload(path, file)
+    const { error } = await supabase.storage.from('portfolio').upload(path, file)
     if (error) { toast.error(error.message); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
-    setForm(f => ({ ...f, image_url: publicUrl }))
+    setOriginalImageUrl(publicUrl)
+    setForm(f => ({ ...f, image_url: publicUrl, title: f.title || `Portfolio photo ${items.length + 1}` }))
     setUploading(false)
     toast.success('Image uploaded!')
+  }
+
+  const polishPhoto = async () => {
+    if (!form.image_url) { toast.error('Upload a photo first'); return }
+    setPolishing(true)
+    try {
+      const res = await fetch('/api/ai/polish-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: form.image_url,
+          title: form.title,
+        }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(data.error || 'Could not polish this photo')
+        return
+      }
+      setForm(f => ({ ...f, image_url: data.imageUrl }))
+      toast.success('Showroom photo ready!')
+    } catch {
+      toast.error('Could not polish this photo. Please try again.')
+    } finally {
+      setPolishing(false)
+    }
   }
 
   const addItem = async (e: React.FormEvent) => {
@@ -56,7 +85,7 @@ export default function PortfolioPage() {
     if (!tailorId) return
     const { error } = await supabase.from('portfolio_items').insert({
       tailor_id: tailorId,
-      title: form.title,
+      title: form.title.trim() || `Portfolio photo ${items.length + 1}`,
       description: form.description || null,
       service_type: form.service_type || null,
       image_url: form.image_url,
@@ -64,6 +93,7 @@ export default function PortfolioPage() {
     if (error) { toast.error(error.message); return }
     toast.success('Portfolio item added!')
     setForm({ title: '', description: '', service_type: '', image_url: '' })
+    setOriginalImageUrl('')
     setAdding(false)
     loadPortfolio(tailorId)
   }
@@ -101,10 +131,41 @@ export default function PortfolioPage() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Photo</label>
                 {form.image_url ? (
-                  <div className="relative w-32 h-32 rounded-xl overflow-hidden">
-                    <img src={form.image_url} alt="" className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => setForm(f => ({ ...f, image_url: '' }))}
-                      className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5"><X size={14} /></button>
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="relative h-48 w-full overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] sm:w-36">
+                      <img src={form.image_url} alt="" className="w-full h-full object-cover" />
+                      <button type="button"
+                        onClick={() => {
+                          setForm(f => ({ ...f, image_url: '' }))
+                          setOriginalImageUrl('')
+                        }}
+                        className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1">
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <div className="flex-1 min-w-0 rounded-xl border border-white/[0.08] bg-white/[0.04] p-4">
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-violet-500/15 px-2.5 py-1 text-xs font-bold text-violet-200">
+                        <Sparkles size={13} /> Showroom polish
+                      </div>
+                      <p className="mt-2 text-sm leading-relaxed text-zinc-400">
+                        Make this upload cleaner, sharper, and showroom ready while keeping the outfit design unchanged.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <Button type="button" size="sm" onClick={polishPhoto} disabled={polishing || uploading}>
+                          {polishing ? (
+                            <span className="h-3 w-3 rounded-full border-2 border-white/70 border-t-transparent animate-spin" />
+                          ) : (
+                            <Sparkles size={14} />
+                          )}
+                          {polishing ? 'Polishing...' : 'Polish for showroom'}
+                        </Button>
+                        {originalImageUrl && originalImageUrl !== form.image_url && (
+                          <Button type="button" variant="outline" size="sm" onClick={() => setForm(f => ({ ...f, image_url: originalImageUrl }))}>
+                            Use original
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center w-40 h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-violet-400 transition-colors">
@@ -122,7 +183,7 @@ export default function PortfolioPage() {
               </div>
 
               <Input label="Title" placeholder="e.g. Custom agbada suit" value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))} required />
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
 
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Service type</label>
@@ -142,7 +203,7 @@ export default function PortfolioPage() {
 
               <div className="flex gap-3">
                 <Button type="button" variant="outline" onClick={() => setAdding(false)} size="md">Cancel</Button>
-                <Button type="submit" size="md" disabled={!form.title || !form.image_url}>Add to Portfolio</Button>
+                <Button type="submit" size="md" disabled={!form.image_url}>Add to Portfolio</Button>
               </div>
             </form>
           </div>
