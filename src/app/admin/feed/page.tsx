@@ -269,16 +269,35 @@ export default function AdminFeedPage() {
               return (
                 <div key={post.id} className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-hidden">
                   {post.image_urls?.length > 0 && (
-                    <div className="relative h-56 bg-white/[0.06] overflow-hidden">
-                      <img src={post.image_urls[0]} alt="" className="w-full h-full object-cover" />
-                      {post.image_urls.length > 1 && (
-                        <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">
-                          +{post.image_urls.length - 1} more
+                    <div className="relative">
+                      {tag && (
+                        <div className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                          {tag}
                         </div>
                       )}
-                      {tag && (
-                        <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                          {tag}
+                      {post.image_urls.length === 1 ? (
+                        <img
+                          src={post.image_urls[0]}
+                          alt=""
+                          className="w-full object-contain max-h-[520px] bg-black/30"
+                          style={{ display: 'block' }}
+                        />
+                      ) : (
+                        <div className="flex gap-1 overflow-x-auto scrollbar-thin" style={{ scrollSnapType: 'x mandatory' }}>
+                          {post.image_urls.map((url, idx) => (
+                            <img
+                              key={idx}
+                              src={url}
+                              alt=""
+                              className="flex-shrink-0 object-contain bg-black/30"
+                              style={{ height: 480, maxWidth: '90%', scrollSnapAlign: 'start' }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {post.image_urls.length > 1 && (
+                        <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {post.image_urls.length} photos
                         </div>
                       )}
                     </div>
