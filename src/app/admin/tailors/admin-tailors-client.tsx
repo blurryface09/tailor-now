@@ -86,18 +86,18 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
-      <div className="bg-[#111114] text-white border border-white/[0.08] shadow-2xl backdrop-blur-xl rounded-2xl w-full max-w-lg">
-        <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
+      <div className="bg-white text-zinc-900 border border-zinc-200 shadow-2xl rounded-2xl w-full max-w-lg">
+        <div className="flex items-center justify-between p-4 border-b border-zinc-200">
           <div>
-            <h3 className="font-bold text-white">Contact {target.name}</h3>
-            <p className="text-xs text-zinc-400">{target.email || 'No email on file'}</p>
+            <h3 className="font-bold text-zinc-900">Contact {target.name}</h3>
+            <p className="text-xs text-zinc-500">{target.email || 'No email on file'}</p>
           </div>
-          <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-colors"><X size={16} /></button>
+          <button onClick={onClose} className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors"><X size={16} /></button>
         </div>
         <div className="flex gap-2 p-4 pb-0">
           {(['message', 'email'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${tab === t ? 'bg-violet-700 text-white' : 'border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${tab === t ? 'bg-violet-700 text-white' : 'border border-zinc-200 text-zinc-600 hover:border-violet-300 hover:text-violet-700'}`}>
               {t === 'message' ? <MessageSquare size={14} /> : <Mail size={14} />}
               {t === 'message' ? 'In-app message' : 'Email'}
             </button>
@@ -107,17 +107,17 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
           {tab === 'email' && (
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Subject</label>
-              <input className="w-full rounded-xl border border-white/[0.12] bg-[#18181b] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+              <input className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
                 value={subject} onChange={e => setSubject(e.target.value)} />
             </div>
           )}
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1">{tab === 'message' ? 'Message' : 'Body'}</label>
             <textarea rows={5}
-              className="w-full rounded-xl border border-white/[0.12] bg-[#18181b] px-3 py-2 text-sm leading-relaxed text-white placeholder:text-zinc-500 caret-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm leading-relaxed text-zinc-900 placeholder:text-zinc-400 caret-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
               placeholder="Write your message..."
               value={body} onChange={e => setBody(e.target.value)} />
-            <p className="text-xs text-zinc-400 mt-0.5">{body.length} chars</p>
+            <p className="text-xs text-zinc-500 mt-0.5">{body.length} chars</p>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[
@@ -126,7 +126,7 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
               { label: 'Suspended', text: 'Your TailorNow account has been temporarily suspended. Contact us at hello@tailornow.shop to resolve any outstanding issues.' },
             ].map(t => (
               <button key={t.label} onClick={() => setBody(t.text)}
-                className="text-xs px-2.5 py-1 bg-white/[0.06] text-zinc-400 rounded-full hover:bg-violet-500/10 hover:text-violet-400 transition-colors">
+                className="text-xs px-2.5 py-1 bg-zinc-100 text-zinc-600 rounded-full hover:bg-violet-50 hover:text-violet-700 transition-colors">
                 {t.label}
               </button>
             ))}
@@ -161,9 +161,9 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
       {/* Drawer */}
       <div className="w-full max-w-md bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white/[0.05] backdrop-blur-xl border-b border-white/[0.08] px-5 py-4 flex items-center justify-between z-10">
-          <h2 className="font-bold text-white">Creative Profile</h2>
-          <button onClick={onClose} className="p-2 hover:bg-white/[0.06] rounded-xl transition-colors">
+        <div className="sticky top-0 bg-white/95 backdrop-blur-xl border-b border-zinc-200 px-5 py-4 flex items-center justify-between z-10">
+          <h2 className="font-bold text-zinc-900">Creative Profile</h2>
+          <button onClick={onClose} className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -173,7 +173,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
           <div className="flex items-start gap-4">
             {tailor.profile?.avatar_url ? (
               <img src={tailor.profile.avatar_url} alt={tailor.business_name}
-                className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border border-white/[0.1]" />
+                className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border border-zinc-200" />
             ) : (
               <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-400 font-bold text-2xl flex-shrink-0">
                 {tailor.business_name?.[0]?.toUpperCase()}
@@ -181,7 +181,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-bold text-white">{tailor.business_name}</h3>
+                <h3 className="font-bold text-zinc-900">{tailor.business_name}</h3>
                 {tailor.is_verified && <BadgeCheck size={16} className="text-violet-600 flex-shrink-0" />}
               </div>
               <p className="text-sm text-zinc-500">{tailor.profile?.full_name}</p>
@@ -195,12 +195,12 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
           </div>
 
           {/* Profile completeness */}
-          <div className="bg-[#09090B] rounded-2xl p-4">
+          <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-bold text-zinc-300">Profile completeness</span>
+              <span className="text-sm font-bold text-zinc-700">Profile completeness</span>
               <span className={`text-sm font-bold ${pct === 100 ? 'text-green-400' : 'text-amber-600'}`}>{pct}%</span>
             </div>
-            <div className="w-full h-2 bg-white/[0.08] rounded-full mb-3 overflow-hidden">
+            <div className="w-full h-2 bg-zinc-200 rounded-full mb-3 overflow-hidden">
               <div className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${pct}%`, background: pct === 100 ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626' }} />
             </div>
@@ -250,9 +250,9 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
           <div>
             <h4 className="text-xs font-bold text-zinc-600 uppercase tracking-wider mb-2">Bio</h4>
             {tailor.bio ? (
-              <p className="text-sm text-zinc-300 bg-[#09090B] rounded-xl p-3 leading-relaxed">{tailor.bio}</p>
+              <p className="text-sm text-zinc-700 bg-zinc-50 rounded-xl p-3 leading-relaxed">{tailor.bio}</p>
             ) : (
-              <p className="text-sm text-zinc-600 italic bg-[#09090B] rounded-xl p-3">No bio added</p>
+              <p className="text-sm text-zinc-500 italic bg-zinc-50 rounded-xl p-3">No bio added</p>
             )}
           </div>
 
@@ -262,7 +262,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
               <h4 className="text-xs font-bold text-zinc-600 uppercase tracking-wider mb-2">Specialties</h4>
               <div className="flex flex-wrap gap-1.5">
                 {tailor.specialties.map(s => (
-                  <span key={s} className="text-xs bg-violet-500/10 text-violet-300 px-2.5 py-1 rounded-full border border-violet-500/20 font-medium">
+                  <span key={s} className="text-xs bg-violet-50 text-violet-700 px-2.5 py-1 rounded-full border border-violet-100 font-medium">
                     {SERVICE_ICONS[s]} {SERVICE_LABELS[s]}
                   </span>
                 ))}
@@ -275,7 +275,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
             <h4 className="text-xs font-bold text-zinc-600 uppercase tracking-wider mb-2">Face / ID Photo</h4>
             {tailor.face_photo_url ? (
               <img src={tailor.face_photo_url} alt="Face verification"
-                className="w-28 h-28 rounded-2xl object-cover border border-white/[0.1] shadow-sm" />
+                className="w-28 h-28 rounded-2xl object-cover border border-zinc-200 shadow-sm" />
             ) : (
               <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 rounded-xl px-3 py-2.5">
                 <AlertCircle size={14} /> Not uploaded — required for verification
@@ -285,7 +285,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
         </div>
 
         {/* Action bar */}
-        <div className="sticky bottom-0 bg-white/[0.05] backdrop-blur-xl border-t border-white/[0.08] p-4 space-y-2">
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-xl border-t border-zinc-200 p-4 space-y-2">
           <div className="flex gap-2">
             <button
               onClick={() => onCompose({ tailorUserId: tailor.user_id, name: tailor.profile?.full_name || tailor.business_name, email: tailor.profile?.email || null })}
@@ -293,7 +293,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
               <MessageSquare size={14} /> Message
             </button>
             <Link href={`/tailors/${tailor.id}`} target="_blank"
-              className="flex-1 flex items-center justify-center gap-1.5 text-sm text-zinc-400 border border-white/[0.1] px-3 py-2.5 rounded-xl hover:bg-white/[0.06] transition-colors font-medium">
+              className="flex-1 flex items-center justify-center gap-1.5 text-sm text-zinc-700 border border-zinc-200 px-3 py-2.5 rounded-xl hover:bg-zinc-50 transition-colors font-medium">
               <Eye size={14} /> View public
             </Link>
           </div>
@@ -335,7 +335,7 @@ function InfoRow({ icon, label, value, missing, warn }: {
       <span className="text-zinc-600 flex-shrink-0">{icon}</span>
       <span className="text-xs text-zinc-600 w-24 flex-shrink-0">{label}</span>
       {value ? (
-        <span className={`text-sm font-medium truncate ${warn ? 'text-amber-600' : 'text-zinc-100'}`}>{value}</span>
+        <span className={`text-sm font-medium truncate ${warn ? 'text-amber-600' : 'text-zinc-800'}`}>{value}</span>
       ) : (
         <span className="text-sm text-red-400 italic">{missing || 'Missing'}</span>
       )}
@@ -343,10 +343,9 @@ function InfoRow({ icon, label, value, missing, warn }: {
   )
 }
 
-export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithProfile[] }) {
+export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors: TailorWithProfile[]; totalMembers: number }) {
   const [tailors, setTailors] = useState(initial)
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState<'all' | 'verified' | 'unverified' | 'suspended'>('all')
   const [loading, setLoading] = useState<string | null>(null)
   const [detail, setDetail] = useState<TailorWithProfile | null>(null)
   const [compose, setCompose] = useState<ComposeTarget | null>(null)
@@ -390,12 +389,7 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
       t.profile?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       t.profile?.email?.toLowerCase().includes(search.toLowerCase()) ||
       t.city?.toLowerCase().includes(search.toLowerCase())
-    const matchesFilter =
-      filter === 'all' ? t.is_active :
-      filter === 'verified' ? (t.is_verified && t.is_active) :
-      filter === 'unverified' ? (!t.is_verified && t.is_active) :
-      !t.is_active
-    return matchesSearch && matchesFilter
+    return matchesSearch && !t.is_verified && t.is_active
   })
 
   const counts = {
@@ -406,37 +400,57 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Manage Creatives</h1>
-        <p className="text-sm text-zinc-500 mt-0.5">{tailors.length} registered · {counts.unverified} pending review</p>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="mb-6 fade-up">
+        <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-xs font-bold text-violet-700 mb-3">
+          <ShieldCheck size={13} /> Pending review queue
+        </div>
+        <h1 className="text-2xl font-bold text-zinc-900">Manage Creatives</h1>
+        <p className="text-sm text-zinc-500 mt-0.5">Only pending creatives are shown here. Verified creatives stay out of this review queue.</p>
       </div>
 
-      <div className="relative mb-4">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" />
+      <div className="grid gap-3 sm:grid-cols-3 mb-6 fade-up-1">
+        <div className="rounded-2xl bg-white border border-zinc-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total members</span>
+            <User size={17} className="text-zinc-400" />
+          </div>
+          <p className="text-3xl font-black text-zinc-900">{totalMembers}</p>
+        </div>
+        <div className="rounded-2xl bg-white border border-zinc-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verified creatives</span>
+            <BadgeCheck size={17} className="text-green-600" />
+          </div>
+          <p className="text-3xl font-black text-zinc-900">{counts.verified}</p>
+        </div>
+        <div className="rounded-2xl bg-white border border-violet-200 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-violet-700">Pending creatives</span>
+            <AlertCircle size={17} className="text-violet-600" />
+          </div>
+          <p className="text-3xl font-black text-violet-700">{counts.unverified}</p>
+        </div>
+      </div>
+
+      <div className="relative mb-5 fade-up-2">
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
         <input
-          className="w-full rounded-xl border border-white/[0.1] pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-          placeholder="Search by name, email, city..."
+          className="w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+          placeholder="Search pending creatives by name, email, city..."
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
-        {(['all', 'unverified', 'verified', 'suspended'] as const).map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${filter === f ? 'bg-violet-700 text-white' : 'bg-white border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
-            {f.charAt(0).toUpperCase() + f.slice(1)} <span className={`${filter === f ? 'text-white/70' : 'text-zinc-600'}`}>({counts[f]})</span>
-          </button>
-        ))}
-      </div>
-
       {filtered.length === 0 && (
-        <div className="text-center py-16 bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08]">
-          <p className="text-zinc-600">No creatives found</p>
+        <div className="text-center py-16 bg-white rounded-2xl border border-zinc-200 shadow-sm fade-up-3">
+          <CheckCircle size={28} className="mx-auto text-green-600 mb-3" />
+          <p className="font-semibold text-zinc-900">No pending creatives found</p>
+          <p className="text-sm text-zinc-500 mt-1">Everyone in the review queue has been handled.</p>
         </div>
       )}
 
       <div className="space-y-3">
-        {filtered.map(tailor => {
+        {filtered.map((tailor, index) => {
           const checks = completenessChecks(tailor)
           const doneCount = checks.filter(c => c.done).length
           const pct = Math.round((doneCount / checks.length) * 100)
@@ -444,7 +458,8 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
 
           return (
             <div key={tailor.id}
-              className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] hover:border-white/[0.1] hover:shadow-sm transition-all cursor-pointer"
+              className="bg-white rounded-2xl border border-zinc-200 hover:border-violet-200 hover:shadow-md transition-all cursor-pointer"
+              style={{ animation: 'fade-up 0.35s cubic-bezier(0.22,1,0.36,1) both', animationDelay: `${Math.min(index, 8) * 45}ms` }}
               onClick={() => setDetail(tailor)}>
               <div className="p-4 flex items-start gap-3">
                 {/* Avatar */}
@@ -465,7 +480,7 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <p className="font-semibold text-white truncate">{tailor.business_name}</p>
+                        <p className="font-semibold text-zinc-900 truncate">{tailor.business_name}</p>
                         {tailor.is_verified && <BadgeCheck size={14} className="text-violet-600 flex-shrink-0" />}
                       </div>
                       <p className="text-xs text-zinc-500 truncate">{tailor.profile?.full_name}</p>
@@ -504,11 +519,11 @@ export function AdminTailorsClient({ tailors: initial }: { tailors: TailorWithPr
 
                   {/* Completeness bar */}
                   <div className="flex items-center gap-2 mt-2">
-                    <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all"
                         style={{ width: `${pct}%`, background: allDone ? '#16a34a' : pct >= 50 ? '#d97706' : '#dc2626' }} />
                     </div>
-                    <span className={`text-xs font-semibold flex-shrink-0 ${allDone ? 'text-green-400' : 'text-amber-600'}`}>
+                    <span className={`text-xs font-semibold flex-shrink-0 ${allDone ? 'text-green-600' : 'text-amber-600'}`}>
                       {doneCount}/{checks.length}
                     </span>
                     <ChevronRight size={14} className="text-zinc-600 flex-shrink-0" />

@@ -12,6 +12,10 @@ export default async function AdminTailorsPage() {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') redirect('/browse')
 
+  const { count: totalMembers } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+
   const { data: tailors } = await supabase
     .from('tailor_profiles')
     .select('*, profile:profiles(full_name, email, phone, avatar_url, created_at)')
@@ -31,9 +35,9 @@ export default async function AdminTailorsPage() {
   const enriched = (tailors || []).map(t => ({ ...t, portfolio_count: countMap[t.id] || 0 }))
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-zinc-50">
       <Navbar />
-      <AdminTailorsClient tailors={enriched} />
+      <AdminTailorsClient tailors={enriched} totalMembers={totalMembers || 0} />
     </div>
   )
 }

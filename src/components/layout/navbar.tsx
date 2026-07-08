@@ -39,7 +39,7 @@ export function Navbar() {
   const [userId, setUserId] = useState<string | null>(null)
 
   // Dark theme for admin, tailor dashboard
-  const isDark = pathname?.startsWith('/admin') ||
+  const isDark = (pathname?.startsWith('/admin') && pathname !== '/admin/tailors') ||
     pathname?.startsWith('/tailor') ||
     pathname?.startsWith('/dashboard')
 
