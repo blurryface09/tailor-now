@@ -8,7 +8,7 @@ import { SERVICE_LABELS, formatRelativeTime } from '@/lib/utils'
 import {
   Plus, Trash2, X, Heart, MessageSquare, ShoppingBag,
   Tag, ToggleLeft, ToggleRight, Share2, ExternalLink,
-  Sparkles,
+  Sparkles, Copy, Check, ChevronDown, ChevronUp, Lightbulb,
 } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -21,6 +21,133 @@ function sharePost(postId: string) {
   } else {
     navigator.clipboard.writeText(url).then(() => toast.success('Link copied! 📋'))
   }
+}
+
+function buildPhotoPrompt(title: string, serviceType: string) {
+  const outfit = title.trim() || `my ${serviceType ? SERVICE_LABELS[serviceType as keyof typeof SERVICE_LABELS] || serviceType : 'fashion piece'}`
+  return `I'm a Nigerian fashion creative selling my work online. I have a photo of "${outfit}" that I want to make look more professional for a fashion marketplace.
+
+Please tell me:
+1. What background colour/setting would show this outfit best?
+2. What lighting should I use (window light, outdoor, ring light)?
+3. What angle or pose would make the outfit look its best?
+4. How can I improve this photo for free using Canva or my phone?
+
+Be specific and practical — I want real tips I can use today.`
+}
+
+function buildCaptionPrompt(title: string, serviceType: string) {
+  const outfit = title.trim() || 'my latest fashion piece'
+  const category = serviceType ? SERVICE_LABELS[serviceType as keyof typeof SERVICE_LABELS] || serviceType : 'custom fashion'
+  return `I'm a Nigerian fashion creative on TailorNow. Write me a compelling product listing for:
+
+Outfit: ${outfit}
+Category: ${category}
+
+Please write:
+1. A punchy product title (max 6 words, no fluff)
+2. A 2–3 sentence description that makes clients want to book — mention fabric, occasion, and what makes it special
+3. A "What's included" line (e.g. fitting session, delivery, alterations)
+4. 6 hashtags for Nigerian fashion reach on Instagram and TikTok
+
+Keep the tone confident, premium, and Nigerian. No generic phrases like "high quality" — be specific.`
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+        copied
+          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+          : 'bg-white/[0.08] text-zinc-300 hover:bg-white/[0.14] hover:text-white border border-white/[0.1]'
+      }`}>
+      {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy prompt</>}
+    </button>
+  )
+}
+
+function ReachTipsPanel({ title, serviceType }: { title: string; serviceType: string }) {
+  const [open, setOpen] = useState(true)
+  const [tab, setTab] = useState<'photo' | 'caption'>('photo')
+
+  return (
+    <div className="rounded-2xl border border-violet-500/20 bg-violet-500/[0.07] overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left">
+        <div className="flex items-center gap-2">
+          <Lightbulb size={15} className="text-violet-400 flex-shrink-0" />
+          <span className="text-sm font-bold text-violet-200">Get more reach — tips & ChatGPT prompts</span>
+        </div>
+        {open ? <ChevronUp size={15} className="text-violet-400" /> : <ChevronDown size={15} className="text-violet-400" />}
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-4">
+          {/* Tab switcher */}
+          <div className="flex gap-1 bg-white/[0.06] p-1 rounded-xl">
+            <button type="button" onClick={() => setTab('photo')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${tab === 'photo' ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}>
+              📸 Photo tips
+            </button>
+            <button type="button" onClick={() => setTab('caption')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${tab === 'caption' ? 'bg-violet-600 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}>
+              ✍️ Caption prompt
+            </button>
+          </div>
+
+          {tab === 'photo' && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { icon: '✅', text: 'Use natural daylight — shoot near a window or outside in soft shade' },
+                  { icon: '✅', text: 'Plain background: white wall, neutral curtain, or a clean door' },
+                  { icon: '✅', text: 'Show the full outfit — head to ankles, no cut edges' },
+                  { icon: '✅', text: 'Steam or press the garment before shooting' },
+                  { icon: '✅', text: 'Upload 3–6 angles: front, back, detail shot, styled on a model' },
+                  { icon: '❌', text: 'Avoid busy backgrounds, cars, harsh phone flash, or dark rooms' },
+                ].map((tip, i) => (
+                  <div key={i} className="flex items-start gap-2.5 text-xs text-zinc-300 leading-relaxed">
+                    <span className="flex-shrink-0 mt-0.5">{tip.icon}</span>
+                    <span>{tip.text}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="rounded-xl bg-white/[0.05] border border-white/[0.08] p-3">
+                <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wide mb-2">Paste this into ChatGPT to get photo tips for your specific outfit</p>
+                <pre className="text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans mb-2">{buildPhotoPrompt(title, serviceType)}</pre>
+                <CopyButton text={buildPhotoPrompt(title, serviceType)} />
+              </div>
+            </div>
+          )}
+
+          {tab === 'caption' && (
+            <div className="space-y-3">
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Paste the prompt below into <span className="text-violet-300 font-semibold">ChatGPT</span>, <span className="text-violet-300 font-semibold">Claude</span>, or any AI — it will write your title, description, and hashtags.
+                {(title || serviceType) && <span className="text-violet-400 font-semibold"> We've pre-filled it with your details.</span>}
+              </p>
+              <div className="rounded-xl bg-white/[0.05] border border-white/[0.08] p-3">
+                <pre className="text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans mb-2">{buildCaptionPrompt(title, serviceType)}</pre>
+                <CopyButton text={buildCaptionPrompt(title, serviceType)} />
+              </div>
+              <p className="text-[11px] text-zinc-600">Tip: fill in the title and category fields first — the prompt updates automatically.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function CreativePostsPage() {
@@ -157,6 +284,10 @@ export default function CreativePostsPage() {
             </div>
 
             <form onSubmit={savePost} className="space-y-5">
+              {/* Tips & prompts panel — shown before upload */}
+              <ReachTipsPanel title={title} serviceType={serviceType} />
+
+              {/* Image upload */}
               <ImageUpload
                 bucket="portfolio"
                 folder={`posts/${userId}`}
@@ -166,6 +297,8 @@ export default function CreativePostsPage() {
                 label="Photos (up to 6)"
                 hint="Show multiple angles — more photos = more bookings"
               />
+
+              {/* AI polish (only shown after images are added) */}
               {images.length > 0 && (
                 <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -204,6 +337,21 @@ export default function CreativePostsPage() {
                 />
               </div>
 
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Category (optional)</label>
+                <select
+                  className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/60 transition-all"
+                  value={serviceType}
+                  onChange={e => setServiceType(e.target.value)}
+                >
+                  <option value="" className="bg-zinc-900">— Select category —</option>
+                  {Object.entries(SERVICE_LABELS).map(([k, v]) => (
+                    <option key={k} value={k} className="bg-zinc-900">{v}</option>
+                  ))}
+                </select>
+              </div>
+
               {/* Price toggle */}
               <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
@@ -218,7 +366,6 @@ export default function CreativePostsPage() {
                       : <ToggleLeft size={28} className="text-zinc-600" />}
                   </button>
                 </div>
-
                 {priceEnabled && (
                   <div className="flex items-center gap-3" style={{ animation: 'fade-up 0.25s ease both' }}>
                     <div className="relative flex-1">
@@ -232,14 +379,12 @@ export default function CreativePostsPage() {
                         onChange={e => setPrice(e.target.value)}
                       />
                     </div>
-                    {/* Available toggle */}
                     <button type="button" onClick={() => setIsAvailable(v => !v)}
                       className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${isAvailable ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-white/[0.04] border-white/[0.1] text-zinc-500'}`}>
                       {isAvailable ? '✓ Available' : 'Unavailable'}
                     </button>
                   </div>
                 )}
-
                 {!priceEnabled && (
                   <p className="text-xs text-zinc-600">Leave off if you prefer to discuss price in chat</p>
                 )}
@@ -255,21 +400,6 @@ export default function CreativePostsPage() {
                   value={caption}
                   onChange={e => setCaption(e.target.value)}
                 />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">Category (optional)</label>
-                <select
-                  className="w-full rounded-xl bg-white/[0.06] border border-white/[0.1] px-4 py-3 text-sm text-white focus:outline-none focus:border-violet-500/60 transition-all"
-                  value={serviceType}
-                  onChange={e => setServiceType(e.target.value)}
-                >
-                  <option value="" className="bg-zinc-900">— Select category —</option>
-                  {Object.entries(SERVICE_LABELS).map(([k, v]) => (
-                    <option key={k} value={k} className="bg-zinc-900">{v}</option>
-                  ))}
-                </select>
               </div>
 
               <div className="flex gap-3 pt-1">
