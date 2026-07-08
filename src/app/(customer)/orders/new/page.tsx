@@ -122,9 +122,6 @@ function NewOrderContent() {
       deadline: form.deadline || null,
       notes: form.notes || null,
       style_reference_urls: styleRefs,
-      fabric_source: fabricSource,
-      fabric_id: fabricSource === 'tailornow' && selectedFabric ? selectedFabric.id : null,
-      fabric_yards: fabricSource === 'tailornow' && fabricYards ? parseFloat(fabricYards) : null,
       status: 'pending',
     }).select().single()
 
@@ -176,7 +173,6 @@ function NewOrderContent() {
       customer_offer: price,
       agreed_price: price,
       style_reference_urls: productPost.image_urls || [],
-      fabric_source: 'customer_own',
       status: 'accepted',
     }).select().single()
 

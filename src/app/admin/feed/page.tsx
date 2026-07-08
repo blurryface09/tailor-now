@@ -6,7 +6,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { formatRelativeTime } from '@/lib/utils'
-import { Plus, Trash2, X, Heart, MessageSquare, ImageIcon } from 'lucide-react'
+import { Plus, Trash2, X, Heart, MessageSquare, ImageIcon, Sparkles, Edit3, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import type { Post, Profile } from '@/types'
@@ -38,6 +38,10 @@ export default function AdminFeedPage() {
   const [images, setImages] = useState<string[]>([])
   const [caption, setCaption] = useState('')
   const [contentTag, setContentTag] = useState('')
+  const [polishingPostId, setPolishingPostId] = useState<string | null>(null)
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editCaption, setEditCaption] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -45,17 +49,16 @@ export default function AdminFeedPage() {
       const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
       if (p?.role !== 'admin') { router.push('/browse'); return }
       setUserId(user.id)
-      loadPosts(user.id)
+      loadPosts()
     })
   }, [])
 
-  const loadPosts = async (uid: string) => {
+  async function loadPosts() {
     const { data } = await supabase
       .from('posts')
       .select('*, author:profiles!posts_user_id_fkey(*)')
-      .eq('user_id', uid)
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(60)
     setPosts(data || [])
   }
 
@@ -79,7 +82,7 @@ export default function AdminFeedPage() {
     toast.success('Post published to feed!')
     reset()
     setSaving(false)
-    loadPosts(userId)
+    loadPosts()
   }
 
   const deletePost = async (id: string) => {
@@ -89,6 +92,51 @@ export default function AdminFeedPage() {
     toast.success('Deleted')
   }
 
+  const startEdit = (post: Post & { author?: Profile }) => {
+    const tag = extractTag(post.caption)
+    setEditingPostId(post.id)
+    setEditTitle(post.title || '')
+    setEditCaption(tag ? post.caption?.replace(/^\[.+?\]\n/, '') || '' : post.caption || '')
+  }
+
+  const saveEdit = async (post: Post & { author?: Profile }) => {
+    const tag = extractTag(post.caption)
+    const nextCaption = tag ? `[${tag}]\n${editCaption.trim()}` : editCaption.trim() || null
+    const { error } = await supabase
+      .from('posts')
+      .update({ title: editTitle.trim() || null, caption: nextCaption })
+      .eq('id', post.id)
+
+    if (error) { toast.error(error.message); return }
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, title: editTitle.trim() || null, caption: nextCaption } : p))
+    setEditingPostId(null)
+    toast.success('Post updated')
+  }
+
+  const polishPostImage = async (post: Post & { author?: Profile }) => {
+    const imageUrl = post.image_urls?.[0]
+    if (!imageUrl) { toast.error('This post has no image to polish'); return }
+    setPolishingPostId(post.id)
+    try {
+      const res = await fetch('/api/ai/polish-portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl, title: post.title || post.caption || 'TailorNow feed post' }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(data.error || 'Could not polish this image')
+      const nextImages = [data.imageUrl as string, ...(post.image_urls || []).slice(1)]
+      const { error } = await supabase.from('posts').update({ image_urls: nextImages }).eq('id', post.id)
+      if (error) throw new Error(error.message)
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, image_urls: nextImages } : p))
+      toast.success('AI polished this post')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not polish this image')
+    } finally {
+      setPolishingPostId(null)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#09090B]">
       <Navbar />
@@ -96,7 +144,7 @@ export default function AdminFeedPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white">Feed Posts</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">Post fashion inspiration, street wear, Ankara — anything that gets people excited</p>
+            <p className="text-sm text-zinc-500 mt-0.5">Post fashion inspiration, edit uploads, and polish feed images from admin</p>
           </div>
           {!adding && (
             <button
@@ -207,8 +255,39 @@ export default function AdminFeedPage() {
                   <div className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        {body && (
-                          <p className="text-sm text-zinc-100 leading-relaxed mb-2">{body}</p>
+                        {editingPostId === post.id ? (
+                          <div className="space-y-2">
+                            <input
+                              value={editTitle}
+                              onChange={e => setEditTitle(e.target.value)}
+                              placeholder="Title"
+                              className="w-full rounded-xl border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            />
+                            <textarea
+                              value={editCaption}
+                              onChange={e => setEditCaption(e.target.value)}
+                              rows={3}
+                              placeholder="Caption"
+                              className="w-full rounded-xl border border-white/[0.1] bg-white/[0.06] px-3 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                            />
+                            <div className="flex gap-2">
+                              <button onClick={() => saveEdit(post)}
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-violet-700 px-3 py-2 text-xs font-bold text-white hover:bg-violet-800">
+                                <Save size={13} /> Save
+                              </button>
+                              <button onClick={() => setEditingPostId(null)}
+                                className="rounded-xl border border-white/[0.1] px-3 py-2 text-xs font-semibold text-zinc-400 hover:text-white">
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {post.title && <p className="text-sm font-bold text-white leading-relaxed mb-1">{post.title}</p>}
+                            {body && (
+                              <p className="text-sm text-zinc-100 leading-relaxed mb-2">{body}</p>
+                            )}
+                          </>
                         )}
                         <div className="flex items-center gap-4 text-xs text-zinc-600">
                           <span className="flex items-center gap-1"><Heart size={11} /> {post.likes_count ?? 0}</span>
@@ -216,11 +295,27 @@ export default function AdminFeedPage() {
                           <span>{formatRelativeTime(post.created_at)}</span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => deletePost(post.id)}
-                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors flex-shrink-0">
-                        <Trash2 size={15} />
-                      </button>
+                      <div className="flex flex-col gap-1.5">
+                        <button
+                          onClick={() => polishPostImage(post)}
+                          disabled={polishingPostId === post.id}
+                          className="p-2 text-amber-300 hover:bg-amber-500/10 rounded-xl transition-colors flex-shrink-0 disabled:opacity-50"
+                          title="AI polish first image">
+                          {polishingPostId === post.id ? <span className="block h-4 w-4 rounded-full border-2 border-amber-300/40 border-t-amber-300 animate-spin" /> : <Sparkles size={15} />}
+                        </button>
+                        <button
+                          onClick={() => startEdit(post)}
+                          className="p-2 text-violet-300 hover:bg-violet-500/10 rounded-xl transition-colors flex-shrink-0"
+                          title="Edit post">
+                          <Edit3 size={15} />
+                        </button>
+                        <button
+                          onClick={() => deletePost(post.id)}
+                          className="p-2 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors flex-shrink-0"
+                          title="Delete post">
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

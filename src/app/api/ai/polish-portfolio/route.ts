@@ -5,11 +5,12 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 const SHOWROOM_PROMPT = [
-  'Transform this tailor portfolio photo into a premium fashion showroom upload.',
-  'Make the garment look sharp, clean, bright, and professionally presented, with Apple-style product clarity and polished fashion marketplace lighting.',
-  'Improve the background, crop, exposure, shadows, sharpness, and overall styling so the item feels ready for a high-end online showroom.',
+  'Transform this tailor portfolio photo into a premium fashion-commerce showroom image, like an Apple product photo meets a luxury fashion lookbook.',
+  'Make the garment the hero: clean vertical crop, balanced composition, crisp fabric texture, flattering natural skin tones, premium lighting, soft realistic shadows, and high-end editorial clarity.',
+  'Replace distracting backgrounds such as cars, cluttered rooms, streets, harsh flash, bad lighting, or messy walls with a tasteful minimalist showroom, boutique studio, or soft neutral editorial backdrop.',
+  'Make the final image feel ready for a polished marketplace feed: sharp, bright, refined, elegant, aspirational, and commercially usable.',
   'Preserve the exact outfit design, fabric, color, pattern, cut, fit, stitching, trims, and visible handmade details.',
-  'Do not redesign the clothing, add logos, add text, change the garment, change the wearer, alter body shape, or invent details that were not in the original.',
+  'Do not redesign the clothing, add logos, add text, change the garment, change the wearer identity, alter body shape, or invent fashion details that were not in the original.',
 ].join(' ')
 
 type PolishRequest = {

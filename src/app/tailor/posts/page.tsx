@@ -8,6 +8,7 @@ import { SERVICE_LABELS, formatRelativeTime } from '@/lib/utils'
 import {
   Plus, Trash2, X, Heart, MessageSquare, ShoppingBag,
   Tag, ToggleLeft, ToggleRight, Share2, ExternalLink,
+  Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -29,6 +30,8 @@ export default function CreativePostsPage() {
   const [creativeId, setCreativeId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [polishing, setPolishing] = useState(false)
+  const [originalImages, setOriginalImages] = useState<string[]>([])
 
   // form state
   const [images, setImages] = useState<string[]>([])
@@ -49,14 +52,43 @@ export default function CreativePostsPage() {
     })
   }, [])
 
-  const loadPosts = async (cid: string) => {
+  async function loadPosts(cid: string) {
     const { data } = await supabase.from('posts').select('*').eq('creative_id', cid).order('created_at', { ascending: false })
     setPosts(data || [])
   }
 
   const resetForm = () => {
-    setImages([]); setTitle(''); setCaption(''); setServiceType('')
+    setImages([]); setOriginalImages([]); setTitle(''); setCaption(''); setServiceType('')
     setPriceEnabled(false); setPrice(''); setIsAvailable(true); setAdding(false)
+  }
+
+  const handleImagesChange = (nextImages: string[]) => {
+    setImages(nextImages)
+    setOriginalImages(current => current.length ? current : nextImages)
+  }
+
+  const polishImages = async () => {
+    if (images.length === 0) { toast.error('Add at least one photo first'); return }
+    setPolishing(true)
+    try {
+      const polished = await Promise.all(images.map(async imageUrl => {
+        const res = await fetch('/api/ai/polish-portfolio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageUrl, title }),
+        })
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) throw new Error(data.error || 'Could not polish this photo')
+        return data.imageUrl as string
+      }))
+      setOriginalImages(current => current.length ? current : images)
+      setImages(polished)
+      toast.success('Showroom photos ready!')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not polish these photos')
+    } finally {
+      setPolishing(false)
+    }
   }
 
   const savePost = async (e: React.FormEvent) => {
@@ -129,11 +161,36 @@ export default function CreativePostsPage() {
                 bucket="portfolio"
                 folder={`posts/${userId}`}
                 value={images}
-                onChange={setImages}
+                onChange={handleImagesChange}
                 maxFiles={6}
                 label="Photos (up to 6)"
                 hint="Show multiple angles — more photos = more bookings"
               />
+              {images.length > 0 && (
+                <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-amber-200">Showroom polish</p>
+                      <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+                        Turn uploaded photos into cleaner, sharper marketplace images while keeping the outfit unchanged.
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button type="button" onClick={polishImages} disabled={polishing || saving}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-black text-black transition-colors hover:bg-amber-300 disabled:opacity-50">
+                        {polishing ? <span className="h-3.5 w-3.5 rounded-full border-2 border-black/30 border-t-black animate-spin" /> : <Sparkles size={14} />}
+                        {polishing ? 'Polishing...' : 'AI polish'}
+                      </button>
+                      {originalImages.length > 0 && originalImages.join('|') !== images.join('|') && (
+                        <button type="button" onClick={() => setImages(originalImages)}
+                          className="rounded-xl border border-white/[0.12] px-3.5 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:border-white/25 hover:text-white">
+                          Use original
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Title */}
               <div>
