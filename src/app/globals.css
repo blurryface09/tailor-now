@@ -14,6 +14,83 @@ body {
   color: #18181b;
 }
 
+/* ── Admin appearance toggle ─────────────────────────────── */
+html[data-admin-route="true"][data-admin-theme="light"] body {
+  background: #fafafa;
+  color: #18181b;
+}
+
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-[#09090B]"],
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-zinc-950"],
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-zinc-900"],
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-black"],
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-white/["] {
+  background-color: #ffffff !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="light"] [class*="border-white/["] {
+  border-color: #e4e4e7 !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="light"] .text-white,
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-50,
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-100,
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-200 {
+  color: #18181b !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-300,
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-400 {
+  color: #52525b !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-500,
+html[data-admin-route="true"][data-admin-theme="light"] .text-zinc-600 {
+  color: #71717a !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-violet"].text-white,
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-amber"].text-white,
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-red"].text-white,
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-green"].text-white,
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-gradient"].text-white {
+  color: #ffffff !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] body {
+  background: #09090b;
+  color: #ffffff;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] .bg-zinc-50,
+html[data-admin-route="true"][data-admin-theme="dark"] [class*="bg-zinc-50"] {
+  background-color: #09090b !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] .bg-white {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] .border-zinc-100,
+html[data-admin-route="true"][data-admin-theme="dark"] .border-zinc-200 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-900,
+html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-800 {
+  color: #ffffff !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-700,
+html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-600 {
+  color: #d4d4d8 !important;
+}
+
+html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-500,
+html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-400 {
+  color: #a1a1aa !important;
+}
+
 /* ── Dark design tokens ──────────────────────────────────── */
 :root {
   --surface: rgba(255,255,255,0.04);

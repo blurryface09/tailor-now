@@ -7,7 +7,7 @@ import type { Profile } from '@/types'
 import {
   Bell, MessageSquare, User, LogOut, Scissors, LayoutDashboard,
   ChevronDown, Menu, X, Shield, Users, Package, Star, TrendingUp,
-  AlertTriangle, Store, Radio, ImageIcon,
+  AlertTriangle, Store, Radio, ImageIcon, Sun, Moon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
@@ -37,11 +37,17 @@ export function Navbar() {
   const [unreadMessages, setUnreadMessages] = useState(0)
   const [unreadNotifs, setUnreadNotifs] = useState(0)
   const [userId, setUserId] = useState<string | null>(null)
+  const [adminTheme, setAdminTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light'
+    return window.localStorage.getItem('tailornow-admin-theme') === 'dark' ? 'dark' : 'light'
+  })
 
-  // Dark theme for admin, tailor dashboard
-  const isDark = (pathname?.startsWith('/admin') && pathname !== '/admin/tailors') ||
+  const isAdminPath = pathname?.startsWith('/admin') || false
+
+  // Admin defaults to light and can be toggled from the account settings menu.
+  const isDark = Boolean((isAdminPath && adminTheme === 'dark') ||
     pathname?.startsWith('/tailor') ||
-    pathname?.startsWith('/dashboard')
+    pathname?.startsWith('/dashboard'))
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -52,6 +58,23 @@ export function Navbar() {
       }
     })
   }, [])
+
+  useEffect(() => {
+    const root = document.documentElement
+
+    if (isAdminPath) {
+      root.dataset.adminRoute = 'true'
+      root.dataset.adminTheme = adminTheme
+    } else {
+      delete root.dataset.adminRoute
+      delete root.dataset.adminTheme
+    }
+
+    return () => {
+      delete root.dataset.adminRoute
+      delete root.dataset.adminTheme
+    }
+  }, [isAdminPath, adminTheme])
 
   useEffect(() => {
     if (!userId) return
@@ -106,6 +129,14 @@ export function Navbar() {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  const toggleAdminTheme = () => {
+    setAdminTheme(current => {
+      const next = current === 'dark' ? 'light' : 'dark'
+      window.localStorage.setItem('tailornow-admin-theme', next)
+      return next
+    })
   }
 
   const isActive = (href: string) => pathname === href || (href !== '/admin' && pathname.startsWith(href))
@@ -254,9 +285,15 @@ export function Navbar() {
                     </Link>
                   )}
                   {profile.role === 'admin' && (
-                    <Link href="/admin" className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors', dropdownItem)}>
-                      <Shield size={15} /> Admin Dashboard
-                    </Link>
+                    <>
+                      <Link href="/admin" className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors', dropdownItem)}>
+                        <Shield size={15} /> Admin Dashboard
+                      </Link>
+                      <button onClick={toggleAdminTheme} className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors w-full text-left', dropdownItem)}>
+                        {adminTheme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+                        {adminTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                      </button>
+                    </>
                   )}
                   <div className={cn('border-t mt-1 pt-1', dropdownDivider)}>
                     <button onClick={handleLogout} className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 w-full text-left transition-colors rounded-b-xl">
@@ -314,6 +351,12 @@ export function Navbar() {
                   {link.icon} {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => { toggleAdminTheme(); setMenuOpen(false) }}
+                className={cn('flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)}>
+                {adminTheme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+                {adminTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              </button>
             </>
           )}
           {profile && (
