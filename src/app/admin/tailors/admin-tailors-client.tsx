@@ -4,7 +4,7 @@ import {
   CheckCircle, XCircle, Star, MapPin, Eye, Mail, Phone, Search,
   AlertCircle, MessageSquare, Send, X, ChevronRight, User,
   Image as ImageIcon, DollarSign, ShieldCheck, Package, Calendar,
-  BadgeCheck, Info,
+  BadgeCheck,
 } from 'lucide-react'
 import { formatDate, SERVICE_LABELS } from '@/lib/utils'
 import type { TailorProfile, Profile } from '@/types'
@@ -37,6 +37,21 @@ function completenessChecks(t: TailorWithProfile) {
 
 type ComposeTarget = { tailorUserId: string; name: string; email: string | null }
 
+async function postJsonWithTimeout(url: string, payload: unknown) {
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), 20000)
+  try {
+    return await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    })
+  } finally {
+    window.clearTimeout(timeout)
+  }
+}
+
 function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () => void }) {
   const [tab, setTab] = useState<'message' | 'email'>('message')
   const [subject, setSubject] = useState('Update on your TailorNow profile')
@@ -45,49 +60,46 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
 
   const send = async () => {
     if (!body.trim()) return
+    if (tab === 'email' && !target.email) { toast.error('No email on file'); return }
     setSending(true)
-    if (tab === 'message') {
-      const res = await fetch('/api/admin/message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tailorUserId: target.tailorUserId, content: body }),
-      })
-      setSending(false)
+    try {
+      const res = tab === 'message'
+        ? await postJsonWithTimeout('/api/admin/message', { tailorUserId: target.tailorUserId, content: body })
+        : await postJsonWithTimeout('/api/admin/email', { to: target.email, toName: target.name, subject, body })
+
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
         toast.error(data.error || `Error ${res.status}`)
         return
       }
-      toast.success('Message sent!')
-    } else {
-      if (!target.email) { toast.error('No email on file'); setSending(false); return }
-      const res = await fetch('/api/admin/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: target.email, toName: target.name, subject, body }),
-      })
+
+      toast.success(tab === 'message' ? 'Message sent!' : 'Email sent!')
+      onClose()
+    } catch (error) {
+      toast.error(error instanceof DOMException && error.name === 'AbortError'
+        ? 'Sending took too long. Please try again.'
+        : 'Could not send. Check your connection and try again.')
+    } finally {
       setSending(false)
-      if (!res.ok) { const { error } = await res.json(); toast.error(error || 'Failed'); return }
-      toast.success('Email sent!')
     }
-    onClose()
   }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
-      <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl w-full max-w-lg">
+      <div className="bg-[#111114] text-white border border-white/[0.08] shadow-2xl backdrop-blur-xl rounded-2xl w-full max-w-lg">
         <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
           <div>
             <h3 className="font-bold text-white">Contact {target.name}</h3>
-            <p className="text-xs text-zinc-600">{target.email || 'No email on file'}</p>
+            <p className="text-xs text-zinc-400">{target.email || 'No email on file'}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/[0.06] rounded-xl transition-colors"><X size={16} /></button>
+          <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-colors"><X size={16} /></button>
         </div>
         <div className="flex gap-2 p-4 pb-0">
           {(['message', 'email'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${tab === t ? 'bg-violet-700 text-white' : 'border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
-              {t === 'message' ? '💬 In-app message' : '✉️ Email'}
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${tab === t ? 'bg-violet-700 text-white' : 'border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
+              {t === 'message' ? <MessageSquare size={14} /> : <Mail size={14} />}
+              {t === 'message' ? 'In-app message' : 'Email'}
             </button>
           ))}
         </div>
@@ -95,17 +107,17 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
           {tab === 'email' && (
             <div>
               <label className="block text-xs font-medium text-zinc-400 mb-1">Subject</label>
-              <input className="w-full rounded-xl border border-white/[0.1] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              <input className="w-full rounded-xl border border-white/[0.12] bg-[#18181b] px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
                 value={subject} onChange={e => setSubject(e.target.value)} />
             </div>
           )}
           <div>
             <label className="block text-xs font-medium text-zinc-400 mb-1">{tab === 'message' ? 'Message' : 'Body'}</label>
             <textarea rows={5}
-              className="w-full rounded-xl border border-white/[0.1] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+              className="w-full rounded-xl border border-white/[0.12] bg-[#18181b] px-3 py-2 text-sm leading-relaxed text-white placeholder:text-zinc-500 caret-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
               placeholder="Write your message..."
               value={body} onChange={e => setBody(e.target.value)} />
-            <p className="text-xs text-zinc-600 mt-0.5">{body.length} chars</p>
+            <p className="text-xs text-zinc-400 mt-0.5">{body.length} chars</p>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {[
