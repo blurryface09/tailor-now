@@ -80,6 +80,7 @@ export default function TailorOnboarding() {
   const [portfolioForm, setPortfolioForm] = useState({ title: '', image_url: '' })
   const [originalPortfolioImageUrl, setOriginalPortfolioImageUrl] = useState('')
   const [polishingPortfolio, setPolishingPortfolio] = useState(false)
+  const [switchingRole, setSwitchingRole] = useState(false)
 
   // Step 9 — pledge
   const [pledges, setPledges] = useState({ delivery: false, honest: false, offplatform: false, conduct: false })
@@ -342,6 +343,29 @@ export default function TailorOnboarding() {
     router.push('/dashboard')
   }
 
+  const switchToCustomer = async () => {
+    setSwitchingRole(true)
+    try {
+      const res = await fetch('/api/account/role', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'customer' }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toast.error(data.error || 'Could not switch your account')
+        return
+      }
+      toast.success('Switched to customer account')
+      router.push('/home')
+      router.refresh()
+    } catch {
+      toast.error('Could not switch your account. Please try again.')
+    } finally {
+      setSwitchingRole(false)
+    }
+  }
+
   const addPortfolioItem = async () => {
     if (!tailorId) { toast.error('Session error — please go back and press Continue again'); return }
     if (!portfolioForm.image_url) { toast.error('Upload a photo first'); return }
@@ -377,6 +401,14 @@ export default function TailorOnboarding() {
           </Link>
           <h1 className="text-2xl font-black text-zinc-900">Apply as a Creative</h1>
           <p className="text-zinc-500 mt-1 text-sm">Complete all steps to be listed and discovered by customers</p>
+          <button
+            type="button"
+            onClick={switchToCustomer}
+            disabled={switchingRole}
+            className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-bold text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 disabled:opacity-60"
+          >
+            {switchingRole ? 'Switching...' : 'I want to continue as a customer instead'}
+          </button>
         </div>
 
         {/* Progress */}

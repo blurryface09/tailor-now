@@ -400,36 +400,36 @@ export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-6 fade-up">
+    <div className="mx-auto w-full max-w-5xl px-3 py-5 sm:px-4 sm:py-8">
+      <div className="mb-5 fade-up sm:mb-6">
         <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-xs font-bold text-violet-700 mb-3">
           <ShieldCheck size={13} /> Pending review queue
         </div>
-        <h1 className="text-2xl font-bold text-zinc-900">Manage Creatives</h1>
+        <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Manage Creatives</h1>
         <p className="text-sm text-zinc-500 mt-0.5">Only pending creatives are shown here. Verified creatives stay out of this review queue.</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3 mb-6 fade-up-1">
-        <div className="rounded-2xl bg-white border border-zinc-200 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Total members</span>
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6 fade-up-1">
+        <div className="rounded-2xl bg-white border border-zinc-200 p-3 shadow-sm sm:p-4">
+          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
+            <span className="text-[10px] font-bold uppercase leading-tight tracking-wider text-zinc-500 sm:text-xs">Total members</span>
             <User size={17} className="text-zinc-400" />
           </div>
-          <p className="text-3xl font-black text-zinc-900">{totalMembers}</p>
+          <p className="text-2xl font-black text-zinc-900 sm:text-3xl">{totalMembers}</p>
         </div>
-        <div className="rounded-2xl bg-white border border-zinc-200 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">Verified creatives</span>
+        <div className="rounded-2xl bg-white border border-zinc-200 p-3 shadow-sm sm:p-4">
+          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
+            <span className="text-[10px] font-bold uppercase leading-tight tracking-wider text-zinc-500 sm:text-xs">Verified creatives</span>
             <BadgeCheck size={17} className="text-green-600" />
           </div>
-          <p className="text-3xl font-black text-zinc-900">{counts.verified}</p>
+          <p className="text-2xl font-black text-zinc-900 sm:text-3xl">{counts.verified}</p>
         </div>
-        <div className="rounded-2xl bg-white border border-violet-200 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-violet-700">Pending creatives</span>
+        <div className="rounded-2xl bg-white border border-violet-200 p-3 shadow-sm sm:p-4">
+          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
+            <span className="text-[10px] font-bold uppercase leading-tight tracking-wider text-violet-700 sm:text-xs">Pending creatives</span>
             <AlertCircle size={17} className="text-violet-600" />
           </div>
-          <p className="text-3xl font-black text-violet-700">{counts.unverified}</p>
+          <p className="text-2xl font-black text-violet-700 sm:text-3xl">{counts.unverified}</p>
         </div>
       </div>
 
@@ -461,14 +461,14 @@ export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors
               className="bg-white rounded-2xl border border-zinc-200 hover:border-violet-200 hover:shadow-md transition-all cursor-pointer"
               style={{ animation: 'fade-up 0.35s cubic-bezier(0.22,1,0.36,1) both', animationDelay: `${Math.min(index, 8) * 45}ms` }}
               onClick={() => setDetail(tailor)}>
-              <div className="p-4 flex items-start gap-3">
+              <div className="flex items-start gap-3 p-3 sm:p-4">
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
                   {tailor.profile?.avatar_url ? (
                     <img src={tailor.profile.avatar_url} alt={tailor.business_name}
-                      className="w-12 h-12 rounded-xl object-cover" />
+                      className="h-11 w-11 rounded-xl object-cover sm:h-12 sm:w-12" />
                   ) : (
-                    <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center text-violet-400 font-bold text-lg">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-lg font-bold text-violet-400 sm:h-12 sm:w-12">
                       {tailor.business_name?.[0]?.toUpperCase()}
                     </div>
                   )}
@@ -494,20 +494,20 @@ export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors
                   </div>
 
                   {/* Contact + location */}
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
+                  <div className="mt-1 grid gap-1 sm:flex sm:flex-wrap sm:gap-x-3 sm:gap-y-0.5">
                     {tailor.profile?.email && (
-                      <span className="flex items-center gap-1 text-xs text-zinc-600"><Mail size={10} /> {tailor.profile.email}</span>
+                      <span className="flex min-w-0 items-center gap-1 text-xs text-zinc-600"><Mail size={10} className="flex-shrink-0" /> <span className="truncate">{tailor.profile.email}</span></span>
                     )}
                     {tailor.profile?.phone && (
-                      <span className="flex items-center gap-1 text-xs text-zinc-600"><Phone size={10} /> {tailor.profile.phone}</span>
+                      <span className="flex min-w-0 items-center gap-1 text-xs text-zinc-600"><Phone size={10} className="flex-shrink-0" /> <span className="truncate">{tailor.profile.phone}</span></span>
                     )}
                     {tailor.city && (
-                      <span className="flex items-center gap-1 text-xs text-zinc-600"><MapPin size={10} /> {tailor.city}</span>
+                      <span className="flex min-w-0 items-center gap-1 text-xs text-zinc-600"><MapPin size={10} className="flex-shrink-0" /> <span className="truncate">{tailor.city}</span></span>
                     )}
                   </div>
 
                   {/* Stats + date */}
-                  <div className="flex items-center gap-3 mt-1 text-xs text-zinc-600">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-600">
                     <span className="flex items-center gap-0.5">
                       <Star size={10} className="text-amber-400 fill-amber-400" />
                       {tailor.avg_rating?.toFixed(1) || '—'} ({tailor.total_reviews})

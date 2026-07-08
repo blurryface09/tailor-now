@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
@@ -10,8 +10,8 @@ import { ImageUpload } from '@/components/ui/image-upload'
 import { SERVICE_LABELS, formatCurrency } from '@/lib/utils'
 import { FABRIC_TYPE_LABELS } from '@/types'
 import toast from 'react-hot-toast'
-import type { TailorProfile, TailorService, Measurements, Profile, Fabric } from '@/types'
-import { MapPin, ChevronRight, Package, Scissors, CheckCircle2 } from 'lucide-react'
+import type { TailorProfile, TailorService, Measurements, Profile, Fabric, Post } from '@/types'
+import { MapPin, ChevronRight, CheckCircle2 } from 'lucide-react'
 
 type Step = 'service' | 'details' | 'fabric' | 'measurements' | 'payment' | 'confirm'
 
@@ -20,6 +20,8 @@ function NewOrderContent() {
   const searchParams = useSearchParams()
   const tailorId = searchParams.get('tailor')
   const serviceId = searchParams.get('service')
+  const postId = searchParams.get('post')
+  const isCustomOrder = searchParams.get('custom') === 'true'
   const supabase = createClient()
 
   const [step, setStep] = useState<Step>('service')
@@ -28,6 +30,8 @@ function NewOrderContent() {
   const [services, setServices] = useState<TailorService[]>([])
   const [measurements, setMeasurements] = useState<Measurements | null>(null)
   const [selectedService, setSelectedService] = useState<TailorService | null>(null)
+  const [fitPost, setFitPost] = useState<Post | null>(null)
+  const [directOrderError, setDirectOrderError] = useState('')
   const [customPrice, setCustomPrice] = useState('')
   const [styleRefs, setStyleRefs] = useState<string[]>([])
 
@@ -43,6 +47,7 @@ function NewOrderContent() {
     title: '', description: '', delivery_type: 'pickup_delivery',
     pickup_address: '', delivery_address: '', deadline: '', notes: '',
   })
+  const directOrderStarted = useRef(false)
 
   useEffect(() => {
     if (!tailorId) return
@@ -53,13 +58,27 @@ function NewOrderContent() {
         if (!user) return { data: null }
         return supabase.from('measurements').select('*').eq('user_id', user.id).single()
       }),
-    ]).then(([{ data: t }, { data: s }, mResult]) => {
+      postId ? supabase.from('posts').select('*').eq('id', postId).single() : Promise.resolve({ data: null }),
+    ]).then(([{ data: t }, { data: s }, mResult, postResult]) => {
       setTailor(t)
       setServices(s || [])
       setMeasurements((mResult as { data: Measurements | null }).data || null)
       if (serviceId) setSelectedService(s?.find(x => x.id === serviceId) || null)
+      const productPost = (postResult as { data: Post | null }).data || null
+      if (productPost) {
+        setFitPost(productPost)
+        setStyleRefs(productPost.image_urls || [])
+        setForm(f => ({
+          ...f,
+          title: productPost.title ? `Order: ${productPost.title}` : 'Order this fit',
+          description: [
+            productPost.title ? `I want this exact fit: ${productPost.title}.` : 'I want this exact fit from the uploaded photo.',
+            productPost.caption ? `Notes from creative: ${productPost.caption}` : '',
+          ].filter(Boolean).join('\n\n'),
+        }))
+      }
     })
-  }, [tailorId, serviceId])
+  }, [tailorId, serviceId, postId])
 
   const loadFabrics = async () => {
     setFabricsLoading(true)
@@ -122,6 +141,68 @@ function NewOrderContent() {
     setLoading(false)
   }
 
+  const createDirectFitOrder = useCallback(async (productPost: Post) => {
+    setLoading(true)
+    setDirectOrderError('')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      toast.error('Please log in first')
+      router.push(`/login?next=${encodeURIComponent(`/orders/new?tailor=${tailorId}&post=${productPost.id}`)}`)
+      return
+    }
+
+    const price = Number(productPost.price)
+    if (!price || price <= 0) {
+      setStep('details')
+      setLoading(false)
+      return
+    }
+
+    const title = productPost.title ? `Order: ${productPost.title}` : 'Order this fit'
+    const description = [
+      productPost.title ? `Customer ordered this exact uploaded fit: ${productPost.title}.` : 'Customer ordered this exact uploaded fit.',
+      productPost.caption ? `Creative caption: ${productPost.caption}` : '',
+      `Product link: /p/${productPost.id}`,
+    ].filter(Boolean).join('\n\n')
+
+    const { data: order, error } = await supabase.from('orders').insert({
+      customer_id: user.id,
+      tailor_id: tailorId,
+      service_id: null,
+      service_type: productPost.service_type || 'custom_outfit',
+      title,
+      description,
+      delivery_type: 'pickup_delivery',
+      customer_offer: price,
+      agreed_price: price,
+      style_reference_urls: productPost.image_urls || [],
+      fabric_source: 'customer_own',
+      status: 'accepted',
+    }).select().single()
+
+    if (error) {
+      setDirectOrderError(error.message)
+      toast.error(error.message)
+      setLoading(false)
+      return
+    }
+
+    fetch('/api/notifications/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: order.id, event: 'new_order' }),
+    }).catch(() => {})
+
+    toast.success('Fit selected. Complete payment to place the order.')
+    router.push(`/orders/${order.id}#payment`)
+  }, [router, supabase, tailorId])
+
+  useEffect(() => {
+    if (!fitPost || !tailorId || isCustomOrder || directOrderStarted.current || !fitPost.price) return
+    directOrderStarted.current = true
+    createDirectFitOrder(fitPost)
+  }, [fitPost, tailorId, isCustomOrder, createDirectFitOrder])
+
   const steps: Step[] = ['service', 'details', 'fabric', 'measurements', 'payment', 'confirm']
   const stepIndex = steps.indexOf(step)
   const stepLabels: Record<Step, string> = {
@@ -145,6 +226,17 @@ function NewOrderContent() {
       </div>
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
+        {fitPost?.price && !isCustomOrder && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-center">
+            <div className="mx-auto mb-3 h-8 w-8 rounded-full border-2 border-amber-300 border-t-amber-600 animate-spin" />
+            <h1 className="text-lg font-black text-zinc-900">Preparing this fit for checkout</h1>
+            <p className="mt-1 text-sm text-zinc-600">We are creating the order from this exact upload and taking you straight to payment.</p>
+            {directOrderError && <p className="mt-3 text-sm font-semibold text-red-600">{directOrderError}</p>}
+          </div>
+        )}
+
+        {fitPost?.price && !isCustomOrder ? null : (
+        <>
         {/* Progress */}
         <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-1">
           {steps.map((s, i) => (
@@ -177,30 +269,51 @@ function NewOrderContent() {
           {/* Step: Select service */}
           {step === 'service' && (
             <div>
-              <h2 className="text-lg font-bold text-zinc-900 mb-4">What do you need?</h2>
-              <div className="space-y-3">
-                {services.map(s => (
-                  <button key={s.id} onClick={() => setSelectedService(s)}
-                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedService?.id === s.id ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-white">{s.title}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5">{SERVICE_LABELS[s.service_type]} · {s.min_days}–{s.max_days} days</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-violet-400">{formatCurrency(s.base_price)}</p>
-                        {s.price_negotiable && <p className="text-xs text-zinc-600">Negotiable</p>}
-                      </div>
+              <h2 className="text-lg font-bold text-zinc-900 mb-4">{fitPost ? 'Confirm this fit request' : 'What do you need?'}</h2>
+              {fitPost && (
+                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-bold text-zinc-900">This request is about the uploaded fit only.</p>
+                  <p className="mt-1 text-xs text-zinc-600">No extra custom questions here. The creative will respond with price if none was set.</p>
+                </div>
+              )}
+              {fitPost ? (
+                <div className="rounded-2xl border-2 border-violet-200 bg-violet-50 p-4">
+                  <div className="flex gap-3">
+                    {fitPost.image_urls?.[0] && (
+                      <img src={fitPost.image_urls[0]} alt="" className="h-20 w-16 rounded-xl object-cover" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-bold text-zinc-900">{fitPost.title || 'Uploaded fit'}</p>
+                      {fitPost.caption && <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-zinc-600">{fitPost.caption}</p>}
+                      <p className="mt-2 text-xs font-semibold text-violet-700">You are ordering only this fit.</p>
                     </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {services.map(s => (
+                    <button key={s.id} onClick={() => setSelectedService(s)}
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedService?.id === s.id ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-white">{s.title}</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">{SERVICE_LABELS[s.service_type]} · {s.min_days}–{s.max_days} days</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-violet-400">{formatCurrency(s.base_price)}</p>
+                          {s.price_negotiable && <p className="text-xs text-zinc-600">Negotiable</p>}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                  <button onClick={() => setSelectedService(null)}
+                    className={`w-full text-left p-4 rounded-xl border-2 transition-all ${!selectedService ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
+                    <p className="font-medium text-white">Custom / Other request</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">Describe what you need and agree on price via chat</p>
                   </button>
-                ))}
-                <button onClick={() => setSelectedService(null)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all ${!selectedService ? 'border-violet-600 bg-violet-500/10' : 'border-white/[0.1] hover:border-violet-500/30'}`}>
-                  <p className="font-medium text-white">Custom / Other request</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">Describe what you need and agree on price via chat</p>
-                </button>
-              </div>
-              <Button className="w-full mt-6" size="lg" onClick={() => setStep('details')}>
+                </div>
+              )}
+              <Button className="w-full mt-6" size="lg" onClick={() => fitPost ? setStep('payment') : setStep('details')}>
                 Continue <ChevronRight size={16} />
               </Button>
             </div>
@@ -356,7 +469,7 @@ function NewOrderContent() {
               {fabricSource === 'customer_own' && (
                 <div className="p-4 bg-violet-500/10 border border-violet-500/20 rounded-xl text-sm text-violet-300"
                   style={{ animation: 'fade-up 0.25s ease both' }}>
-                  <p className="font-semibold text-white mb-1">You're providing your own fabric</p>
+                  <p className="font-semibold text-white mb-1">You&apos;re providing your own fabric</p>
                   <p className="text-zinc-400 text-xs leading-relaxed">The creative will contact you to arrange fabric handover. You can add details in the notes during the next steps.</p>
                 </div>
               )}
@@ -531,6 +644,8 @@ function NewOrderContent() {
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   )

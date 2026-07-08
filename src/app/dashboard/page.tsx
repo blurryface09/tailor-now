@@ -6,6 +6,7 @@ import { formatCurrency, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatDate } 
 import { CREATIVE_SUPPORT_EMAIL_URL, CREATIVE_SUPPORT_WHATSAPP_URL } from '@/lib/support'
 import { isCreativeProfileComplete } from '@/lib/creative-completeness'
 import { calcScore, getLevel } from '@/lib/creative-score'
+import { SwitchToCustomerButton } from '@/components/account/switch-to-customer-button'
 import { Scissors, Star, TrendingUp, Clock, CheckCircle, Package, MessageSquare, ImageIcon, UserCog, AlertCircle, Mail } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -142,6 +143,7 @@ export default async function TailorDashboard() {
               </div>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
+                <SwitchToCustomerButton className="border-amber-300/60" />
                 <a
                   href={CREATIVE_SUPPORT_WHATSAPP_URL}
                   target="_blank"
