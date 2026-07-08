@@ -130,6 +130,13 @@ export default function TailorOnboarding() {
   const toggle = (arr: string[], val: string) =>
     arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val]
 
+  const cleanPriceInput = (value: string) =>
+    value.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '')
+
+  const minPriceAmount = Number(minPrice)
+  const maxPriceAmount = Number(maxPrice)
+  const hasValidPriceRange = minPriceAmount > 0 && maxPriceAmount >= minPriceAmount
+
   const canNext = (): boolean => {
     switch (step) {
       case 0: return Object.values(eligibility).every(Boolean)
@@ -145,7 +152,7 @@ export default function TailorOnboarding() {
       case 4: return !!avatarUrl && phone.trim().length >= 7
       case 5: return !!govIdUrl && !!govIdType
       case 6: return !!facePhotoUrl
-      case 7: return !!(minPrice && maxPrice && parseInt(minPrice) > 0 && parseInt(maxPrice) >= parseInt(minPrice))
+      case 7: return hasValidPriceRange
       case 8: return portfolioItems.length >= 3
       case 9: return Object.values(pledges).every(Boolean) && pledgeName.trim().length >= 3
       default: return false
@@ -248,7 +255,7 @@ export default function TailorOnboarding() {
     if (step === 7 && tailorId) {
       setSaving(true)
       const { error } = await supabase.from('tailor_profiles').update({
-        min_price: parseInt(minPrice), max_price: parseInt(maxPrice),
+        min_price: minPriceAmount, max_price: maxPriceAmount,
       }).eq('id', tailorId)
       setSaving(false)
       if (error) { toast.error(error.message); return }
@@ -860,23 +867,26 @@ export default function TailorOnboarding() {
                   <label className="block text-sm font-semibold text-zinc-700 mb-1.5">Minimum (₦) *</label>
                   <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500">
                     <span className="px-3 py-2.5 bg-zinc-50 text-sm text-zinc-500 border-r border-zinc-200">₦</span>
-                    <input type="number" min="0" placeholder="5,000"
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="5,000"
                       className="flex-1 px-3 py-2.5 text-sm text-zinc-900 focus:outline-none bg-white"
-                      value={minPrice} onChange={e => setMinPrice(e.target.value)} />
+                      value={minPrice} onChange={e => setMinPrice(cleanPriceInput(e.target.value))} />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-zinc-700 mb-1.5">Maximum (₦) *</label>
                   <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500">
                     <span className="px-3 py-2.5 bg-zinc-50 text-sm text-zinc-500 border-r border-zinc-200">₦</span>
-                    <input type="number" min="0" placeholder="150,000"
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" placeholder="150,000"
                       className="flex-1 px-3 py-2.5 text-sm text-zinc-900 focus:outline-none bg-white"
-                      value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
+                      value={maxPrice} onChange={e => setMaxPrice(cleanPriceInput(e.target.value))} />
                   </div>
                 </div>
               </div>
-              {minPrice && maxPrice && parseInt(maxPrice) < parseInt(minPrice) && (
+              {minPrice && maxPrice && maxPriceAmount < minPriceAmount && (
                 <p className="text-xs text-red-500 mt-2">Maximum must be at least as large as minimum</p>
+              )}
+              {(!minPrice || !maxPrice) && (
+                <p className="text-xs text-zinc-500 mt-2">Enter both prices as numbers. You can type or paste amounts with commas.</p>
               )}
 
               <div className="mt-5 p-4 bg-zinc-50 rounded-2xl border border-zinc-200">
@@ -899,7 +909,7 @@ export default function TailorOnboarding() {
                 </div>
                 <div>
                   <h2 className="font-black text-zinc-900 text-lg">Your Work Portfolio</h2>
-                  <p className="text-sm text-zinc-500">Add at least 3 photos of real outfits you've made — this is the first thing customers see</p>
+                  <p className="text-sm text-zinc-500">Add at least 3 photos of real outfits you&apos;ve made — this is the first thing customers see</p>
                 </div>
               </div>
 
@@ -995,7 +1005,7 @@ export default function TailorOnboarding() {
 
               <div className="bg-violet-50 border border-violet-200 rounded-2xl p-4 mb-5">
                 <p className="text-sm text-violet-800 leading-relaxed font-medium">
-                  "As a TailorNow Creative, I commit to protecting our customers' trust and upholding the standards that make this platform great."
+                  &quot;As a TailorNow Creative, I commit to protecting our customers&apos; trust and upholding the standards that make this platform great.&quot;
                 </p>
               </div>
 
