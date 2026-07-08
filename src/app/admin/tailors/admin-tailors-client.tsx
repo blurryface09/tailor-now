@@ -36,6 +36,7 @@ function completenessChecks(t: TailorWithProfile) {
 }
 
 type ComposeTarget = { tailorUserId: string; name: string; email: string | null }
+type SendResponse = { error?: string; mailtoUrl?: string }
 
 async function postJsonWithTimeout(url: string, payload: unknown) {
   const controller = new AbortController()
@@ -67,8 +68,13 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
         ? await postJsonWithTimeout('/api/admin/message', { tailorUserId: target.tailorUserId, content: body })
         : await postJsonWithTimeout('/api/admin/email', { to: target.email, toName: target.name, subject, body })
 
-      const data = await res.json().catch(() => ({}))
+      const data = await res.json().catch(() => ({})) as SendResponse
       if (!res.ok) {
+        if (tab === 'email' && data.mailtoUrl) {
+          window.location.href = data.mailtoUrl
+          toast.error(data.error || 'Server email is not connected. Opening your email app instead.')
+          return
+        }
         toast.error(data.error || `Error ${res.status}`)
         return
       }

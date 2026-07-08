@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@folubandsamuellabs.com'
+
 function escapeHtml(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -9,6 +11,29 @@ function escapeHtml(value: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
+}
+
+function makeMailtoUrl(to: string, subject: string, body: string) {
+  const params = new URLSearchParams({
+    subject,
+    body: `${body}\n\n--\nTailorNow Support\n${ADMIN_EMAIL}`,
+  })
+
+  return `mailto:${encodeURIComponent(to)}?${params.toString()}`
+}
+
+function providerErrorMessage(message: string) {
+  const lower = message.toLowerCase()
+
+  if (lower.includes('domain') || lower.includes('sender') || lower.includes('from')) {
+    return 'Email provider rejected the sender address. Verify RESEND_FROM_EMAIL/domain in Resend, then redeploy.'
+  }
+
+  if (lower.includes('api key') || lower.includes('unauthorized') || lower.includes('forbidden')) {
+    return 'Email provider rejected the API key. Check RESEND_API_KEY in Vercel, then redeploy.'
+  }
+
+  return message || 'Email provider could not send this message.'
 }
 
 export async function POST(req: NextRequest) {
@@ -25,7 +50,10 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.RESEND_API_KEY
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'Email is not connected yet. Add RESEND_API_KEY in Vercel, then redeploy.' },
+        {
+          error: 'Email is not connected yet. Add RESEND_API_KEY in Vercel, then redeploy.',
+          mailtoUrl: makeMailtoUrl(to, subject, body),
+        },
         { status: 503 }
       )
     }
@@ -38,6 +66,7 @@ export async function POST(req: NextRequest) {
       resend.emails.send({
         from,
         to: [to],
+        replyTo: ADMIN_EMAIL,
         subject,
         html: `
         <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
@@ -58,7 +87,15 @@ export async function POST(req: NextRequest) {
       }),
     ])
 
-    if (sendResult.error) return NextResponse.json({ error: sendResult.error.message }, { status: 500 })
+    if (sendResult.error) {
+      return NextResponse.json(
+        {
+          error: providerErrorMessage(sendResult.error.message),
+          mailtoUrl: makeMailtoUrl(to, subject, body),
+        },
+        { status: 502 }
+      )
+    }
     return NextResponse.json({ ok: true })
   } catch (error) {
     return NextResponse.json(
