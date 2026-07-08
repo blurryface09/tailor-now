@@ -6,7 +6,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { formatRelativeTime } from '@/lib/utils'
-import { Plus, Trash2, X, Heart, MessageSquare, ImageIcon, Sparkles, Edit3, Save } from 'lucide-react'
+import { Plus, Trash2, X, Heart, MessageSquare, ImageIcon, Sparkles, Edit3, Save, Download, Upload } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import type { Post, Profile } from '@/types'
@@ -42,6 +42,7 @@ export default function AdminFeedPage() {
   const [editingPostId, setEditingPostId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editCaption, setEditCaption] = useState('')
+  const [replacingPostId, setReplacingPostId] = useState<string | null>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -137,6 +138,32 @@ export default function AdminFeedPage() {
     }
   }
 
+  const replacePostImage = async (post: Post & { author?: Profile }, file: File) => {
+    if (!userId) return
+    setReplacingPostId(post.id)
+    try {
+      const ext = file.name.split('.').pop() || 'jpg'
+      const path = `admin-feed/replacements/${post.id}-${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('portfolio')
+        .upload(path, file, { contentType: file.type, upsert: true })
+
+      if (uploadError) throw new Error(uploadError.message)
+
+      const { data: { publicUrl } } = supabase.storage.from('portfolio').getPublicUrl(path)
+      const nextImages = [publicUrl, ...(post.image_urls || []).slice(1)]
+      const { error } = await supabase.from('posts').update({ image_urls: nextImages }).eq('id', post.id)
+      if (error) throw new Error(error.message)
+
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, image_urls: nextImages } : p))
+      toast.success('Image replaced')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not replace this image')
+    } finally {
+      setReplacingPostId(null)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#09090B]">
       <Navbar />
@@ -224,6 +251,10 @@ export default function AdminFeedPage() {
           </form>
         )}
 
+        <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          AI credits low? Download a post image, polish it manually in Canva/PhotoRoom, then use the upload icon on that post to replace it.
+        </div>
+
         {/* Existing posts */}
         <div className="space-y-4">
           {posts.length === 0 ? (
@@ -296,6 +327,35 @@ export default function AdminFeedPage() {
                         </div>
                       </div>
                       <div className="flex flex-col gap-1.5">
+                        {post.image_urls?.[0] && (
+                          <a
+                            href={post.image_urls[0]}
+                            download
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 text-emerald-300 hover:bg-emerald-500/10 rounded-xl transition-colors flex-shrink-0"
+                            title="Download current image">
+                            <Download size={15} />
+                          </a>
+                        )}
+                        <label
+                          className="p-2 text-sky-300 hover:bg-sky-500/10 rounded-xl transition-colors flex-shrink-0 cursor-pointer"
+                          title="Replace image with manual edit">
+                          {replacingPostId === post.id
+                            ? <span className="block h-4 w-4 rounded-full border-2 border-sky-300/40 border-t-sky-300 animate-spin" />
+                            : <Upload size={15} />}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={replacingPostId === post.id}
+                            onChange={e => {
+                              const file = e.target.files?.[0]
+                              e.currentTarget.value = ''
+                              if (file) replacePostImage(post, file)
+                            }}
+                          />
+                        </label>
                         <button
                           onClick={() => polishPostImage(post)}
                           disabled={polishingPostId === post.id}

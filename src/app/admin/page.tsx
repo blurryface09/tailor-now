@@ -3,7 +3,7 @@ import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { Users, Scissors, Package, TrendingUp, Clock, Star } from 'lucide-react'
+import { Users, Scissors, Package, TrendingUp, Clock, Star, Image as ImageIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,6 +68,9 @@ export default async function AdminDashboard() {
             </Link>
             <Link href="/admin/fabrics" className="bg-white border border-amber-200 text-amber-700 text-sm px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors shadow-sm">
               Fabrics
+            </Link>
+            <Link href="/admin/portfolio" className="bg-white border border-violet-200 text-violet-700 text-sm px-4 py-2 rounded-xl hover:bg-violet-50 transition-colors shadow-sm">
+              Polish Portfolio
             </Link>
             <Link href="/admin/orders" className="bg-violet-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-violet-800 transition-colors">
               All Orders
@@ -141,6 +144,7 @@ export default async function AdminDashboard() {
                 { href: '/admin/reviews', icon: <Star size={18} />, label: 'Reviews', desc: 'Moderate ratings & reviews' },
                 { href: '/admin/orders', icon: <Package size={18} />, label: 'All Orders', desc: 'Monitor disputes, view history' },
                 { href: '/admin/payouts', icon: <TrendingUp size={18} />, label: 'Payouts', desc: 'Process creative payouts' },
+                { href: '/admin/portfolio', icon: <ImageIcon size={18} />, label: 'Polish Portfolio', desc: 'Download, edit & re-upload creative photos' },
               ].map(a => (
                 <Link key={a.href} href={a.href} className="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
                   <div className="w-9 h-9 bg-violet-50 text-violet-600 rounded-xl flex items-center justify-center flex-shrink-0">{a.icon}</div>
