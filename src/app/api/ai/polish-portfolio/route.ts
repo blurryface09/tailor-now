@@ -19,10 +19,10 @@ type PolishRequest = {
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.OPENAI_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return NextResponse.json(
-      { error: 'AI photo polish is not configured yet. Add OPENAI_API_KEY in Vercel to enable it.' },
+      { error: 'AI photo polish is not configured yet. Add GEMINI_API_KEY in Vercel to enable it.' },
       { status: 501 }
     )
   }
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not read the uploaded photo.' }, { status: 400 })
   }
 
-  const contentType = imageResponse.headers.get('content-type') || 'image/png'
+  const contentType = imageResponse.headers.get('content-type') || 'image/jpeg'
   if (!contentType.startsWith('image/')) {
     return NextResponse.json({ error: 'The uploaded file must be an image.' }, { status: 400 })
   }
@@ -75,39 +75,55 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Photo is too large for AI polish. Use an image under 10MB.' }, { status: 400 })
   }
 
-  const inputBlob = new Blob([imageBytes], { type: contentType })
-  const formData = new FormData()
-  formData.append('model', 'gpt-image-2')
-  formData.append('image[]', inputBlob, `tailornow-${user.id}.png`)
-  formData.append('prompt', body.title ? `${SHOWROOM_PROMPT} Portfolio title: ${body.title}.` : SHOWROOM_PROMPT)
-  formData.append('size', '1024x1536')
-  formData.append('quality', 'medium')
-  formData.append('output_format', 'png')
+  const base64Image = Buffer.from(imageBytes).toString('base64')
+  const prompt = body.title
+    ? `${SHOWROOM_PROMPT} Portfolio title: ${body.title}.`
+    : SHOWROOM_PROMPT
 
-  const openAiResponse = await fetch('https://api.openai.com/v1/images/edits', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: formData,
-  })
+  // Gemini 2.0 Flash image generation — sends image + prompt, returns edited image
+  const geminiResponse = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inline_data: { mime_type: contentType, data: base64Image } },
+          ],
+        }],
+        generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
+      }),
+    }
+  )
 
-  const openAiJson = await openAiResponse.json().catch(() => null)
-  if (!openAiResponse.ok) {
-    return NextResponse.json(
-      { error: openAiJson?.error?.message || 'AI photo polish failed. Please try again.' },
-      { status: openAiResponse.status }
-    )
+  const geminiJson = await geminiResponse.json().catch(() => null)
+
+  if (!geminiResponse.ok) {
+    const errMsg = geminiJson?.error?.message || 'AI photo polish failed. Please try again.'
+    console.error('[polish] Gemini error:', geminiJson?.error)
+    return NextResponse.json({ error: errMsg }, { status: geminiResponse.status })
   }
 
-  const b64 = openAiJson?.data?.[0]?.b64_json
-  if (!b64) {
+  // Find the image part in the response
+  const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> =
+    geminiJson?.candidates?.[0]?.content?.parts ?? []
+  const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'))
+
+  if (!imagePart?.inlineData) {
+    console.error('[polish] Gemini returned no image part:', JSON.stringify(geminiJson?.candidates?.[0]?.content))
     return NextResponse.json({ error: 'AI photo polish returned no image. Please try again.' }, { status: 502 })
   }
 
-  const polishedBytes = Buffer.from(b64, 'base64')
-  const polishedPath = `portfolio/${user.id}/ai-polished-${Date.now()}.png`
+  const polishedBytes = Buffer.from(imagePart.inlineData.data, 'base64')
+  const outMime = imagePart.inlineData.mimeType || 'image/png'
+  const ext = outMime.includes('jpeg') ? 'jpg' : 'png'
+  const polishedPath = `portfolio/${user.id}/ai-polished-${Date.now()}.${ext}`
+
   const { error: uploadError } = await supabase.storage
     .from('portfolio')
-    .upload(polishedPath, polishedBytes, { contentType: 'image/png', upsert: false })
+    .upload(polishedPath, polishedBytes, { contentType: outMime, upsert: false })
 
   if (uploadError) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 })
