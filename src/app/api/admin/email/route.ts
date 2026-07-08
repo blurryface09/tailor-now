@@ -23,14 +23,20 @@ export async function POST(req: NextRequest) {
     if (!to || !subject || !body) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
     const apiKey = process.env.RESEND_API_KEY
-    if (!apiKey) return NextResponse.json({ error: 'Email service not configured' }, { status: 500 })
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'Email is not connected yet. Add RESEND_API_KEY in Vercel, then redeploy.' },
+        { status: 503 }
+      )
+    }
 
     const safeName = escapeHtml(toName || 'there')
     const safeBody = escapeHtml(body).replace(/\n/g, '<br>')
     const resend = new Resend(apiKey)
+    const from = process.env.RESEND_FROM_EMAIL || 'TailorNow <hello@tailornow.shop>'
     const sendResult = await Promise.race([
       resend.emails.send({
-        from: 'TailorNow <hello@tailornow.shop>',
+        from,
         to: [to],
         subject,
         html: `

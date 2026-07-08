@@ -119,9 +119,10 @@ export async function POST(req: NextRequest) {
   const resendKey = process.env.RESEND_API_KEY
   if (resendKey && userEmail) {
     const resend = new Resend(resendKey)
+    const from = process.env.RESEND_FROM_EMAIL || 'TailorNow <hello@tailornow.shop>'
     const isCreative = role === 'tailor'
     await resend.emails.send({
-      from: 'TailorNow <hello@tailornow.shop>',
+      from,
       to: [userEmail],
       subject: isCreative
         ? 'Welcome to TailorNow — your profile is under review 🎉'

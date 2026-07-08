@@ -37,7 +37,12 @@ export async function POST(req: NextRequest) {
   if (adminProfile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const resendKey = process.env.RESEND_API_KEY
-  if (!resendKey) return NextResponse.json({ error: 'RESEND_API_KEY not configured' }, { status: 500 })
+  if (!resendKey) {
+    return NextResponse.json(
+      { error: 'Email is not connected yet. Add RESEND_API_KEY in Vercel, then redeploy.' },
+      { status: 503 }
+    )
+  }
 
   const { subject, body, audience } = await req.json() as {
     subject: string
@@ -50,6 +55,7 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient()
   const resend = new Resend(resendKey)
+  const from = process.env.RESEND_FROM_EMAIL || 'TailorNow <hello@tailornow.shop>'
 
   // Fetch contacts (reuse same logic as /api/admin/contacts)
   const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
@@ -85,7 +91,7 @@ export async function POST(req: NextRequest) {
   for (let i = 0; i < contacts.length; i += CHUNK) {
     const chunk = contacts.slice(i, i + CHUNK)
     const batch = chunk.map(c => ({
-      from: 'TailorNow <hello@tailornow.shop>',
+      from,
       to: [c.email],
       subject,
       html: broadcastHtml(c.name, body),
