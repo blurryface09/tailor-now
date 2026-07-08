@@ -80,6 +80,11 @@ export interface TailorProfile {
   total_orders: number
   completion_rate: number
   response_time_hours: number | null
+  years_experience: string | null
+  gov_id_url: string | null
+  turnaround_days: string | null
+  instagram_url: string | null
+  pledge_signed_at: string | null
   created_at: string
 }
 
