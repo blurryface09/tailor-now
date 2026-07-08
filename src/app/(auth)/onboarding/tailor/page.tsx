@@ -133,9 +133,46 @@ export default function TailorOnboarding() {
   const cleanPriceInput = (value: string) =>
     value.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '')
 
+  const cleanPhoneInput = (value: string) =>
+    value.replace(/[^\d+]/g, '').slice(0, 15)
+
   const minPriceAmount = Number(minPrice)
   const maxPriceAmount = Number(maxPrice)
   const hasValidPriceRange = minPriceAmount > 0 && maxPriceAmount >= minPriceAmount
+  const requiredPortfolioCount = 1
+
+  const blockedReason = (): string => {
+    switch (step) {
+      case 0: return 'Tick all eligibility boxes to continue.'
+      case 1:
+        if (form.business_name.trim().length < 2) return 'Enter your business name.'
+        if (!form.years_experience) return 'Select your years of experience.'
+        if (!form.state || !form.city) return 'Select your state and city.'
+        if (!form.address.trim()) return 'Enter your shop or workshop address.'
+        if (form.bio.trim().length < 20) return 'Write at least 20 characters about your business.'
+        return 'Complete the business information to continue.'
+      case 2: return 'Select at least one service you offer.'
+      case 3:
+        if (form.delivery_types.length === 0) return 'Select how you work with customers.'
+        return 'Select a typical order turnaround time.'
+      case 4:
+        if (!avatarUrl) return 'Upload a clear profile photo.'
+        return 'Enter your phone number.'
+      case 5:
+        if (!govIdType) return 'Select your government ID type.'
+        return 'Upload your government ID photo.'
+      case 6: return 'Upload your face verification selfie.'
+      case 7:
+        if (!minPrice || !maxPrice) return 'Enter both minimum and maximum prices.'
+        if (maxPriceAmount < minPriceAmount) return 'Maximum price must be at least the minimum price.'
+        return 'Enter a valid price range.'
+      case 8: return 'Upload at least one work photo to continue.'
+      case 9:
+        if (!Object.values(pledges).every(Boolean)) return 'Tick all quality pledge boxes.'
+        return 'Type your full name to sign the pledge.'
+      default: return 'Complete this step to continue.'
+    }
+  }
 
   const canNext = (): boolean => {
     switch (step) {
@@ -153,7 +190,7 @@ export default function TailorOnboarding() {
       case 5: return !!govIdUrl && !!govIdType
       case 6: return !!facePhotoUrl
       case 7: return hasValidPriceRange
-      case 8: return portfolioItems.length >= 3
+      case 8: return portfolioItems.length >= requiredPortfolioCount
       case 9: return Object.values(pledges).every(Boolean) && pledgeName.trim().length >= 3
       default: return false
     }
@@ -277,10 +314,13 @@ export default function TailorOnboarding() {
   }
 
   const addPortfolioItem = async () => {
-    if (!tailorId || !portfolioForm.title || !portfolioForm.image_url) return
+    if (!tailorId) { toast.error('Session error — please go back and press Continue again'); return }
+    if (!portfolioForm.image_url) { toast.error('Upload a photo first'); return }
     setSaving(true)
     const { data, error } = await supabase.from('portfolio_items').insert({
-      tailor_id: tailorId, title: portfolioForm.title, image_url: portfolioForm.image_url,
+      tailor_id: tailorId,
+      title: portfolioForm.title.trim() || `Portfolio photo ${portfolioItems.length + 1}`,
+      image_url: portfolioForm.image_url,
     }).select('id, image_url, title').single()
     setSaving(false)
     if (error) { toast.error(error.message); return }
@@ -655,7 +695,7 @@ export default function TailorOnboarding() {
                 <div className="flex items-center border border-zinc-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500/20 focus-within:border-violet-500">
                   <span className="px-3 py-2.5 bg-zinc-50 text-sm text-zinc-500 border-r border-zinc-200 flex-shrink-0">+234</span>
                   <input type="tel" placeholder="08012345678" value={phone}
-                    onChange={e => setPhone(e.target.value)}
+                    onChange={e => setPhone(cleanPhoneInput(e.target.value))}
                     className="flex-1 px-3 py-2.5 text-sm text-zinc-900 focus:outline-none bg-white" />
                 </div>
               </div>
@@ -909,7 +949,7 @@ export default function TailorOnboarding() {
                 </div>
                 <div>
                   <h2 className="font-black text-zinc-900 text-lg">Your Work Portfolio</h2>
-                  <p className="text-sm text-zinc-500">Add at least 3 photos of real outfits you&apos;ve made — this is the first thing customers see</p>
+                  <p className="text-sm text-zinc-500">Add at least 1 photo of a real outfit you&apos;ve made — you can add more later</p>
                 </div>
               </div>
 
@@ -959,7 +999,11 @@ export default function TailorOnboarding() {
                           if (!file || !userId) return
                           const ext = file.name.split('.').pop() || 'jpg'
                           await uploadImage(file, `portfolio/${userId}/${Date.now()}.${ext}`,
-                            (url) => setPortfolioForm(f => ({ ...f, image_url: url })),
+                            (url) => setPortfolioForm(f => ({
+                              ...f,
+                              image_url: url,
+                              title: f.title || `Portfolio photo ${portfolioItems.length + 1}`,
+                            })),
                             setUploadingPortfolio)
                           e.target.value = ''
                         }} />
@@ -970,7 +1014,7 @@ export default function TailorOnboarding() {
                     value={portfolioForm.title}
                     onChange={e => setPortfolioForm(f => ({ ...f, title: e.target.value }))} />
                   <Button type="button" size="md" loading={saving}
-                    disabled={!portfolioForm.title || !portfolioForm.image_url || saving}
+                    disabled={!portfolioForm.image_url || saving}
                     onClick={addPortfolioItem}>
                     Add Photo
                   </Button>
@@ -979,12 +1023,12 @@ export default function TailorOnboarding() {
 
               <div className="mt-3 flex items-center gap-3">
                 <div className="flex gap-1">
-                  {Array.from({ length: Math.max(portfolioItems.length + 1, 3) }, (_, i) => (
+                  {Array.from({ length: Math.max(portfolioItems.length + 1, requiredPortfolioCount) }, (_, i) => (
                     <div key={i} className={`w-5 h-1.5 rounded-full ${i < portfolioItems.length ? 'bg-violet-600' : 'bg-zinc-200'}`} />
                   ))}
                 </div>
-                <p className={`text-xs font-medium ${portfolioItems.length >= 3 ? 'text-green-600' : 'text-zinc-500'}`}>
-                  {portfolioItems.length}/3 minimum {portfolioItems.length >= 3 ? '✓' : ''}
+                <p className={`text-xs font-medium ${portfolioItems.length >= requiredPortfolioCount ? 'text-green-600' : 'text-zinc-500'}`}>
+                  {portfolioItems.length}/{requiredPortfolioCount} minimum {portfolioItems.length >= requiredPortfolioCount ? '✓' : ''}
                 </p>
               </div>
             </div>
@@ -1065,15 +1109,33 @@ export default function TailorOnboarding() {
               </button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button type="button" size="lg" className="flex-1" loading={saving}
-                disabled={!canNext() || saving} onClick={handleNext}>
-                Continue →
-              </Button>
+              <div className="flex-1">
+                <Button type="button" size="lg" className="w-full" loading={saving}
+                  disabled={!canNext() || saving}
+                  onClick={() => {
+                    if (!canNext()) { toast.error(blockedReason()); return }
+                    handleNext()
+                  }}>
+                  Continue →
+                </Button>
+                {!canNext() && (
+                  <p className="mt-2 text-xs text-zinc-500 text-center">{blockedReason()}</p>
+                )}
+              </div>
             ) : (
-              <Button type="button" size="lg" className="flex-1" loading={saving}
-                disabled={!canNext() || saving} onClick={handleFinish}>
-                Submit Application →
-              </Button>
+              <div className="flex-1">
+                <Button type="button" size="lg" className="w-full" loading={saving}
+                  disabled={!canNext() || saving}
+                  onClick={() => {
+                    if (!canNext()) { toast.error(blockedReason()); return }
+                    handleFinish()
+                  }}>
+                  Submit Application →
+                </Button>
+                {!canNext() && (
+                  <p className="mt-2 text-xs text-zinc-500 text-center">{blockedReason()}</p>
+                )}
+              </div>
             )}
           </div>
         </div>
