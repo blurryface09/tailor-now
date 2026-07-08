@@ -202,30 +202,35 @@ export default function TailorOnboarding() {
       full_name: user?.user_metadata?.full_name || '',
       role: 'tailor',
     }, { onConflict: 'id' })
-    const payload = {
-      business_name:    form.business_name.trim(),
-      bio:              form.bio.trim(),
-      city:             form.city.trim(),
-      state:            form.state.trim(),
-      address:          form.address.trim(),
-      specialties:      form.specialties,
-      delivery_types:   form.delivery_types,
-      years_experience: form.years_experience,
+    // Core columns only — new columns (years_experience etc.) saved separately after migration
+    const corePayload = {
+      business_name:  form.business_name.trim(),
+      bio:            form.bio.trim(),
+      city:           form.city.trim(),
+      state:          form.state.trim(),
+      address:        form.address.trim(),
+      specialties:    form.specialties,
+      delivery_types: form.delivery_types,
+    }
+    let id = tailorId
+    if (id) {
+      const { error } = await supabase.from('tailor_profiles').update(corePayload).eq('id', id)
+      if (error) { setSaving(false); toast.error(error.message); return null }
+    } else {
+      const { data, error } = await supabase.from('tailor_profiles')
+        .insert({ user_id: userId, ...corePayload }).select('id').single()
+      if (error) { setSaving(false); toast.error(error.message); return null }
+      id = data.id
+      setTailorId(id)
+    }
+    // Best-effort save of new columns — silently skips if migration hasn't run yet
+    await supabase.from('tailor_profiles').update({
+      years_experience: form.years_experience || null,
       instagram_url:    form.instagram_url.trim() || null,
-      turnaround_days:  form.turnaround_days,
-    }
-    if (tailorId) {
-      const { error } = await supabase.from('tailor_profiles').update(payload).eq('id', tailorId)
-      setSaving(false)
-      if (error) { toast.error(error.message); return null }
-      return tailorId
-    }
-    const { data, error } = await supabase.from('tailor_profiles')
-      .insert({ user_id: userId, ...payload }).select('id').single()
+      turnaround_days:  form.turnaround_days || null,
+    }).eq('id', id)
     setSaving(false)
-    if (error) { toast.error(error.message); return null }
-    setTailorId(data.id)
-    return data.id
+    return id
   }
 
   const handleNext = async () => {
@@ -729,9 +734,9 @@ export default function TailorOnboarding() {
                           <p className="text-xs text-zinc-400 mt-0.5">JPG, PNG or PDF · max 5MB</p>
                         </>
                     }
-                    <input type="file" accept="image/*" className="hidden" disabled={uploading || !tailorId}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploading}
                       onChange={async (e) => {
-                        if (!tailorId) { toast.error('Complete the previous steps first'); return }
+                        if (!tailorId) { toast.error('Session error — please go back to step 4 and press Continue again'); return }
                         const file = e.target.files?.[0]
                         if (!file || !userId) return
                         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
@@ -779,7 +784,8 @@ export default function TailorOnboarding() {
                       <input type="file" accept="image/*" className="hidden" disabled={uploading}
                         onChange={async (e) => {
                           const file = e.target.files?.[0]
-                          if (!file || !userId || !tailorId) return
+                          if (!file) return
+                          if (!tailorId) { toast.error('Session error — please go back to step 4 and press Continue again'); return }
                           const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
                           await uploadImage(file, `faces/${userId}.${ext}`, async (url) => {
                             await supabase.from('tailor_profiles').update({ face_photo_url: url }).eq('id', tailorId)
@@ -800,7 +806,8 @@ export default function TailorOnboarding() {
                     <input type="file" accept="image/*" className="hidden" disabled={uploading}
                       onChange={async (e) => {
                         const file = e.target.files?.[0]
-                        if (!file || !userId || !tailorId) return
+                        if (!file) return
+                        if (!tailorId) { toast.error('Session error — please go back to step 4 and press Continue again'); return }
                         const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
                         await uploadImage(file, `faces/${userId}.${ext}`, async (url) => {
                           await supabase.from('tailor_profiles').update({ face_photo_url: url }).eq('id', tailorId)
