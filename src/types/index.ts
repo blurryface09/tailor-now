@@ -283,7 +283,7 @@ export interface Follow {
 export interface Notification {
   id: string
   user_id: string
-  type: 'order_update' | 'new_follower' | 'post_like' | 'post_comment' | 'payment' | 'new_message'
+  type: 'order_update' | 'new_follower' | 'post_like' | 'post_comment' | 'payment' | 'new_message' | 'new_post'
   title: string
   body: string | null
   data: Record<string, string>

@@ -38,6 +38,7 @@ export default function AdminFeedPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [posts, setPosts] = useState<(Post & { author?: Profile })[]>([])
   const [adding, setAdding] = useState(false)
+  const [editorialTitle, setEditorialTitle] = useState('')
   const [saving, setSaving] = useState(false)
   const [images, setImages] = useState<string[]>([])
   const [caption, setCaption] = useState('')
@@ -77,7 +78,7 @@ export default function AdminFeedPage() {
     setPosts(data || [])
   }
 
-  const reset = () => { setAdding(false); setImages([]); setCaption(''); setContentTag('') }
+  const reset = () => { setAdding(false); setImages([]); setCaption(''); setContentTag(''); setEditorialTitle('') }
 
   const savePost = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,9 +90,11 @@ export default function AdminFeedPage() {
     const { error } = await supabase.from('posts').insert({
       user_id: userId,
       creative_id: null,
+      title: editorialTitle.trim() || null,
       caption: fullCaption,
       image_urls: images,
       service_type: null,
+      post_type: 'editorial',
     })
     if (error) { toast.error(error.message); setSaving(false); return }
     toast.success('Post published to feed!')
@@ -236,6 +239,15 @@ export default function AdminFeedPage() {
                 className="p-1.5 rounded-lg hover:bg-white/[0.06] text-zinc-600 transition-colors">
                 <X size={16} />
               </button>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1.5">Title <span className="text-zinc-600 normal-case font-normal">(optional)</span></label>
+              <input
+                value={editorialTitle}
+                onChange={e => setEditorialTitle(e.target.value)}
+                placeholder="e.g. 5 Ankara styles trending this season"
+                className="w-full border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">Photos</label>

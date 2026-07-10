@@ -252,9 +252,9 @@ function DemoInspoCard({ post, idx }: { post: DemoInspo; idx: number }) {
 
 // ── Real PostCard ─────────────────────────────────────────────────────────────
 function PostCard({
-  post, userId, onLike, onFollow, following, idx,
+  post, userId, userName, onLike, onFollow, following, idx,
 }: {
-  post: Post; userId: string | null
+  post: Post; userId: string | null; userName: string
   onLike: (id: string, liked: boolean) => void
   onFollow: (uid: string, isFollowing: boolean) => void
   following: Set<string>
@@ -290,6 +290,16 @@ function PostCard({
     if (!commentText.trim()) return
     setPosting(true)
     await supabase.from('post_comments').insert({ post_id: post.id, user_id: userId, content: commentText.trim() })
+    // Notify post owner (skip if self-comment)
+    if (post.user_id && post.user_id !== userId) {
+      supabase.from('notifications').insert({
+        user_id: post.user_id,
+        type: 'post_comment',
+        title: `${userName || 'Someone'} commented on your post`,
+        body: commentText.trim().slice(0, 100),
+        data: { post_id: post.id },
+      }).then(() => null)
+    }
     setCommentText(''); setPosting(false); loadComments()
   }
 
@@ -562,6 +572,7 @@ export default function FeedPage() {
   const router = useRouter()
   const [posts, setPosts] = useState<Post[]>([])
   const [userId, setUserId] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string>('')
   const [isCreative, setIsCreative] = useState(false)
   const [following, setFollowing] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
@@ -574,12 +585,14 @@ export default function FeedPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       setUserId(user.id)
-      const [followsRes, creativeRes] = await Promise.all([
+      const [followsRes, creativeRes, profileRes] = await Promise.all([
         supabase.from('follows').select('following_id').eq('follower_id', user.id),
         supabase.from('tailor_profiles').select('id').eq('user_id', user.id).maybeSingle(),
+        supabase.from('profiles').select('full_name').eq('id', user.id).single(),
       ])
       setFollowing(new Set((followsRes.data || []).map((f: any) => f.following_id)))
       setIsCreative(!!creativeRes.data)
+      setUserName(profileRes.data?.full_name || '')
     }
     const { data: postsData } = await supabase
       .from('posts')
@@ -587,9 +600,20 @@ export default function FeedPage() {
       .order('created_at', { ascending: false })
       .limit(40)
     if (postsData && user) {
-      const { data: liked } = await supabase.from('post_likes').select('post_id').eq('user_id', user.id)
+      const [{ data: liked }, { data: follows }] = await Promise.all([
+        supabase.from('post_likes').select('post_id').eq('user_id', user.id),
+        supabase.from('follows').select('following_id').eq('follower_id', user.id),
+      ])
       const likedSet = new Set((liked || []).map((l: any) => l.post_id))
-      setPosts(postsData.map((p: any) => ({ ...p, liked_by_me: likedSet.has(p.id) })))
+      const followedSet = new Set((follows || []).map((f: any) => f.following_id))
+      const withMeta = postsData.map((p: any) => ({ ...p, liked_by_me: likedSet.has(p.id) }))
+      // Followed creatives' posts surface first
+      withMeta.sort((a: any, b: any) => {
+        const aFollowed = followedSet.has(a.creative?.user_id) ? 1 : 0
+        const bFollowed = followedSet.has(b.creative?.user_id) ? 1 : 0
+        return bFollowed - aFollowed
+      })
+      setPosts(withMeta)
     } else {
       setPosts(postsData || [])
     }
@@ -613,6 +637,14 @@ export default function FeedPage() {
     } else {
       await supabase.from('follows').insert({ follower_id: userId, following_id: creativeUserId })
       setFollowing(prev => new Set([...prev, creativeUserId]))
+      // Notify the creative
+      supabase.from('notifications').insert({
+        user_id: creativeUserId,
+        type: 'new_follower',
+        title: `${userName || 'Someone'} started following you`,
+        body: 'They\'ll see your posts in their feed',
+        data: {},
+      }).then(() => null)
       toast.success('Following!')
     }
   }
@@ -698,7 +730,7 @@ export default function FeedPage() {
           <div className="space-y-5">
             {/* Real posts */}
             {filteredPosts.map((post, i) => (
-              <PostCard key={post.id} post={post} userId={userId} onLike={handleLike} onFollow={handleFollow} following={following} idx={i} />
+              <PostCard key={post.id} post={post} userId={userId} userName={userName} onLike={handleLike} onFollow={handleFollow} following={following} idx={i} />
             ))}
 
             {/* Demo showroom when empty */}

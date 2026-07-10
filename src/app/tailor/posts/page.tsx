@@ -155,6 +155,7 @@ export default function CreativePostsPage() {
   const [posts, setPosts] = useState<Post[]>([])
   const [userId, setUserId] = useState<string | null>(null)
   const [creativeId, setCreativeId] = useState<string | null>(null)
+  const [businessName, setBusinessName] = useState<string>('')
   const [adding, setAdding] = useState(false)
   const [saving, setSaving] = useState(false)
   const [polishing, setPolishing] = useState(false)
@@ -173,7 +174,8 @@ export default function CreativePostsPage() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       setUserId(user.id)
-      supabase.from('tailor_profiles').select('id').eq('user_id', user.id).single().then(({ data }) => {
+      supabase.from('tailor_profiles').select('id, business_name').eq('user_id', user.id).single().then(({ data }) => {
+        if (data?.business_name) setBusinessName(data.business_name)
         if (data) { setCreativeId(data.id); loadPosts(data.id) }
       })
     })
@@ -225,7 +227,7 @@ export default function CreativePostsPage() {
     const parsedPrice = priceEnabled && price ? parseFloat(price.replace(/,/g, '')) : null
     if (priceEnabled && price && isNaN(parsedPrice!)) { toast.error('Enter a valid price'); return }
     setSaving(true)
-    const { error } = await supabase.from('posts').insert({
+    const { data: inserted, error } = await supabase.from('posts').insert({
       user_id: userId,
       creative_id: creativeId,
       caption: caption.trim() || null,
@@ -235,9 +237,15 @@ export default function CreativePostsPage() {
       post_type: 'product',
       price: parsedPrice,
       is_available: isAvailable,
-    })
+    }).select('id').single()
     if (error) { toast.error(error.message); setSaving(false); return }
     toast.success('Product posted! 🎉')
+    // Notify followers in background
+    fetch('/api/posts/notify-followers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId: inserted?.id, creativeUserId: userId, postTitle: title.trim() || null, businessName }),
+    }).catch(() => null)
     resetForm()
     loadPosts(creativeId)
   }

@@ -15,6 +15,7 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string }> = {
   post_comment: { icon: <MessageSquare size={16} />, color: 'bg-blue-100 text-blue-700' },
   new_follower: { icon: <UserPlus size={16} />, color: 'bg-amber-100 text-amber-400' },
   new_message:  { icon: <MessageSquare size={16} />, color: 'bg-violet-100 text-violet-700' },
+  new_post:     { icon: <CheckCircle size={16} />, color: 'bg-fuchsia-100 text-fuchsia-600' },
 }
 
 export default function NotificationsPage() {
@@ -54,7 +55,8 @@ export default function NotificationsPage() {
 
   const getLink = (n: Notification) => {
     if (n.data?.order_id) return `/orders/${n.data.order_id}`
-    if (n.data?.post_id) return `/feed`
+    if (n.data?.post_id) return `/p/${n.data.post_id}`
+    if (n.type === 'new_follower') return `/feed`
     if (n.type === 'new_message' && n.data?.room_tailor_id) return `/chat?tailor=${n.data.room_tailor_id}`
     if (n.type === 'new_message') return `/chat`
     return null
