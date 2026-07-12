@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { Users, Scissors, Package, TrendingUp, Clock, Star, Image as ImageIcon } from 'lucide-react'
+import { RecentOrdersClient } from './recent-orders-client'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,8 +33,9 @@ export default async function AdminDashboard() {
     supabase.from('orders').select('*', { count: 'exact', head: true }),
     supabase.from('tailor_profiles').select('*', { count: 'exact', head: true }).eq('is_verified', false).eq('is_active', true),
     supabase.from('ratings').select('*', { count: 'exact', head: true }),
-    supabase.from('orders').select('*, customer:profiles(full_name), tailor:tailor_profiles(business_name)')
-      .order('created_at', { ascending: false }).limit(8),
+    supabase.from('orders').select('*, customer:profiles(full_name), tailor:tailor_profiles(business_name, user_id)')
+      .in('status', ['pending', 'completed'])
+      .order('created_at', { ascending: false }).limit(10),
     supabase.from('payouts').select('commission_amount').eq('status', 'paid'),
   ])
 
@@ -118,20 +120,7 @@ export default async function AdminDashboard() {
               <h2 className="font-bold text-zinc-900">Recent Orders</h2>
               <Link href="/admin/orders" className="text-sm text-violet-600 hover:underline">View all</Link>
             </div>
-            <div className="divide-y divide-zinc-100">
-              {(recentOrders || []).map(order => (
-                <Link key={order.id} href={`/orders/${order.id}`} className="flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors">
-                  <div>
-                    <p className="text-sm font-medium text-zinc-900">{order.title}</p>
-                    <p className="text-xs text-zinc-500">{order.customer?.full_name} → {order.tailor?.business_name}</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {order.agreed_price && <span className="text-sm font-medium text-zinc-900">{formatCurrency(order.agreed_price)}</span>}
-                    <span className="text-xs text-zinc-500">{formatDate(order.created_at)}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <RecentOrdersClient orders={recentOrders || []} />
           </div>
 
           {/* Quick actions */}
