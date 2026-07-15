@@ -10,7 +10,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 
   return (
     <html>
-      <body className="min-h-screen bg-[#09090B] text-white flex items-center justify-center p-4 font-sans">
+      <body className="min-h-screen bg-[#140F1E] text-white flex items-center justify-center p-4 font-sans">
         <div className="max-w-sm w-full text-center">
           <div className="w-20 h-20 bg-red-500/20 border border-red-500/30 rounded-3xl flex items-center justify-center mx-auto mb-5">
             <svg width="36" height="36" viewBox="0 0 36 36" fill="none">

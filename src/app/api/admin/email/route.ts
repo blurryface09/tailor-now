@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     replyTo: ADMIN_EMAIL,
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-        <div style="background:#7C3AED;padding:20px 24px;border-radius:12px 12px 0 0">
+        <div style="background:#4B3B66;padding:20px 24px;border-radius:12px 12px 0 0">
           <h1 style="color:white;margin:0;font-size:20px">TailorNow</h1>
         </div>
         <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">

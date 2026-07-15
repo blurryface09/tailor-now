@@ -77,7 +77,7 @@ export function AdminUsersClient({ users: initial, orderCounts }: { users: Profi
       <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-[#09090B] border-b border-white/[0.08]">
+            <thead className="bg-[#140F1E] border-b border-white/[0.08]">
               <tr>
                 {['User', 'Contact', 'Location', 'Role', 'Orders', 'Joined', 'Actions'].map(h => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider">{h}</th>

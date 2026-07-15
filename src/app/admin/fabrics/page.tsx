@@ -105,7 +105,7 @@ export default function AdminFabricsPage() {
   const displayed = filterType ? fabrics.filter(f => f.fabric_type === filterType) : fabrics
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 left-1/3 w-96 h-96 bg-amber-600/6 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-violet-600/5 rounded-full blur-3xl" />

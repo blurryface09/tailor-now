@@ -11,7 +11,7 @@ function broadcastHtml(name: string, body: string): string {
     .replace(/\n/g, '<br>')
   return `
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:16px">
-  <div style="background:linear-gradient(135deg,#7C3AED 0%,#6D28D9 100%);padding:24px 28px;border-radius:16px 16px 0 0;text-align:center">
+  <div style="background:linear-gradient(135deg,#4B3B66 0%,#241C36 100%);padding:24px 28px;border-radius:16px 16px 0 0;text-align:center">
     <h1 style="color:white;margin:0;font-size:26px;font-weight:800">✂️ TailorNow</h1>
     <p style="color:#DDD6FE;margin:6px 0 0;font-size:13px">Nigeria's Fashion Marketplace</p>
   </div>
@@ -21,7 +21,7 @@ function broadcastHtml(name: string, body: string): string {
     <hr style="border:none;border-top:1px solid #f3f4f6;margin:28px 0 16px">
     <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center">
       TailorNow — Nigeria's Fashion Marketplace &nbsp;·&nbsp;
-      <a href="${SITE_URL}" style="color:#7C3AED;text-decoration:none">tailornow.shop</a>
+      <a href="${SITE_URL}" style="color:#C68A52;text-decoration:none">tailornow.shop</a>
     </p>
     <p style="margin:8px 0 0;color:#d1d5db;font-size:11px;text-align:center">
       You're receiving this because you have an account on TailorNow.

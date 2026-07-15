@@ -1,17 +1,61 @@
 @import "tailwindcss";
 
+/* ── TailorNow Brand Palette ────────────────────────────── */
+@theme {
+  /* Remap violet → brand purples */
+  --color-violet-50:  #f0edf5;
+  --color-violet-100: #dad4e2;
+  --color-violet-200: #b5a9c6;
+  --color-violet-300: #9a8fa4;
+  --color-violet-400: #6d5e87;
+  --color-violet-500: #4b3b66;
+  --color-violet-600: #3e3157;
+  --color-violet-700: #362a4c;
+  --color-violet-800: #2a1f3a;
+  --color-violet-900: #241c36;
+  --color-violet-950: #140f1e;
+
+  /* Remap amber → brand warm tans */
+  --color-amber-50:  #faf6f0;
+  --color-amber-100: #f6e8d8;
+  --color-amber-200: #ecd4b8;
+  --color-amber-300: #deb995;
+  --color-amber-400: #c68a52;
+  --color-amber-500: #b07a42;
+  --color-amber-600: #885f40;
+  --color-amber-700: #583e32;
+  --color-amber-800: #3d2a22;
+  --color-amber-900: #2a1c17;
+  --color-amber-950: #1a100d;
+
+  /* Remap fuchsia/pink → brand mauve */
+  --color-fuchsia-50:  #faf0f4;
+  --color-fuchsia-100: #f1e0e3;
+  --color-fuchsia-200: #e4c0d1;
+  --color-fuchsia-300: #d9a6c2;
+  --color-fuchsia-400: #c080a8;
+  --color-fuchsia-500: #8c5a78;
+  --color-fuchsia-600: #76497f;  /* was #563850 */
+  --color-fuchsia-700: #563850;
+  --color-fuchsia-800: #3d2538;
+  --color-fuchsia-900: #2a1827;
+  --color-fuchsia-950: #1a0f19;
+}
+
 :root {
-  --brand: #7C3AED;
-  --brand-dark: #5B21B6;
-  --brand-light: #EDE9FE;
-  --gold: #D97706;
-  --gold-light: #FEF3C7;
+  --brand: #4B3B66;
+  --brand-dark: #362A4C;
+  --brand-light: #DAD4E2;
+  --gold: #C68A52;
+  --gold-light: #F6E8D8;
+  /* Brand gradient: warm tan → mauve → deep purple */
+  --brand-gradient: linear-gradient(135deg, #C68A52, #8C5A78, #241C36);
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f9fafb;
-  color: #18181b;
+  background: #FAF6F0;
+  color: #140F1E;
 }
 
 /* ── Admin appearance toggle ─────────────────────────────── */
@@ -20,7 +64,7 @@ html[data-admin-route="true"][data-admin-theme="light"] body {
   color: #18181b;
 }
 
-html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-[#09090B]"],
+html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-[#140F1E]"],
 html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-zinc-950"],
 html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-zinc-900"],
 html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-black"],
@@ -58,13 +102,13 @@ html[data-admin-route="true"][data-admin-theme="light"] [class*="bg-gradient"].t
 }
 
 html[data-admin-route="true"][data-admin-theme="dark"] body {
-  background: #09090b;
-  color: #ffffff;
+  background: #140F1E;
+  color: #FAF6F0;
 }
 
 html[data-admin-route="true"][data-admin-theme="dark"] .bg-zinc-50,
 html[data-admin-route="true"][data-admin-theme="dark"] [class*="bg-zinc-50"] {
-  background-color: #09090b !important;
+  background-color: #140F1E !important;
 }
 
 html[data-admin-route="true"][data-admin-theme="dark"] .bg-white {
@@ -97,8 +141,8 @@ html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-400 {
   --surface-2: rgba(255,255,255,0.08);
   --border: rgba(255,255,255,0.08);
   --border-2: rgba(255,255,255,0.14);
-  --glow-violet: rgba(109,40,217,0.25);
-  --glow-amber: rgba(217,119,6,0.2);
+  --glow-violet: rgba(75,59,102,0.35);
+  --glow-amber: rgba(198,138,82,0.25);
 }
 
 /* ── Glass card ──────────────────────────────────────────── */
@@ -205,7 +249,7 @@ html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-400 {
 }
 .card-lift:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 32px -8px rgba(124, 58, 237, 0.18);
+  box-shadow: 0 12px 32px -8px rgba(75, 59, 102, 0.22);
 }
 
 /* ── Spin loader ─────────────────────────────────────────── */
@@ -244,7 +288,7 @@ html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-400 {
   100% { background-position: 0% 50%; }
 }
 .gold-shimmer {
-  background: linear-gradient(135deg, #F59E0B, #D97706, #FBBF24, #D97706);
+  background: linear-gradient(135deg, #C68A52, #885F40, #DEB995, #885F40);
   background-size: 200% 200%;
   animation: gold-shimmer 3s ease infinite;
 }
@@ -261,7 +305,7 @@ html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-400 {
 
 /* ── Gradient text ───────────────────────────────────────── */
 .gradient-text {
-  background: linear-gradient(135deg, #7C3AED, #D97706);
+  background: linear-gradient(135deg, #C68A52, #8C5A78, #4B3B66);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -269,17 +313,17 @@ html[data-admin-route="true"][data-admin-theme="dark"] .text-zinc-400 {
 
 /* ── Glow button ─────────────────────────────────────────── */
 .btn-glow {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 0 20px rgba(75, 59, 102, 0.45);
   transition: box-shadow 0.3s ease;
 }
 .btn-glow:hover {
-  box-shadow: 0 0 32px rgba(124, 58, 237, 0.6);
+  box-shadow: 0 0 32px rgba(75, 59, 102, 0.65);
 }
 
 /* ── Input focus glow ───────────────────────────────────── */
 input:focus, textarea:focus, select:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 0 0 3px rgba(75, 59, 102, 0.3);
 }
 
 /* ── Smooth page transitions ─────────────────────────────── */
@@ -296,7 +340,7 @@ input:focus, textarea:focus, select:focus {
   left: 0;
   width: 0;
   height: 2px;
-  background: #7C3AED;
+  background: #C68A52;
   transition: width 0.3s ease;
   border-radius: 1px;
 }
@@ -323,7 +367,7 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Soft focus ring for interactive elements ────────────── */
 button:focus-visible, a:focus-visible {
-  outline: 2px solid #7C3AED;
+  outline: 2px solid #4B3B66;
   outline-offset: 3px;
   border-radius: 8px;
 }

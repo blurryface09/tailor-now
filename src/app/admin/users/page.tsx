@@ -27,7 +27,7 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <AdminUsersClient users={users || []} orderCounts={countMap} />
     </div>

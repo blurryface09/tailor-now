@@ -86,7 +86,7 @@ export function LiveMap({ orderId }: LiveMapProps) {
         )}
       </div>
       {offline ? (
-        <div className="h-48 flex items-center justify-center bg-[#09090B] text-sm text-zinc-600">
+        <div className="h-48 flex items-center justify-center bg-[#140F1E] text-sm text-zinc-600">
           Waiting for creative to start delivery...
         </div>
       ) : (

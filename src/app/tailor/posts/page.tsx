@@ -258,7 +258,7 @@ export default function CreativePostsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/8 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-amber-600/5 rounded-full blur-3xl" />

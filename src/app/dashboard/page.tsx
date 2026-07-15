@@ -56,7 +56,7 @@ export default async function TailorDashboard() {
   const levelPct = nextLevel !== null ? Math.min(100, Math.round((score / nextLevel) * 100)) : 100
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 py-8 page-enter">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

@@ -36,7 +36,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#140F1E] flex items-center justify-center px-4">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-72 h-72 bg-fuchsia-600/8 rounded-full blur-3xl" />

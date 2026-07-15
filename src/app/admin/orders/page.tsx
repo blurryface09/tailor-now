@@ -24,7 +24,7 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   const { data: orders } = await query
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <AdminOrdersClient orders={orders || []} initialStatus={status || ''} />
     </div>

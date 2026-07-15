@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="TailorNow" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#7C3AED" />
+        <meta name="theme-color" content="#241C36" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           position="top-center"
           toastOptions={{
             style: { borderRadius: '12px', fontFamily: 'Inter, sans-serif' },
-            success: { iconTheme: { primary: '#7C3AED', secondary: '#fff' } },
+            success: { iconTheme: { primary: '#C68A52', secondary: '#fff' } },
           }}
         />
       </body>

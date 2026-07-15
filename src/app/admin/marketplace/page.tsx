@@ -74,14 +74,14 @@ export default function MarketplacePage() {
   const colorCfg = COLORS.find(c => c.val === settings.announcement_color) || COLORS[0]
 
   if (loading) return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="flex justify-center py-24"><div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" /></div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
         <div className="flex items-center gap-3 mb-2">

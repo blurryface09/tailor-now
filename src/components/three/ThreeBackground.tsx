@@ -26,7 +26,7 @@ function WavingCloth() {
   return (
     <mesh ref={mesh} geometry={geo} position={[0, 0, -5]}>
       <meshStandardMaterial
-        color="#5B21B6" emissive="#4C1D95" emissiveIntensity={0.4}
+        color="#4B3B66" emissive="#362A4C" emissiveIntensity={0.4}
         metalness={0.5} roughness={0.5}
         transparent opacity={0.18} side={THREE.DoubleSide}
       />
@@ -220,7 +220,7 @@ function SparkleField({ count = 200, variant }: { count?: number; variant: 'full
     const positions = new Float32Array(count * 3)
     const colors    = new Float32Array(count * 3)
     const violet = new THREE.Color('#8B5CF6')
-    const amber  = new THREE.Color('#F59E0B')
+    const amber  = new THREE.Color('#C68A52')
     const white  = new THREE.Color('#ffffff')
     for (let i = 0; i < count; i++) {
       positions[i*3]   = (Math.random()-0.5)*28
@@ -267,18 +267,18 @@ function Scene({ variant }: { variant: 'full' | 'subtle' | 'light' }) {
 
   const needles = [
     { pos: [-6.5, 2.5,-3] as [number,number,number], rot: [0.5,0.2,0.3] as [number,number,number], scale:1.0*s, threadColor:'#8B5CF6', speed:0.50, phase:0.0 },
-    { pos: [ 7.0,-1.5,-4] as [number,number,number], rot: [1.0,0.5,0.1] as [number,number,number], scale:0.75*s, threadColor:'#F59E0B', speed:0.35, phase:1.2 },
+    { pos: [ 7.0,-1.5,-4] as [number,number,number], rot: [1.0,0.5,0.1] as [number,number,number], scale:0.75*s, threadColor:'#C68A52', speed:0.35, phase:1.2 },
     { pos: [-2.5,-4.5,-2] as [number,number,number], rot: [0.2,0.8,0.5] as [number,number,number], scale:0.65*s, threadColor:'#F472B6', speed:0.60, phase:2.4 },
     { pos: [ 4.5, 4.5,-5] as [number,number,number], rot: [0.7,0.3,0.2] as [number,number,number], scale:0.90*s, threadColor:'#8B5CF6', speed:0.40, phase:0.8 },
-    { pos: [ 1.0,-5.5,-6] as [number,number,number], rot: [0.3,0.6,0.7] as [number,number,number], scale:1.10*s, threadColor:'#F59E0B', speed:0.28, phase:3.1 },
+    { pos: [ 1.0,-5.5,-6] as [number,number,number], rot: [0.3,0.6,0.7] as [number,number,number], scale:1.10*s, threadColor:'#C68A52', speed:0.28, phase:3.1 },
   ]
 
   const spools = [
-    { pos: [ 3.5, 1.5,-1.5] as [number,number,number], rot: [0,0.5,0] as [number,number,number], scale:0.85*s, threadColor:'#F59E0B', speed:0.70, phase:0.5 },
+    { pos: [ 3.5, 1.5,-1.5] as [number,number,number], rot: [0,0.5,0] as [number,number,number], scale:0.85*s, threadColor:'#C68A52', speed:0.70, phase:0.5 },
     { pos: [-7.0,-2.0,-4]   as [number,number,number], rot: [0.3,0.2,0] as [number,number,number], scale:0.65*s, threadColor:'#8B5CF6', speed:0.55, phase:1.8 },
     { pos: [ 1.0, 5.0,-6]   as [number,number,number], rot: [0.2,0.7,0] as [number,number,number], scale:0.90*s, threadColor:'#F472B6', speed:0.45, phase:2.7 },
-    { pos: [-2.5, 0.5,-1]   as [number,number,number], rot: [0.4,0.3,0] as [number,number,number], scale:0.55*s, threadColor:'#F59E0B', speed:0.80, phase:0.2 },
-    { pos: [ 8.0,-3.5,-5]   as [number,number,number], rot: [0.1,0.8,0] as [number,number,number], scale:0.70*s, threadColor:'#7C3AED', speed:0.50, phase:1.4 },
+    { pos: [-2.5, 0.5,-1]   as [number,number,number], rot: [0.4,0.3,0] as [number,number,number], scale:0.55*s, threadColor:'#C68A52', speed:0.80, phase:0.2 },
+    { pos: [ 8.0,-3.5,-5]   as [number,number,number], rot: [0.1,0.8,0] as [number,number,number], scale:0.70*s, threadColor:'#4B3B66', speed:0.50, phase:1.4 },
   ]
 
   const scissorsList = [
@@ -289,8 +289,8 @@ function Scene({ variant }: { variant: 'full' | 'subtle' | 'light' }) {
   ]
 
   const buttons = [
-    { pos: [-5.5, 5.0,-7] as [number,number,number], rot: [0.2,0.7,0.1] as [number,number,number], scale:0.90*s, color:'#7C3AED', speed:0.38, phase:3.5 },
-    { pos: [ 2.0,-2.5,-2] as [number,number,number], rot: [0.6,0.4,0.3] as [number,number,number], scale:0.55*s, color:'#F59E0B', speed:0.62, phase:0.9 },
+    { pos: [-5.5, 5.0,-7] as [number,number,number], rot: [0.2,0.7,0.1] as [number,number,number], scale:0.90*s, color:'#4B3B66', speed:0.38, phase:3.5 },
+    { pos: [ 2.0,-2.5,-2] as [number,number,number], rot: [0.6,0.4,0.3] as [number,number,number], scale:0.55*s, color:'#C68A52', speed:0.62, phase:0.9 },
     { pos: [-3.5,-1.5,-3] as [number,number,number], rot: [0.8,0.2,0.5] as [number,number,number], scale:0.70*s, color:'#EC4899', speed:0.44, phase:2.0 },
     { pos: [ 5.5, 3.5,-6] as [number,number,number], rot: [0.3,0.9,0.2] as [number,number,number], scale:0.80*s, color:'#8B5CF6', speed:0.52, phase:1.5 },
   ]
@@ -299,10 +299,10 @@ function Scene({ variant }: { variant: 'full' | 'subtle' | 'light' }) {
     <>
       <ambientLight intensity={variant==='light' ? 0.65 : 0.5} />
       <directionalLight position={[5,5,5]}   intensity={variant==='light' ? 1.4 : 2.0} color="#8B5CF6" />
-      <directionalLight position={[-5,-3,3]} intensity={variant==='light' ? 1.0 : 1.5} color="#F59E0B" />
+      <directionalLight position={[-5,-3,3]} intensity={variant==='light' ? 1.0 : 1.5} color="#C68A52" />
       <pointLight       position={[0,0,4]}   intensity={1.2} color="#ffffff" />
-      <pointLight       position={[-4,3,0]}  intensity={variant==='light' ? 1.2 : 2.0} color="#7C3AED" />
-      <pointLight       position={[4,-2,0]}  intensity={variant==='light' ? 1.2 : 2.0} color="#F59E0B" />
+      <pointLight       position={[-4,3,0]}  intensity={variant==='light' ? 1.2 : 2.0} color="#4B3B66" />
+      <pointLight       position={[4,-2,0]}  intensity={variant==='light' ? 1.2 : 2.0} color="#C68A52" />
 
       <CameraRig strength={variant==='subtle' ? 1.0 : variant==='light' ? 1.2 : 1.8} />
       <SparkleField count={variant==='light' ? 120 : variant==='subtle' ? 140 : 240} variant={variant} />

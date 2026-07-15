@@ -96,14 +96,14 @@ export default function AdminDisputesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#140F1E] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="max-w-5xl mx-auto px-4 py-8 page-enter">
         <div className="flex items-start justify-between mb-6">
@@ -224,7 +224,7 @@ export default function AdminDisputesPage() {
                     )}
 
                     {dispute.admin_notes && (
-                      <div className="bg-[#09090B] rounded-xl p-3">
+                      <div className="bg-[#140F1E] rounded-xl p-3">
                         <p className="text-xs font-semibold text-zinc-500 mb-0.5">Admin notes</p>
                         <p className="text-sm text-zinc-300">{dispute.admin_notes}</p>
                       </div>

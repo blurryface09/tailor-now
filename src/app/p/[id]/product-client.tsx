@@ -97,13 +97,13 @@ export function ProductClient() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
+    <div className="min-h-screen bg-[#140F1E] flex items-center justify-center">
       <div className="w-10 h-10 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
     </div>
   )
 
   if (!post) return (
-    <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center gap-4">
+    <div className="min-h-screen bg-[#140F1E] flex flex-col items-center justify-center gap-4">
       <div className="text-5xl">🔍</div>
       <p className="text-zinc-400">Product not found</p>
       <Link href="/feed" className="text-violet-400 text-sm hover:text-violet-300">← Back to feed</Link>
@@ -115,7 +115,7 @@ export function ProductClient() {
   const isAdminPost = !post.creative_id
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-white">
+    <div className="min-h-screen bg-[#140F1E] text-white">
       {/* Ambient glows */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-violet-600/8 rounded-full blur-3xl" />
@@ -123,7 +123,7 @@ export function ProductClient() {
       </div>
 
       {/* Top bar */}
-      <div className="sticky top-0 z-40 bg-[#09090B]/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3 flex items-center justify-between">
+      <div className="sticky top-0 z-40 bg-[#140F1E]/80 backdrop-blur-xl border-b border-white/[0.06] px-4 py-3 flex items-center justify-between">
         <button onClick={() => router.back()}
           className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-medium">
           <ArrowLeft size={18} /> Back

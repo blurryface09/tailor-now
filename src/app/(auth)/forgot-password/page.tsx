@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#140F1E] flex items-center justify-center px-4">
       <div className="w-full max-w-md page-enter">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex mb-6 justify-center">

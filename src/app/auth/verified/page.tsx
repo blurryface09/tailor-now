@@ -38,7 +38,7 @@ function VerifiedContent() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#09090B] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#140F1E] flex items-center justify-center px-4">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
       </div>
@@ -87,7 +87,7 @@ function VerifiedContent() {
 export default function VerifiedPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#140F1E] flex items-center justify-center">
         <div className="w-8 h-8 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
       </div>
     }>

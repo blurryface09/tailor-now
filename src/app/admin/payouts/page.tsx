@@ -91,14 +91,14 @@ export default function AdminPayoutsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#09090B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#140F1E] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 py-8 page-enter">
@@ -160,7 +160,7 @@ export default function AdminPayoutsPage() {
         <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/[0.08] bg-[#09090B]/50">
+              <tr className="border-b border-white/[0.08] bg-[#140F1E]/50">
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Creative</th>
                 <th className="text-left px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Order</th>
                 <th className="text-right px-5 py-3.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">Gross</th>

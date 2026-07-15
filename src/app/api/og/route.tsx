@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
           height: '630px',
           display: 'flex',
           flexDirection: 'column',
-          background: 'linear-gradient(135deg, #0a0a0f 0%, #13082a 50%, #0a0a0f 100%)',
+          background: 'linear-gradient(135deg, #140F1E 0%, #241C36 50%, #140F1E 100%)',
           fontFamily: 'sans-serif',
           position: 'relative',
           overflow: 'hidden',
@@ -27,13 +27,13 @@ export async function GET(req: NextRequest) {
         <div style={{
           position: 'absolute', top: '-120px', left: '-80px',
           width: '500px', height: '500px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(198,138,82,0.3) 0%, transparent 70%)',
           display: 'flex',
         }} />
         <div style={{
           position: 'absolute', bottom: '-100px', right: '-60px',
           width: '400px', height: '400px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(109,40,217,0.25) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(140,90,120,0.3) 0%, transparent 70%)',
           display: 'flex',
         }} />
 
@@ -50,17 +50,17 @@ export async function GET(req: NextRequest) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{
               width: '52px', height: '52px', borderRadius: '14px',
-              background: 'linear-gradient(135deg, #7C3AED, #6D28D9)',
+              background: 'linear-gradient(135deg, #C68A52, #8C5A78, #4B3B66)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '28px',
             }}>
               ✂️
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ color: 'white', fontSize: '24px', fontWeight: 800, letterSpacing: '-0.5px' }}>
+              <span style={{ color: '#FAF6F0', fontSize: '24px', fontWeight: 800, letterSpacing: '-0.5px' }}>
                 TailorNow
               </span>
-              <span style={{ color: 'rgba(167,139,250,0.8)', fontSize: '13px', marginTop: '1px' }}>
+              <span style={{ color: 'rgba(222,185,149,0.8)', fontSize: '13px', marginTop: '1px' }}>
                 tailornow.shop
               </span>
             </div>
@@ -71,19 +71,19 @@ export async function GET(req: NextRequest) {
             {type !== 'default' && (
               <div style={{
                 display: 'flex',
-                background: 'rgba(124,58,237,0.2)',
-                border: '1px solid rgba(124,58,237,0.4)',
+                background: 'rgba(198,138,82,0.15)',
+                border: '1px solid rgba(198,138,82,0.4)',
                 borderRadius: '100px',
                 padding: '6px 18px',
                 width: 'fit-content',
               }}>
-                <span style={{ color: '#a78bfa', fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }}>
+                <span style={{ color: '#DEB995', fontSize: '14px', fontWeight: 600, letterSpacing: '0.5px' }}>
                   {type === 'tailor' ? '✦ VERIFIED CREATIVE' : '✦ FASHION PIECE'}
                 </span>
               </div>
             )}
             <div style={{
-              color: 'white',
+              color: '#FAF6F0',
               fontSize: title.length > 40 ? '52px' : '64px',
               fontWeight: 800,
               lineHeight: 1.1,
@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
               {title}
             </div>
             <div style={{
-              color: 'rgba(196,181,253,0.8)',
+              color: 'rgba(222,185,149,0.85)',
               fontSize: '24px',
               fontWeight: 400,
               maxWidth: '800px',
@@ -113,16 +113,16 @@ export async function GET(req: NextRequest) {
                 background: '#22c55e',
                 display: 'flex',
               }} />
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '16px' }}>
+              <span style={{ color: 'rgba(250,246,240,0.5)', fontSize: '16px' }}>
                 Nigeria&apos;s Fashion Marketplace
               </span>
             </div>
             <span style={{
-              color: 'rgba(124,58,237,0.9)',
+              color: '#C68A52',
               fontSize: '16px',
               fontWeight: 600,
-              background: 'rgba(124,58,237,0.1)',
-              border: '1px solid rgba(124,58,237,0.3)',
+              background: 'rgba(198,138,82,0.12)',
+              border: '1px solid rgba(198,138,82,0.35)',
               borderRadius: '8px',
               padding: '6px 16px',
               display: 'flex',

@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     subject: '✅ TailorNow email is working',
     html: `
 <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px">
-  <div style="background:#7C3AED;padding:20px 24px;border-radius:12px 12px 0 0">
+  <div style="background:#4B3B66;padding:20px 24px;border-radius:12px 12px 0 0">
     <h1 style="color:white;margin:0;font-size:20px">✂️ TailorNow</h1>
   </div>
   <div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px">
       Your Resend integration is configured correctly. Welcome emails, admin messages, and broadcasts will all be delivered.
     </p>
-    <div style="background:#f5f3ff;border-radius:8px;padding:14px;font-size:13px;color:#5B21B6">
+    <div style="background:#f0edf5;border-radius:8px;padding:14px;font-size:13px;color:#362A4C">
       <strong>Sending from:</strong> ${fromAddress}<br>
       <strong>Sent to:</strong> ${adminEmail}
     </div>

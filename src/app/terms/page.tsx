@@ -5,7 +5,7 @@ export const metadata = { title: 'Terms of Service — TailorNow' }
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="max-w-3xl mx-auto px-4 py-12">
         <div className="mb-8">

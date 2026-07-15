@@ -195,7 +195,7 @@ export default function EditCreativeProfile() {
   const doneCount = checks.filter(c => c.done).length
 
   if (loading) return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="flex justify-center py-24">
         <div className="animate-spin w-8 h-8 border-4 border-violet-700 border-t-transparent rounded-full" />
@@ -204,7 +204,7 @@ export default function EditCreativeProfile() {
   )
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="flex items-center gap-3 mb-6">
@@ -315,7 +315,7 @@ export default function EditCreativeProfile() {
                 Phone number * <span className="font-normal text-zinc-600 text-xs">(customers can call/WhatsApp you)</span>
               </label>
               <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1] flex-shrink-0">+234</span>
+                <span className="px-3 py-2.5 bg-[#140F1E] text-sm text-zinc-500 border-r border-white/[0.1] flex-shrink-0">+234</span>
                 <input
                   type="tel"
                   placeholder="08012345678"
@@ -348,7 +348,7 @@ export default function EditCreativeProfile() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">City *</label>
                 <select
-                  className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-[#09090B] disabled:text-zinc-600"
+                  className="w-full rounded-xl border border-white/[0.1] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 disabled:bg-[#140F1E] disabled:text-zinc-600"
                   value={form.city}
                   disabled={!form.state}
                   onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
@@ -385,7 +385,7 @@ export default function EditCreativeProfile() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Minimum (₦)</label>
                 <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                  <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
+                  <span className="px-3 py-2.5 bg-[#140F1E] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
                   <input type="number" min="0" placeholder="5000"
                     className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
                     value={form.min_price} onChange={e => setForm(f => ({ ...f, min_price: e.target.value }))} />
@@ -394,7 +394,7 @@ export default function EditCreativeProfile() {
               <div>
                 <label className="block text-sm font-medium text-zinc-300 mb-1.5">Maximum (₦)</label>
                 <div className="flex items-center border border-white/[0.1] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-violet-500">
-                  <span className="px-3 py-2.5 bg-[#09090B] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
+                  <span className="px-3 py-2.5 bg-[#140F1E] text-sm text-zinc-500 border-r border-white/[0.1]">₦</span>
                   <input type="number" min="0" placeholder="150000"
                     className="flex-1 px-3 py-2.5 text-sm focus:outline-none"
                     value={form.max_price} onChange={e => setForm(f => ({ ...f, max_price: e.target.value }))} />

@@ -28,8 +28,8 @@ export function StarRating({ value, onChange, readonly = false, size = 'md' }: S
         >
           <svg
             className={cn(sizes[size], 'transition-colors')}
-            fill={(hovered || value) >= star ? '#F59E0B' : 'none'}
-            stroke={(hovered || value) >= star ? '#F59E0B' : '#D1D5DB'}
+            fill={(hovered || value) >= star ? '#C68A52' : 'none'}
+            stroke={(hovered || value) >= star ? '#C68A52' : '#D1D5DB'}
             viewBox="0 0 24 24"
             strokeWidth="1.5"
           >

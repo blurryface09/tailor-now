@@ -170,7 +170,7 @@ export default function TailorOrdersPage() {
   const tabs = ['active', 'pending', 'completed']
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#140F1E]">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold text-white mb-6">Orders</h1>

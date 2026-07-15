@@ -7,7 +7,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tailornow.shop'
 function creativeEmailHtml(name: string) {
   return `
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:16px">
-  <div style="background:linear-gradient(135deg,#7C3AED 0%,#6D28D9 100%);padding:32px 28px;border-radius:16px 16px 0 0;text-align:center">
+  <div style="background:linear-gradient(135deg,#4B3B66 0%,#241C36 100%);padding:32px 28px;border-radius:16px 16px 0 0;text-align:center">
     <p style="color:#DDD6FE;margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase">Welcome to</p>
     <h1 style="color:white;margin:0;font-size:30px;font-weight:800;letter-spacing:-0.5px">✂️ TailorNow</h1>
     <p style="color:#DDD6FE;margin:8px 0 0;font-size:14px">Nigeria's Fashion Marketplace</p>
@@ -19,14 +19,14 @@ function creativeEmailHtml(name: string) {
       <strong>under review</strong> — once our team verifies it, customers will start finding you.
     </p>
     <div style="background:#f5f3ff;border:1px solid #ede9fe;border-radius:12px;padding:20px;margin:0 0 24px">
-      <p style="margin:0 0 12px;color:#5B21B6;font-size:14px;font-weight:700">What happens next</p>
+      <p style="margin:0 0 12px;color:#362A4C;font-size:14px;font-weight:700">What happens next</p>
       <p style="margin:0 0 8px;color:#374151;font-size:14px">✅ &nbsp;Admin reviews your profile (1–2 business days)</p>
       <p style="margin:0 0 8px;color:#374151;font-size:14px">✅ &nbsp;You get a verified badge visible to customers</p>
       <p style="margin:0;color:#374151;font-size:14px">✅ &nbsp;Customers can discover, message, and book you</p>
     </div>
     <div style="text-align:center;margin:0 0 28px">
       <a href="${SITE_URL}/dashboard"
-        style="display:inline-block;background:#7C3AED;color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:12px;text-decoration:none">
+        style="display:inline-block;background:#4B3B66;color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:12px;text-decoration:none">
         Go to Your Dashboard →
       </a>
     </div>
@@ -36,7 +36,7 @@ function creativeEmailHtml(name: string) {
     <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0">
     <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center">
       TailorNow — Nigeria's Fashion Marketplace &nbsp;·&nbsp;
-      <a href="${SITE_URL}" style="color:#7C3AED;text-decoration:none">tailornow.shop</a>
+      <a href="${SITE_URL}" style="color:#C68A52;text-decoration:none">tailornow.shop</a>
     </p>
   </div>
 </div>`
@@ -45,7 +45,7 @@ function creativeEmailHtml(name: string) {
 function customerEmailHtml(name: string) {
   return `
 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:16px">
-  <div style="background:linear-gradient(135deg,#7C3AED 0%,#6D28D9 100%);padding:32px 28px;border-radius:16px 16px 0 0;text-align:center">
+  <div style="background:linear-gradient(135deg,#4B3B66 0%,#241C36 100%);padding:32px 28px;border-radius:16px 16px 0 0;text-align:center">
     <p style="color:#DDD6FE;margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase">Welcome to</p>
     <h1 style="color:white;margin:0;font-size:30px;font-weight:800;letter-spacing:-0.5px">✂️ TailorNow</h1>
     <p style="color:#DDD6FE;margin:8px 0 0;font-size:14px">Nigeria's Fashion Marketplace</p>
@@ -57,7 +57,7 @@ function customerEmailHtml(name: string) {
       tailors, designers, bridal specialists, and more.
     </p>
     <div style="background:#f5f3ff;border:1px solid #ede9fe;border-radius:12px;padding:20px;margin:0 0 24px">
-      <p style="margin:0 0 12px;color:#5B21B6;font-size:14px;font-weight:700">What you can do</p>
+      <p style="margin:0 0 12px;color:#362A4C;font-size:14px;font-weight:700">What you can do</p>
       <p style="margin:0 0 8px;color:#374151;font-size:14px">👗 &nbsp;Browse verified creatives near you</p>
       <p style="margin:0 0 8px;color:#374151;font-size:14px">💬 &nbsp;Chat directly about your ideas</p>
       <p style="margin:0 0 8px;color:#374151;font-size:14px">📐 &nbsp;Share measurements for a perfect fit</p>
@@ -65,14 +65,14 @@ function customerEmailHtml(name: string) {
     </div>
     <div style="text-align:center;margin:0 0 28px">
       <a href="${SITE_URL}/browse"
-        style="display:inline-block;background:#7C3AED;color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:12px;text-decoration:none">
+        style="display:inline-block;background:#4B3B66;color:white;font-size:15px;font-weight:700;padding:14px 32px;border-radius:12px;text-decoration:none">
         Browse Creatives →
       </a>
     </div>
     <hr style="border:none;border-top:1px solid #f3f4f6;margin:24px 0">
     <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center">
       TailorNow — Nigeria's Fashion Marketplace &nbsp;·&nbsp;
-      <a href="${SITE_URL}" style="color:#7C3AED;text-decoration:none">tailornow.shop</a>
+      <a href="${SITE_URL}" style="color:#C68A52;text-decoration:none">tailornow.shop</a>
     </p>
   </div>
 </div>`

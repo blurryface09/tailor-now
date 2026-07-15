@@ -201,7 +201,7 @@ export default function LandingPage() {
               <span className="block text-zinc-900">Nigeria&apos;s</span>
               <span
                 className="block text-transparent bg-clip-text"
-                style={{ backgroundImage: 'linear-gradient(90deg, #F59E0B, #FBBF24, #F59E0B, #D97706)', backgroundSize: '200% 100%', animation: 'gold-shimmer 3s ease infinite' }}
+                style={{ backgroundImage: 'linear-gradient(90deg, #C68A52, #DEB995, #C68A52, #885F40)', backgroundSize: '200% 100%', animation: 'gold-shimmer 3s ease infinite' }}
               >
                 Fashion
               </span>

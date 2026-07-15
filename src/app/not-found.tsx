@@ -1,7 +1,7 @@
 import Link from 'next/link'
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#09090B] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#140F1E] flex flex-col items-center justify-center p-4">
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl" />
       </div>
@@ -15,7 +15,7 @@ export default function NotFound() {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-20 h-20 bg-violet-500/20 border border-violet-500/30 rounded-3xl flex items-center justify-center">
               <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                <path d="M7 29L29 7M7 7l22 22" stroke="#7C3AED" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M7 29L29 7M7 7l22 22" stroke="#4B3B66" strokeWidth="2.5" strokeLinecap="round"/>
               </svg>
             </div>
           </div>
