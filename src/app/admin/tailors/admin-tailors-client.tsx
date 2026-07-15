@@ -178,7 +178,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
           {/* Identity */}
           <div className="flex items-start gap-4">
             {tailor.profile?.avatar_url ? (
-              <img src={tailor.profile.avatar_url} alt={tailor.business_name}
+              <img src={tailor.profile.avatar_url} alt={tailor.business_name} loading="lazy"
                 className="w-16 h-16 rounded-2xl object-cover flex-shrink-0 border border-zinc-200" />
             ) : (
               <div className="w-16 h-16 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-400 font-bold text-2xl flex-shrink-0">
@@ -280,7 +280,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
           <div>
             <h4 className="text-xs font-bold text-zinc-600 uppercase tracking-wider mb-2">Face / ID Photo</h4>
             {tailor.face_photo_url ? (
-              <img src={tailor.face_photo_url} alt="Face verification"
+              <img src={tailor.face_photo_url} alt="Face verification" loading="lazy"
                 className="w-28 h-28 rounded-2xl object-cover border border-zinc-200 shadow-sm" />
             ) : (
               <div className="flex items-center gap-2 text-sm text-red-500 bg-red-500/10 rounded-xl px-3 py-2.5">
@@ -471,7 +471,7 @@ export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors
                 {/* Avatar */}
                 <div className="relative flex-shrink-0">
                   {tailor.profile?.avatar_url ? (
-                    <img src={tailor.profile.avatar_url} alt={tailor.business_name}
+                    <img src={tailor.profile.avatar_url} alt={tailor.business_name} loading="lazy"
                       className="h-11 w-11 rounded-xl object-cover sm:h-12 sm:w-12" />
                   ) : (
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-lg font-bold text-violet-400 sm:h-12 sm:w-12">

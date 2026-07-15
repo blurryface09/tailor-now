@@ -719,7 +719,7 @@ export default function TailorOnboarding() {
                 <div className="flex items-center gap-5">
                   <div className="relative flex-shrink-0">
                     {avatarUrl
-                      ? <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-zinc-200" />
+                      ? <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-zinc-200"  loading="lazy"/>
                       : <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
                           {form.business_name?.[0]?.toUpperCase() || '✂'}
                         </div>
@@ -806,7 +806,7 @@ export default function TailorOnboarding() {
                 {govIdUrl ? (
                   <div className="flex items-start gap-4">
                     <div className="relative w-36 h-24 rounded-xl overflow-hidden border-2 border-green-300 flex-shrink-0">
-                      <img src={govIdUrl} alt="Gov ID" className="w-full h-full object-cover" />
+                      <img src={govIdUrl} alt="Gov ID" className="w-full h-full object-cover"  loading="lazy"/>
                       <label className="absolute bottom-1 right-1 bg-black/60 text-white rounded-full p-1 cursor-pointer">
                         {uploading
                           ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -886,7 +886,7 @@ export default function TailorOnboarding() {
               <div className="flex items-start gap-4 mb-4">
                 {facePhotoUrl ? (
                   <div className="relative flex-shrink-0">
-                    <img src={facePhotoUrl} alt="Face" className="w-32 h-32 rounded-2xl object-cover border-2 border-green-300" />
+                    <img src={facePhotoUrl} alt="Face" className="w-32 h-32 rounded-2xl object-cover border-2 border-green-300"  loading="lazy"/>
                     <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-violet-600 border-2 border-white flex items-center justify-center cursor-pointer shadow-sm">
                       {uploading ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         : <Camera size={11} className="text-white" />}
@@ -1019,7 +1019,7 @@ export default function TailorOnboarding() {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {portfolioItems.map(item => (
                     <div key={item.id} className="relative aspect-square rounded-xl overflow-hidden group border border-zinc-200">
-                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
+                      <img src={item.image_url} alt={item.title} className="w-full h-full object-cover"  loading="lazy"/>
                       <button
                         onClick={() => {
                           supabase.from('portfolio_items').delete().eq('id', item.id)
@@ -1042,7 +1042,7 @@ export default function TailorOnboarding() {
                   {portfolioForm.image_url ? (
                     <div className="flex gap-3">
                       <div className="relative w-28 h-32 rounded-xl overflow-hidden border border-zinc-200 bg-white flex-shrink-0">
-                        <img src={portfolioForm.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={portfolioForm.image_url} alt="" className="w-full h-full object-cover"  loading="lazy"/>
                         <button type="button"
                           onClick={() => {
                             setPortfolioForm(f => ({ ...f, image_url: '' }))

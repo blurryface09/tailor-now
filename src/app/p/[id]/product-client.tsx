@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -140,10 +141,13 @@ export function ProductClient() {
 
         {/* Image carousel */}
         <div className="relative rounded-3xl overflow-hidden mb-6 shadow-2xl shadow-black/50" style={{ aspectRatio: '4/5', maxHeight: '75vh' }}>
-          <img
+          <Image
             src={post.image_urls[imgIdx]}
             alt={post.title || 'Product'}
-            className="w-full h-full object-cover"
+            fill
+            priority
+            sizes="(max-width:768px) 100vw, 672px"
+            className="object-cover"
             style={{ animation: 'fade-up 0.4s ease both' }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -192,7 +196,7 @@ export function ProductClient() {
               {post.image_urls.map((url, i) => (
                 <button key={i} onClick={() => setImgIdx(i)}
                   className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${i === imgIdx ? 'border-amber-400 scale-105' : 'border-white/20 opacity-70 hover:opacity-100'}`}>
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <Image src={url} alt="" width={56} height={56} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -351,9 +355,9 @@ export function ProductClient() {
                 {related.map(r => (
                   <Link key={r.id} href={`/p/${r.id}`}
                     className="group relative rounded-2xl overflow-hidden border border-white/[0.07] hover:border-violet-500/20 transition-all hover:shadow-lg hover:shadow-violet-500/10">
-                    <div className="aspect-square">
+                    <div className="aspect-square relative">
                       {r.image_urls[0] && (
-                        <img src={r.image_urls[0]} alt={r.title || ''} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <Image src={r.image_urls[0]} alt={r.title || ''} fill sizes="(max-width:768px) 50vw, 336px" className="object-cover transition-transform duration-500 group-hover:scale-105" />
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                     </div>

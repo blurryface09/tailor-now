@@ -1,5 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
+import Image from 'next/image'
 import { useState } from 'react'
 import nextDynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -119,7 +120,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 grid grid-cols-2 gap-1.5 p-1.5">
           {FASHION_COLLAGE.map((src, i) => (
             <div key={i} className="relative overflow-hidden rounded-xl">
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <Image src={src} alt="" fill sizes="(max-width:1024px) 0vw, 25vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
             </div>
           ))}

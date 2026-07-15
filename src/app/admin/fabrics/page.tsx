@@ -286,7 +286,7 @@ export default function AdminFabricsPage() {
                 {/* Image */}
                 <div className="aspect-[4/3] overflow-hidden relative">
                   {fabric.image_urls[0]
-                    ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"  loading="lazy"/>
                     : <div className="w-full h-full bg-white/[0.05] flex items-center justify-center text-3xl">🧵</div>
                   }
                   {/* Unavailable overlay */}

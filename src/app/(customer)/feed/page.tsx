@@ -1,5 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
+import Image from 'next/image'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
@@ -117,7 +118,7 @@ function DemoProductCard({ post, idx }: { post: DemoProduct; idx: number }) {
       style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}>
       {/* Image */}
       <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
-        <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        <Image src={post.image} alt={post.title} fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
         <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
 
@@ -208,7 +209,7 @@ function DemoInspoCard({ post, idx }: { post: DemoInspo; idx: number }) {
     <div className="bg-white border border-zinc-200 rounded-3xl overflow-hidden group hover:border-fuchsia-200 hover:shadow-lg transition-all duration-300 shadow-sm"
       style={{ animation: 'fade-up 0.5s ease both', animationDelay: `${idx * 80}ms` }}>
       <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
-        <img src={post.image} alt="Inspiration" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
+        <Image src={post.image} alt="Inspiration" fill sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
         <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />
 
@@ -312,10 +313,12 @@ function PostCard({
     >
       {post.image_urls.length > 0 && (
         <div className="relative overflow-hidden" style={{ aspectRatio: '4/5' }}>
-          <img
+          <Image
             src={post.image_urls[imgIdx]}
             alt={post.title || captionBody || 'Post'}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            fill
+            sizes="(max-width:640px) 100vw, (max-width:1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12 pointer-events-none" />

@@ -276,7 +276,7 @@ function NewOrderContent() {
                 <div className="rounded-2xl border-2 border-violet-200 bg-violet-50 p-4">
                   <div className="flex gap-3">
                     {fitPost.image_urls?.[0] && (
-                      <img src={fitPost.image_urls[0]} alt="" className="h-20 w-16 rounded-xl object-cover" />
+                      <img src={fitPost.image_urls[0]} alt="" className="h-20 w-16 rounded-xl object-cover"  loading="lazy"/>
                     )}
                     <div className="min-w-0">
                       <p className="font-bold text-zinc-900">{fitPost.title || 'Uploaded fit'}</p>
@@ -414,7 +414,7 @@ function NewOrderContent() {
                           className={`text-left rounded-xl overflow-hidden border-2 transition-all ${selectedFabric?.id === fabric.id ? 'border-amber-500 shadow-lg shadow-amber-500/10' : 'border-white/[0.07] hover:border-amber-500/30'}`}>
                           <div className="aspect-[4/3] overflow-hidden relative">
                             {fabric.image_urls[0]
-                              ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover" />
+                              ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover"  loading="lazy"/>
                               : <div className="w-full h-full bg-white/[0.05] flex items-center justify-center">🧵</div>
                             }
                             {selectedFabric?.id === fabric.id && (
@@ -586,7 +586,7 @@ function NewOrderContent() {
                     {fabricSource === 'tailornow' && selectedFabric ? (
                       <div className="flex items-center gap-2">
                         {selectedFabric.image_urls[0] && (
-                          <img src={selectedFabric.image_urls[0]} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                          <img src={selectedFabric.image_urls[0]} alt="" className="w-8 h-8 rounded-lg object-cover"  loading="lazy"/>
                         )}
                         <div>
                           <p className="text-white font-medium text-sm">{selectedFabric.name}</p>
@@ -605,7 +605,7 @@ function NewOrderContent() {
                   <p className="text-zinc-500 text-sm mb-2">Style refs</p>
                   <div className="flex gap-2 flex-wrap">
                     {styleRefs.map((url, i) => (
-                      <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-zinc-100" />
+                      <img key={i} src={url} alt="" className="w-16 h-16 rounded-xl object-cover border border-zinc-100"  loading="lazy"/>
                     ))}
                   </div>
                 </div>

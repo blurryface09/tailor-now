@@ -445,7 +445,7 @@ export default function CreativePostsPage() {
                   <div className="flex gap-0.5">
                     {post.image_urls.slice(0, 3).map((url, i) => (
                       <div key={i} className={`${post.image_urls.length === 1 ? 'w-full' : 'flex-1'} aspect-square overflow-hidden`}>
-                        <img src={url} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                        <img src={url} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"  loading="lazy"/>
                       </div>
                     ))}
                     {post.image_urls.length > 3 && (

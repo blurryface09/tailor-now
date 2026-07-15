@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search, MapPin, Filter, Star, CheckCircle, Clock, Zap, Navigation } from 'lucide-react'
@@ -276,11 +277,12 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
     <>
       {/* Header — fashion photo + brand gradient overlay */}
       <div className="h-44 relative overflow-hidden">
-        <img
+        <Image
           src={bgImage}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          loading="lazy"
+          fill
+          sizes="(max-width:768px) 100vw, (max-width:1024px) 50vw, 33vw"
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
         {/* Brand color tint overlay */}
         <div className={cn('absolute inset-0 bg-gradient-to-br opacity-70', gradient)} />
@@ -301,7 +303,8 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
         )}
         <div className="absolute bottom-0 left-4 translate-y-1/2">
           {(tailor as any).profile?.avatar_url ? (
-            <img src={(tailor as any).profile.avatar_url} alt={tailor.business_name}
+            <Image src={(tailor as any).profile.avatar_url} alt={tailor.business_name}
+              width={56} height={56}
               className="w-14 h-14 rounded-2xl object-cover shadow-xl border-2 border-white group-hover:scale-105 transition-transform duration-300" />
           ) : (
             <div className="w-14 h-14 rounded-2xl bg-violet-100 shadow-xl flex items-center justify-center text-violet-700 font-black text-xl border-2 border-white group-hover:scale-105 transition-transform duration-300">

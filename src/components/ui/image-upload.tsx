@@ -49,7 +49,7 @@ export function ImageUpload({ bucket, folder, value, onChange, maxFiles = 5, lab
       <div className="flex flex-wrap gap-3 items-start">
         {value.map((url, i) => (
           <div key={i} className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border border-white/[0.08] shadow-sm group">
-            <img src={url} alt={`Upload ${i + 1}`} className="w-full h-full object-cover" />
+            <img src={url} alt={`Upload ${i + 1}`} className="w-full h-full object-cover"  loading="lazy"/>
             <button
               type="button"
               onClick={() => remove(url)}

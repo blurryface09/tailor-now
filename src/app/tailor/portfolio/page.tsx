@@ -133,7 +133,7 @@ export default function PortfolioPage() {
                 {form.image_url ? (
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="relative h-48 w-full overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.04] sm:w-36">
-                      <img src={form.image_url} alt="" className="w-full h-full object-cover" />
+                      <img src={form.image_url} alt="" className="w-full h-full object-cover"  loading="lazy"/>
                       <button type="button"
                         onClick={() => {
                           setForm(f => ({ ...f, image_url: '' }))
@@ -223,7 +223,7 @@ export default function PortfolioPage() {
               <div key={item.id} className="group bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] overflow-hidden">
                 <div className="aspect-square bg-violet-50 relative overflow-hidden">
                   {item.image_url ? (
-                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform"  loading="lazy"/>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-5xl">✂️</div>
                   )}

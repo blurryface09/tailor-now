@@ -228,7 +228,7 @@ function OrderDetailContent() {
               <div className="flex gap-2 flex-wrap">
                 {order.style_reference_urls.map((url, i) => (
                   <a key={i} href={url} target="_blank" rel="noreferrer">
-                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-zinc-100 hover:opacity-90 transition-opacity" />
+                    <img src={url} alt={`Ref ${i + 1}`} className="w-20 h-20 rounded-xl object-cover border border-zinc-100 hover:opacity-90 transition-opacity"  loading="lazy"/>
                   </a>
                 ))}
               </div>

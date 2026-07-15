@@ -165,7 +165,7 @@ export default function CustomerHome() {
               {QUICK_ACTIONS.map((action, i) => (
                 <Link key={action.href} href={action.href}
                   className={`relative overflow-hidden rounded-2xl aspect-[4/3] flex flex-col justify-end p-4 group cursor-pointer shadow-lg ${action.glow} hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 fade-up-${i + 1}`}>
-                  <img src={action.img} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={action.img} alt="" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"  loading="lazy"/>
                   <div className={`absolute inset-0 bg-gradient-to-t ${action.bg} opacity-70 group-hover:opacity-80 transition-opacity duration-300`} />
                   <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12" />
                   <div className="relative z-10">

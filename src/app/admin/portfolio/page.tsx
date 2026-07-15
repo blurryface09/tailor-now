@@ -166,7 +166,7 @@ export default function AdminPortfolioPage() {
                 {/* Image */}
                 <div className="relative aspect-[3/4] bg-zinc-100 overflow-hidden">
                   {it.image_url
-                    ? <img src={it.image_url} alt={it.title || ''} className="w-full h-full object-cover" />
+                    ? <img src={it.image_url} alt={it.title || ''} className="w-full h-full object-cover"  loading="lazy"/>
                     : <div className="w-full h-full flex items-center justify-center text-zinc-300"><ImageIcon size={28} /></div>
                   }
                   {it.service_type && (

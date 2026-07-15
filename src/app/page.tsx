@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
+import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/logo'
@@ -249,21 +250,21 @@ export default function LandingPage() {
               {/* Layer 3 — deepest */}
               <div className="absolute bottom-0 left-0 w-[210px] h-[300px] lg:w-[255px] lg:h-[365px] rounded-3xl overflow-hidden border border-zinc-200 shadow-2xl shadow-zinc-300/50"
                 style={{ transform: `rotate(-8deg) translate(${mouse.x * 35}px, ${mouse.y * 22}px)`, transition: 'transform 0.9s ease-out' }}>
-                <img src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=510&h=730&fit=crop&q=85" alt="" className="w-full h-full object-cover" loading="eager" />
+                <Image src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=510&h=730&fit=crop&q=85" alt="" fill priority sizes="(max-width:1024px) 210px, 255px" className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>
 
               {/* Layer 2 — mid depth */}
               <div className="absolute top-8 left-14 w-[185px] h-[265px] lg:w-[220px] lg:h-[320px] rounded-3xl overflow-hidden border border-violet-200 shadow-2xl shadow-violet-300/40 z-[1]"
                 style={{ transform: `rotate(5deg) translate(${mouse.x * 20}px, ${mouse.y * 13}px)`, transition: 'transform 0.75s ease-out' }}>
-                <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=440&h=640&fit=crop&q=85" alt="" className="w-full h-full object-cover" loading="eager" />
+                <Image src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=440&h=640&fit=crop&q=85" alt="" fill priority sizes="(max-width:1024px) 185px, 220px" className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
               </div>
 
               {/* Layer 1 — front */}
               <div className="absolute top-0 right-0 w-[225px] h-[315px] lg:w-[265px] lg:h-[385px] rounded-3xl overflow-hidden border border-zinc-200 shadow-2xl shadow-zinc-300/50 z-[2]"
                 style={{ transform: `rotate(3deg) translate(${mouse.x * 8}px, ${mouse.y * 5}px)`, transition: 'transform 0.6s ease-out' }}>
-                <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=530&h=770&fit=crop&q=85" alt="" className="w-full h-full object-cover" loading="eager" />
+                <Image src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=530&h=770&fit=crop&q=85" alt="" fill priority sizes="(max-width:1024px) 225px, 265px" className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               </div>
 
@@ -344,7 +345,7 @@ export default function LandingPage() {
               <TiltCard strength={10} className="group block cursor-pointer">
                 <Link href="/browse">
                   <div className="relative overflow-hidden rounded-3xl" style={{ aspectRatio: '3/4' }}>
-                    <img src={s.img} alt={s.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                    <Image src={s.img} alt={s.name} fill sizes="(max-width:768px) 50vw, 25vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                     <div className="absolute inset-0 overflow-hidden pointer-events-none">
                       <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/8 to-transparent skew-x-12" />

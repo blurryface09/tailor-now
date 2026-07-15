@@ -97,7 +97,7 @@ export default function FabricsPage() {
                 {/* Image */}
                 <div className="aspect-[4/3] overflow-hidden relative">
                   {fabric.image_urls[0]
-                    ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ? <img src={fabric.image_urls[0]} alt={fabric.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"  loading="lazy"/>
                     : <div className="w-full h-full bg-zinc-50 flex items-center justify-center text-3xl">🧵</div>
                   }
                   {selected?.id === fabric.id && (
@@ -138,7 +138,7 @@ export default function FabricsPage() {
             style={{ animation: 'fade-up 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
             <div className="bg-zinc-950/95 backdrop-blur-2xl border border-amber-500/30 rounded-2xl p-4 shadow-2xl shadow-amber-500/10 flex items-center gap-4">
               {selected.image_urls[0] && (
-                <img src={selected.image_urls[0]} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-amber-500/30" />
+                <img src={selected.image_urls[0]} alt="" className="w-12 h-12 rounded-xl object-cover flex-shrink-0 border border-amber-500/30"  loading="lazy"/>
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-white text-sm truncate">{selected.name}</p>

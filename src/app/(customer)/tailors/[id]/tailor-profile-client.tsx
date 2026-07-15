@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
@@ -103,10 +104,13 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
         {hasCover ? (
           <>
             {/* Main cover: first portfolio image */}
-            <img
+            <Image
               src={coverImages[0].image_url!}
               alt="cover"
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
             />
             {/* Dark gradient overlay for readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10" />
@@ -114,8 +118,9 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
             {coverImages.length >= 2 && (
               <div className="absolute right-0 top-0 bottom-0 w-1/4 flex flex-col gap-0.5 overflow-hidden">
                 {coverImages.slice(1).map((img, i) => (
-                  <img key={i} src={img.image_url!} alt=""
-                    className="flex-1 w-full object-cover opacity-80" />
+                  <div key={i} className="flex-1 relative overflow-hidden">
+                    <Image src={img.image_url!} alt="" fill sizes="25vw" className="object-cover opacity-80" />
+                  </div>
                 ))}
               </div>
             )}
@@ -123,10 +128,13 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
         ) : (
           <>
             {/* Use a random fashion placeholder as background */}
-            <img
+            <Image
               src={PORTFOLIO_PLACEHOLDERS[Math.abs(tailor.business_name.charCodeAt(0)) % PORTFOLIO_PLACEHOLDERS.length]}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-violet-900/85 via-violet-800/75 to-purple-900/85" />
             <div className="absolute inset-0 opacity-[0.06]"
@@ -157,7 +165,8 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
           <div className="relative -mt-14 mb-3 flex items-end justify-between">
             <div className="relative flex-shrink-0">
               {tailor.profile?.avatar_url ? (
-                <img src={tailor.profile.avatar_url} alt={tailor.business_name}
+                <Image src={tailor.profile.avatar_url} alt={tailor.business_name}
+                  width={96} height={96}
                   className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg" />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-violet-500/100 to-purple-700 border-4 border-white shadow-lg flex items-center justify-center text-white text-4xl font-bold select-none">
@@ -332,10 +341,10 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                 <div className="relative mt-1 rounded-2xl overflow-hidden">
                   <div className="columns-2 sm:columns-3 gap-2 space-y-2">
                     {PORTFOLIO_PLACEHOLDERS.map((src, i) => (
-                      <div key={i} className="break-inside-avoid overflow-hidden rounded-xl">
-                        <img src={src} alt="" loading="lazy"
-                          className="w-full object-cover blur-sm brightness-75 scale-105"
-                          style={{ aspectRatio: i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '3/4' }} />
+                      <div key={i} className="break-inside-avoid overflow-hidden rounded-xl relative"
+                        style={{ aspectRatio: i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '3/4' }}>
+                        <Image src={src} alt="" fill sizes="(max-width:640px) 50vw, 33vw"
+                          className="object-cover blur-sm brightness-75 scale-105" />
                       </div>
                     ))}
                   </div>
@@ -365,10 +374,13 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                       )}
                       onClick={() => item.image_url && setLightbox(item.image_url)}>
                       {item.image_url ? (
-                        <img src={item.image_url} alt={item.title}
-                          className="w-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                          style={{ aspectRatio: i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '3/4' }}
-                        />
+                        <div className="relative overflow-hidden w-full"
+                          style={{ aspectRatio: i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '3/4' }}>
+                          <Image src={item.image_url} alt={item.title}
+                            fill sizes="(max-width:640px) 50vw, 33vw"
+                            className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          />
+                        </div>
                       ) : (
                         <div className="w-full h-40 flex items-center justify-center text-4xl">✂️</div>
                       )}

@@ -249,7 +249,7 @@ export default function EditCreativeProfile() {
             <div className="flex items-center gap-5">
               <div className="relative flex-shrink-0">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-white/[0.08]" />
+                  <img src={avatarUrl} alt="Profile" className="w-20 h-20 rounded-2xl object-cover border-2 border-white/[0.08]"  loading="lazy"/>
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500/100 to-purple-700 flex items-center justify-center text-white text-2xl font-bold">
                     {form.business_name?.[0]?.toUpperCase() || '✂'}
@@ -280,7 +280,7 @@ export default function EditCreativeProfile() {
             <div className="flex items-start gap-4">
               {facePhotoUrl ? (
                 <div className="relative flex-shrink-0">
-                  <img src={facePhotoUrl} alt="Face verification" className="w-24 h-24 rounded-xl object-cover border-2 border-green-500/20" />
+                  <img src={facePhotoUrl} alt="Face verification" className="w-24 h-24 rounded-xl object-cover border-2 border-green-500/20"  loading="lazy"/>
                   <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-violet-700 border-2 border-white flex items-center justify-center cursor-pointer hover:bg-violet-800 transition-colors">
                     {uploadingFace ? <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <Camera size={10} className="text-white" />}
                     <input type="file" accept="image/*" className="hidden" onChange={uploadFace} disabled={uploadingFace} />
