@@ -544,7 +544,7 @@ function NewOrderContent() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 font-medium text-sm">₦</span>
                 <input type="number" min="0"
                   placeholder={selectedService ? String(selectedService.base_price) : 'e.g. 35000'}
-                  className="w-full pl-8 pr-4 py-3.5 rounded-xl bg-white/[0.06] border-2 border-white/[0.1] focus:border-violet-500 focus:outline-none text-lg font-semibold text-white transition-all"
+                  className="w-full pl-8 pr-4 py-3.5 rounded-xl bg-white border-2 border-zinc-200 focus:border-violet-500 focus:outline-none text-lg font-semibold text-zinc-900 placeholder:text-zinc-400 transition-all"
                   value={customPrice} onChange={e => setCustomPrice(e.target.value)} />
               </div>
               <p className="text-xs text-zinc-600 mb-4">This is your tailoring offer only — fabric cost is added separately.</p>
