@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { SERVICE_LABELS } from '@/lib/utils'
 import { NIGERIAN_STATES, citiesForState, matchState, matchCity } from '@/lib/nigeria-locations'
+import { PayoutAccountCard } from '@/components/tailor/PayoutAccountCard'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { CheckCircle, ArrowLeft, Navigation, Camera, AlertCircle } from 'lucide-react'
@@ -30,6 +31,12 @@ export default function EditCreativeProfile() {
   const [saving, setSaving] = useState(false)
   const [detecting, setDetecting] = useState(false)
   const [phone, setPhone] = useState('')
+  const [payoutAccount, setPayoutAccount] = useState({
+    bankCode: null as string | null,
+    accountNumber: null as string | null,
+    accountName: null as string | null,
+    hasSubaccount: false,
+  })
 
   const [form, setForm] = useState({
     business_name: '',
@@ -55,6 +62,12 @@ export default function EditCreativeProfile() {
       if (!tailor) { router.push('/onboarding/tailor'); return }
       setTailorId(tailor.id)
       setFacePhotoUrl(tailor.face_photo_url || null)
+      setPayoutAccount({
+        bankCode: tailor.bank_code || null,
+        accountNumber: tailor.account_number || null,
+        accountName: tailor.account_name || null,
+        hasSubaccount: !!tailor.paystack_subaccount_code,
+      })
       setForm({
         business_name: tailor.business_name || '',
         bio: tailor.bio || '',
@@ -302,6 +315,14 @@ export default function EditCreativeProfile() {
               </ul>
             </div>
           </div>
+
+          {/* Payout account */}
+          <PayoutAccountCard
+            initialBankCode={payoutAccount.bankCode}
+            initialAccountNumber={payoutAccount.accountNumber}
+            initialAccountName={payoutAccount.accountName}
+            hasSubaccount={payoutAccount.hasSubaccount}
+          />
 
           {/* Basic info */}
           <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-4">

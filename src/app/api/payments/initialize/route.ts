@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { calculateServiceCharge } from '@/lib/utils'
+import { calculateServiceCharge, calculateCommission } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
   const { orderId, amount, email, type } = await req.json()
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select('id, customer_id, agreed_price, status, deposit_paid')
+    .select('id, customer_id, tailor_id, agreed_price, status, deposit_paid')
     .eq('id', orderId)
     .single()
 
@@ -36,6 +36,24 @@ export async function POST(req: NextRequest) {
     process.env.NEXT_PUBLIC_SITE_URL ||
     new URL(req.url).origin
 
+  // If this tailor has a Paystack subaccount, split the payment automatically at
+  // checkout instead of collecting it all and paying out manually later.
+  const { data: tailor } = await supabase
+    .from('tailor_profiles')
+    .select('paystack_subaccount_code')
+    .eq('id', order.tailor_id)
+    .single()
+
+  const splitFields = tailor?.paystack_subaccount_code
+    ? {
+        subaccount: tailor.paystack_subaccount_code,
+        bearer: 'account' as const,
+        // Platform keeps its 20% commission plus the full service charge;
+        // the rest settles straight to the tailor's own bank account.
+        transaction_charge: Math.round((calculateCommission(amount).commission + serviceCharge) * 100),
+      }
+    : {}
+
   const res = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',
     headers: {
@@ -47,11 +65,12 @@ export async function POST(req: NextRequest) {
       amount: Math.round(totalCharged * 100),
       reference: `TN-${orderId}-${type}-${Date.now()}`,
       callback_url: `${appUrl}/api/payments/verify`,
+      ...splitFields,
       metadata: {
         orderId,
         type,
         platform: 'tailornow',
-        payout_model: 'platform_collects_then_manual_payout',
+        payout_model: tailor?.paystack_subaccount_code ? 'paystack_split' : 'platform_collects_then_manual_payout',
         agreed_price: amount,
         service_charge: serviceCharge,
         custom_fields: [

@@ -12,6 +12,7 @@ type Payout = {
   commission_amount: number
   net_amount: number
   status: string
+  method: 'manual' | 'split'
   bank_name: string | null
   account_number: string | null
   account_name: string | null
@@ -205,6 +206,9 @@ export default function AdminPayoutsPage() {
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${cfg.color}`}>
                         {cfg.icon} {cfg.label}
                       </span>
+                      {payout.method === 'split' && (
+                        <span className="block mt-1 text-[11px] text-violet-400">⚡ Auto-paid via Paystack split</span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       {payout.status === 'pending' && (

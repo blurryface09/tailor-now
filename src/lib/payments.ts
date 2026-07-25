@@ -6,6 +6,13 @@ type PaidOrder = {
   tailor_id: string
 }
 
+type TailorPayoutAccount = {
+  paystack_subaccount_code: string | null
+  bank_name: string | null
+  account_number: string | null
+  account_name: string | null
+}
+
 export async function markOrderPaid(orderId: string, reference: string, amountPaid: number) {
   const admin = createAdminClient()
 
@@ -19,8 +26,15 @@ export async function markOrderPaid(orderId: string, reference: string, amountPa
     throw new Error(orderError?.message || 'Order not found')
   }
 
+  const { data: tailor } = await admin
+    .from('tailor_profiles')
+    .select('paystack_subaccount_code, bank_name, account_number, account_name')
+    .eq('id', order.tailor_id)
+    .single<TailorPayoutAccount>()
+
   const gross = order.agreed_price || amountPaid
   const { commission, net } = calculateCommission(gross)
+  const isSplit = !!tailor?.paystack_subaccount_code
 
   const { error: updateError } = await admin.from('orders').update({
     deposit_paid: true,
@@ -38,7 +52,12 @@ export async function markOrderPaid(orderId: string, reference: string, amountPa
     commission_rate: 0.20,
     commission_amount: commission,
     net_amount: net,
-    status: 'pending',
+    method: isSplit ? 'split' : 'manual',
+    status: isSplit ? 'paid' : 'pending',
+    paid_at: isSplit ? new Date().toISOString() : null,
+    bank_name: tailor?.bank_name ?? null,
+    account_number: tailor?.account_number ?? null,
+    account_name: tailor?.account_name ?? null,
   }, { onConflict: 'order_id' })
 
   if (payoutError) throw new Error(payoutError.message)

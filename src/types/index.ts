@@ -85,6 +85,11 @@ export interface TailorProfile {
   turnaround_days: string | null
   instagram_url: string | null
   pledge_signed_at: string | null
+  bank_code: string | null
+  bank_name: string | null
+  account_number: string | null
+  account_name: string | null
+  paystack_subaccount_code: string | null
   created_at: string
 }
 
