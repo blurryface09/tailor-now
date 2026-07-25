@@ -276,7 +276,7 @@ export default function EditCreativeProfile() {
               <h2 className="font-bold text-white">Face Verification Photo <span className="text-red-500 text-sm">*</span></h2>
               {facePhotoUrl && <span className="flex items-center gap-1 text-xs text-green-400"><CheckCircle size={12} /> Uploaded</span>}
             </div>
-            <p className="text-sm text-zinc-500 mb-4">A clear selfie holding a piece of paper with today's date. Used only for admin identity verification — not shown publicly.</p>
+            <p className="text-sm text-zinc-500 mb-4">A clear selfie holding a piece of paper with today&apos;s date. Used only for admin identity verification — not shown publicly.</p>
             <div className="flex items-start gap-4">
               {facePhotoUrl ? (
                 <div className="relative flex-shrink-0">
@@ -296,7 +296,7 @@ export default function EditCreativeProfile() {
               )}
               <ul className="text-xs text-zinc-500 space-y-1">
                 <li>• Clear, well-lit selfie</li>
-                <li>• Hold a paper with today's date</li>
+                <li>• Hold a paper with today&apos;s date</li>
                 <li>• Face clearly visible</li>
                 <li>• Kept private by admin</li>
               </ul>
@@ -452,7 +452,7 @@ export default function EditCreativeProfile() {
 
           {/* Portfolio reminder */}
           <div className="bg-violet-50 border border-violet-500/30 rounded-2xl p-4">
-            <p className="text-sm font-semibold text-violet-300 mb-1">Don't forget your portfolio</p>
+            <p className="text-sm font-semibold text-violet-300 mb-1">Don&apos;t forget your portfolio</p>
             <p className="text-xs text-violet-700">Upload at least 2 photos of your work to complete your profile. Go to <strong>My Portfolio</strong> in your dashboard.</p>
           </div>
 

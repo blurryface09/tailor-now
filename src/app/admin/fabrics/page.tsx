@@ -30,13 +30,13 @@ export default function AdminFabricsPage() {
   const [form, setForm] = useState({ ...EMPTY_FORM })
   const [filterType, setFilterType] = useState('')
 
-  useEffect(() => { loadFabrics() }, [])
-
   const loadFabrics = async () => {
     const { data } = await supabase.from('fabrics').select('*').order('created_at', { ascending: false })
     setFabrics(data || [])
     setLoading(false)
   }
+
+  useEffect(() => { loadFabrics() }, [])
 
   const openAdd = () => {
     setForm({ ...EMPTY_FORM })

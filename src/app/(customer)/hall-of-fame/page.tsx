@@ -50,7 +50,7 @@ export default async function HallOfFamePage() {
             Hall of Fame
           </h1>
           <p className="text-violet-200 text-lg max-w-xl mx-auto">
-            Nigeria's top verified creatives, ranked by community love and craft mastery
+            Nigeria&apos;s top verified creatives, ranked by community love and craft mastery
           </p>
           <p className="text-violet-400 text-sm mt-3">
             Rankings based on average rating · Tie-broken by completed orders

@@ -44,10 +44,6 @@ export default function AdminPayoutsPage() {
   const [updating, setUpdating] = useState<string | null>(null)
   const [showBankModal, setShowBankModal] = useState<Payout | null>(null)
 
-  useEffect(() => {
-    fetchPayouts()
-  }, [])
-
   async function fetchPayouts() {
     const { data } = await supabase
       .from('payouts')
@@ -60,6 +56,10 @@ export default function AdminPayoutsPage() {
     setPayouts((data as Payout[]) || [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    fetchPayouts()
+  }, [])
 
   async function updateStatus(payoutId: string, newStatus: string) {
     setUpdating(payoutId)

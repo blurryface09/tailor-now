@@ -24,10 +24,6 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true)
   const [unreadCount, setUnreadCount] = useState(0)
 
-  useEffect(() => {
-    loadNotifications()
-  }, [])
-
   const loadNotifications = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -52,6 +48,10 @@ export default function NotificationsPage() {
         .eq('read', false)
     }
   }
+
+  useEffect(() => {
+    loadNotifications()
+  }, [])
 
   const getLink = (n: Notification) => {
     if (n.data?.order_id) return `/orders/${n.data.order_id}`
@@ -87,7 +87,7 @@ export default function NotificationsPage() {
               <Bell size={28} className="text-violet-500" />
             </div>
             <h3 className="font-semibold text-zinc-900 mb-1">No notifications yet</h3>
-            <p className="text-sm text-zinc-500">We'll let you know when something happens</p>
+            <p className="text-sm text-zinc-500">We&apos;ll let you know when something happens</p>
           </div>
         ) : (
           <div className="space-y-2">

@@ -135,7 +135,7 @@ function ReachTipsPanel({ title, serviceType }: { title: string; serviceType: st
             <div className="space-y-3">
               <p className="text-xs text-zinc-400 leading-relaxed">
                 Paste the prompt below into <span className="text-violet-300 font-semibold">ChatGPT</span>, <span className="text-violet-300 font-semibold">Claude</span>, or any AI — it will write your title, description, and hashtags.
-                {(title || serviceType) && <span className="text-violet-400 font-semibold"> We've pre-filled it with your details.</span>}
+                {(title || serviceType) && <span className="text-violet-400 font-semibold"> We&apos;ve pre-filled it with your details.</span>}
               </p>
               <div className="rounded-xl bg-white/[0.05] border border-white/[0.08] p-3">
                 <pre className="text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap font-sans mb-2">{buildCaptionPrompt(title, serviceType)}</pre>

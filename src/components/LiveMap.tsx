@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js'
+import type { Map as LeafletMap, Marker as LeafletMarker } from 'leaflet'
 
 interface LiveMapProps {
   orderId: string
@@ -8,17 +10,31 @@ interface LiveMapProps {
 
 export function LiveMap({ orderId }: LiveMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstance = useRef<any>(null)
-  const markerRef = useRef<any>(null)
+  const mapInstance = useRef<LeafletMap | null>(null)
+  const markerRef = useRef<LeafletMarker | null>(null)
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [offline, setOffline] = useState(false)
+
+  const updateMarker = (lat: number, lng: number) => {
+    setLocation({ lat, lng })
+    import('leaflet').then((L) => {
+      if (!mapInstance.current) return
+      if (markerRef.current) {
+        markerRef.current.setLatLng([lat, lng])
+      } else {
+        markerRef.current = L.marker([lat, lng]).addTo(mapInstance.current)
+          .bindPopup('Creative is on the way 🛵').openPopup()
+      }
+      mapInstance.current.setView([lat, lng], 15)
+    })
+  }
 
   // Load Leaflet dynamically (SSR safe)
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
     import('leaflet').then((L) => {
       // Fix default icon paths
-      delete (L.Icon.Default.prototype as any)._getIconUrl
+      delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
         iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -51,8 +67,8 @@ export function LiveMap({ orderId }: LiveMapProps) {
         schema: 'public',
         table: 'delivery_locations',
         filter: `order_id=eq.${orderId}`,
-      }, (payload: any) => {
-        const { lat, lng } = payload.new
+      }, (payload: RealtimePostgresChangesPayload<{ lat: number; lng: number }>) => {
+        const { lat, lng } = payload.new as { lat: number; lng: number }
         setOffline(false)
         updateMarker(lat, lng)
       })
@@ -60,20 +76,6 @@ export function LiveMap({ orderId }: LiveMapProps) {
 
     return () => { supabase.removeChannel(channel) }
   }, [orderId])
-
-  const updateMarker = (lat: number, lng: number) => {
-    setLocation({ lat, lng })
-    import('leaflet').then((L) => {
-      if (!mapInstance.current) return
-      if (markerRef.current) {
-        markerRef.current.setLatLng([lat, lng])
-      } else {
-        markerRef.current = L.marker([lat, lng]).addTo(mapInstance.current)
-          .bindPopup('Creative is on the way 🛵').openPopup()
-      }
-      mapInstance.current.setView([lat, lng], 15)
-    })
-  }
 
   return (
     <div className="rounded-2xl overflow-hidden border border-white/[0.1]">

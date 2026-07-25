@@ -85,28 +85,6 @@ function ChatContent() {
   const [pendingMessage, setPendingMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) { setUserId(user.id); loadRooms(user.id) }
-    })
-  }, [])
-
-  useEffect(() => {
-    if (activeRoom && userId) {
-      loadMessages(activeRoom.id)
-      checkDepositOrder(activeRoom)
-      const channel = supabase.channel(`room-${activeRoom.id}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${activeRoom.id}` },
-          () => loadMessages(activeRoom.id))
-        .subscribe()
-      return () => { supabase.removeChannel(channel) }
-    }
-  }, [activeRoom?.id])
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
   const checkDepositOrder = async (room: RoomWithProfiles) => {
     const { data } = await supabase.from('orders')
       .select('id, deposit_paid')
@@ -147,6 +125,28 @@ function ChatContent() {
     setMessages(data || [])
     await supabase.from('chat_messages').update({ read: true }).eq('room_id', roomId).neq('sender_id', userId)
   }
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) { setUserId(user.id); loadRooms(user.id) }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (activeRoom && userId) {
+      loadMessages(activeRoom.id)
+      checkDepositOrder(activeRoom)
+      const channel = supabase.channel(`room-${activeRoom.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `room_id=eq.${activeRoom.id}` },
+          () => loadMessages(activeRoom.id))
+        .subscribe()
+      return () => { supabase.removeChannel(channel) }
+    }
+  }, [activeRoom?.id])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const submitMessage = async (content: string) => {
     if (!content.trim() || !activeRoom || !userId) return
@@ -206,7 +206,7 @@ function ChatContent() {
   const otherPerson = activeRoom
     ? (userId === activeRoom.customer_id ? activeRoom.tailor : activeRoom.customer)
     : null
-  const otherIsAdmin = (otherPerson as any)?.role === 'admin'
+  const otherIsAdmin = otherPerson?.role === 'admin'
   const otherDisplayName = otherIsAdmin ? 'TailorNow' : otherPerson?.full_name
 
   return (
@@ -230,7 +230,7 @@ function ChatContent() {
             )}
             {rooms.map(room => {
               const other = userId === room.customer_id ? room.tailor : room.customer
-              const otherIsAdmin = (other as any)?.role === 'admin'
+              const otherIsAdmin = other?.role === 'admin'
               const displayName = otherIsAdmin ? 'TailorNow' : other?.full_name
               return (
                 <button key={room.id} onClick={() => setActiveRoom(room)}
@@ -311,7 +311,7 @@ function ChatContent() {
                 {messages.map(msg => {
                   const isMe = msg.sender_id === userId
                   const hasBankAlert = containsBankDetails(msg.content)
-                  const isAdmin = (msg.sender as any)?.role === 'admin'
+                  const isAdmin = msg.sender?.role === 'admin'
                   const senderName = isAdmin ? 'TailorNow' : (msg.sender?.full_name || '?')
                   return (
                     <div key={msg.id} className={cn('flex gap-2', isMe && 'flex-row-reverse')}>

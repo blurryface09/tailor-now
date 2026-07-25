@@ -47,8 +47,6 @@ export default function AdminDisputesPage() {
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [updating, setUpdating] = useState<string | null>(null)
 
-  useEffect(() => { fetchDisputes() }, [])
-
   async function fetchDisputes() {
     const { data } = await supabase
       .from('disputes')
@@ -64,6 +62,8 @@ export default function AdminDisputesPage() {
     setDisputes((data as Dispute[]) || [])
     setLoading(false)
   }
+
+  useEffect(() => { fetchDisputes() }, [])
 
   async function resolve(disputeId: string, resolution: string) {
     setUpdating(disputeId)

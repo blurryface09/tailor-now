@@ -31,10 +31,6 @@ export default function TailorOrdersPage() {
   const [trackingOrderId, setTrackingOrderId] = useState<string | null>(null)
   const watchIdRef = useRef<number | null>(null)
 
-  useEffect(() => {
-    loadOrders()
-  }, [filter])
-
   const loadOrders = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
@@ -51,6 +47,10 @@ export default function TailorOrdersPage() {
     const { data } = await query
     setOrders(data || [])
   }
+
+  useEffect(() => {
+    loadOrders()
+  }, [filter])
 
   const openQuoteModal = (order: Order) => {
     setQuoteModal({ orderId: order.id, currentBudget: (order as Order & { customer_offer?: number }).customer_offer || order.agreed_price || null })

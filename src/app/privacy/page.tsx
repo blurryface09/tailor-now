@@ -82,7 +82,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-lg font-bold text-white mb-3">8. Security</h2>
-            <p className="text-sm">Your data is stored encrypted in Supabase. All connections use HTTPS. Payments are handled by Paystack's PCI-compliant infrastructure. We never store raw card numbers or CVV codes.</p>
+            <p className="text-sm">Your data is stored encrypted in Supabase. All connections use HTTPS. Payments are handled by Paystack&apos;s PCI-compliant infrastructure. We never store raw card numbers or CVV codes.</p>
           </section>
 
           <section>

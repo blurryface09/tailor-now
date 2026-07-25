@@ -244,9 +244,9 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
               <MapPin size={13} className="text-zinc-600" />
               {tailor.city}, {tailor.state}
             </span>
-            {(tailor as any).min_price && (tailor as any).max_price && (
+            {tailor.min_price && tailor.max_price && (
               <span className="flex items-center gap-1 text-violet-400 font-medium">
-                ₦{((tailor as any).min_price / 1000).toFixed(0)}k – ₦{((tailor as any).max_price / 1000).toFixed(0)}k
+                ₦{(tailor.min_price / 1000).toFixed(0)}k – ₦{(tailor.max_price / 1000).toFixed(0)}k
               </span>
             )}
             <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full border ${level.bg} ${level.color} ${level.border}`}>
@@ -437,17 +437,17 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                   <MapPin size={15} className="text-violet-500 flex-shrink-0" />
                   {tailor.city}, {tailor.state}
                 </div>
-                {(tailor as any).address && (
+                {tailor.address && (
                   <div className="flex items-start gap-2.5 text-zinc-300">
                     <MapPin size={15} className="text-zinc-600 flex-shrink-0 mt-0.5" />
-                    {(tailor as any).address}
+                    {tailor.address}
                   </div>
                 )}
-                {(tailor as any).min_price && (tailor as any).max_price && (
+                {tailor.min_price && tailor.max_price && (
                   <div className="flex items-center gap-2.5">
                     <span className="text-lg">💰</span>
                     <span className="text-violet-400 font-semibold">
-                      ₦{formatCurrency((tailor as any).min_price).replace('₦', '')} – ₦{formatCurrency((tailor as any).max_price).replace('₦', '')}
+                      ₦{formatCurrency(tailor.min_price).replace('₦', '')} – ₦{formatCurrency(tailor.max_price).replace('₦', '')}
                     </span>
                   </div>
                 )}
@@ -535,7 +535,7 @@ export function TailorProfileClient({ tailor, services, portfolio, ratings, isOw
                 </Link>
               ) : (
                 <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-5">
-                  <p className="text-sm text-zinc-500 mb-4">Service pricing hasn't been listed yet. This creative specialises in:</p>
+                  <p className="text-sm text-zinc-500 mb-4">Service pricing hasn&apos;t been listed yet. This creative specialises in:</p>
                   {(tailor.specialties || []).length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 mb-5">
                       {tailor.specialties.map(s => (

@@ -30,8 +30,6 @@ export function ProductClient() {
   const [loading, setLoading] = useState(true)
   const [showAllComments, setShowAllComments] = useState(false)
 
-  useEffect(() => { init() }, [id])
-
   const init = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) setUserId(user.id)
@@ -67,6 +65,8 @@ export function ProductClient() {
 
     setLoading(false)
   }
+
+  useEffect(() => { init() }, [id])
 
   const toggleLike = async () => {
     if (!userId) { toast.error('Sign in to like'); return }

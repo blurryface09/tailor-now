@@ -53,7 +53,7 @@ export default function AdminSetupPage() {
           {done ? (
             <div className="flex flex-col items-center gap-4">
               <CheckCircle size={48} className="text-green-500" />
-              <h1 className="text-xl font-bold text-white">You're now an admin!</h1>
+              <h1 className="text-xl font-bold text-white">You&apos;re now an admin!</h1>
               <p className="text-sm text-zinc-500">Redirecting to admin panel…</p>
             </div>
           ) : (

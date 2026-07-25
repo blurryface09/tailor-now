@@ -19,6 +19,11 @@ export default function PricingPage() {
   const emptyForm = { service_type: 'custom_outfit', title: '', description: '', base_price: '', min_days: '3', max_days: '14', price_negotiable: true }
   const [form, setForm] = useState(emptyForm)
 
+  const loadServices = async (tid: string) => {
+    const { data } = await supabase.from('tailor_services').select('*').eq('tailor_id', tid).order('created_at')
+    setServices(data || [])
+  }
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) supabase.from('tailor_profiles').select('id').eq('user_id', user.id).single().then(({ data }) => {
@@ -26,11 +31,6 @@ export default function PricingPage() {
       })
     })
   }, [])
-
-  const loadServices = async (tid: string) => {
-    const { data } = await supabase.from('tailor_services').select('*').eq('tailor_id', tid).order('created_at')
-    setServices(data || [])
-  }
 
   const saveService = async (e: React.FormEvent) => {
     e.preventDefault()

@@ -51,7 +51,7 @@ export default function TermsPage() {
               <li>All payments are processed by Paystack and held in escrow until the customer confirms delivery.</li>
               <li>TailorNow charges a <strong>20% platform commission</strong> on every completed order. Creatives receive 80% of the agreed price.</li>
               <li>Payments are released to the creative after the customer confirms delivery, or automatically 7 days after the order is marked as delivered if no confirmation is received.</li>
-              <li>Refunds are issued at TailorNow's discretion following our dispute resolution process.</li>
+              <li>Refunds are issued at TailorNow&apos;s discretion following our dispute resolution process.</li>
               <li>Attempting to conduct payments outside the platform to avoid commission is a violation of these terms and grounds for account termination.</li>
             </ul>
           </section>
@@ -62,7 +62,7 @@ export default function TermsPage() {
             <ul className="space-y-1.5 list-disc list-inside text-sm">
               <li>First attempt to resolve it directly through in-app chat.</li>
               <li>If unresolved, raise a dispute via the order page. Our team reviews within 3 business days.</li>
-              <li>TailorNow's decision on disputes is final and binding.</li>
+              <li>TailorNow&apos;s decision on disputes is final and binding.</li>
               <li>Chargebacks initiated directly with your bank without going through our process may result in account suspension.</li>
             </ul>
           </section>

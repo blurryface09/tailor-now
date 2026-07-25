@@ -40,6 +40,17 @@ function OrderDetailContent() {
   const [showCounter, setShowCounter] = useState(false)
   const [sendingCounter, setSendingCounter] = useState(false)
 
+  const fetchOrder = async () => {
+    const { data } = await supabase.from('orders').select(`
+      *, customer:profiles(*), tailor:tailor_profiles(*, profile:profiles(*))
+    `).eq('id', id).single()
+    if (data) setOrder(data)
+    if (data && userId) {
+      const { data: rating } = await supabase.from('ratings').select('*').eq('order_id', id).eq('reviewer_id', userId).single()
+      setMyRating(rating)
+    }
+  }
+
   useEffect(() => {
     const payment = searchParams.get('payment')
     if (payment === 'success') toast.success('Payment successful!')
@@ -55,17 +66,6 @@ function OrderDetailContent() {
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [id])
-
-  const fetchOrder = async () => {
-    const { data } = await supabase.from('orders').select(`
-      *, customer:profiles(*), tailor:tailor_profiles(*, profile:profiles(*))
-    `).eq('id', id).single()
-    if (data) setOrder(data)
-    if (data && userId) {
-      const { data: rating } = await supabase.from('ratings').select('*').eq('order_id', id).eq('reviewer_id', userId).single()
-      setMyRating(rating)
-    }
-  }
 
   const acceptCreativePrice = async () => {
     if (!order?.agreed_price) return

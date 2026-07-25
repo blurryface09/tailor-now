@@ -291,7 +291,7 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
         {/* Decorative scissors */}
         <div className="absolute right-4 bottom-3 text-white/10 text-8xl leading-none select-none font-black">✂</div>
 
-        {(tailor as any).is_founder && (
+        {tailor.is_founder && (
           <div className="absolute top-3 left-3 flex items-center gap-1 bg-gradient-to-r from-gray-950 to-slate-800 rounded-full px-2.5 py-1 text-xs font-bold text-amber-400 shadow-md ring-1 ring-amber-500/30 backdrop-blur-sm">
             ✂ First Cut
           </div>
@@ -302,8 +302,8 @@ function TailorCard({ tailor, index }: { tailor: TailorWithProfile; index: numbe
           </div>
         )}
         <div className="absolute bottom-0 left-4 translate-y-1/2">
-          {(tailor as any).profile?.avatar_url ? (
-            <Image src={(tailor as any).profile.avatar_url} alt={tailor.business_name}
+          {tailor.profile?.avatar_url ? (
+            <Image src={tailor.profile.avatar_url} alt={tailor.business_name}
               width={56} height={56}
               className="w-14 h-14 rounded-2xl object-cover shadow-xl border-2 border-white group-hover:scale-105 transition-transform duration-300" />
           ) : (

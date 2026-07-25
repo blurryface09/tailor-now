@@ -52,7 +52,7 @@ export async function PATCH(req: NextRequest) {
     const { error } = await admin.from('tailor_profiles').update({ [field]: value }).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || String(e) }, { status: 500 })
+  } catch (e: unknown) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : String(e) }, { status: 500 })
   }
 }

@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Download, Upload, Edit3, Save, X, Search, Image as ImageIcon } from 'lucide-react'
@@ -21,7 +21,6 @@ export default function AdminPortfolioPage() {
   const supabase = createClient()
   const router = useRouter()
   const [items, setItems] = useState<ItemWithCreative[]>([])
-  const [filtered, setFiltered] = useState<ItemWithCreative[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [replacingId, setReplacingId] = useState<string | null>(null)
@@ -30,26 +29,6 @@ export default function AdminPortfolioPage() {
   const [editDesc, setEditDesc] = useState('')
   const [savingId, setSavingId] = useState<string | null>(null)
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
-
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { router.push('/login'); return }
-      const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (p?.role !== 'admin') { router.push('/browse'); return }
-      loadItems()
-    })
-  }, [])
-
-  useEffect(() => {
-    const q = search.toLowerCase()
-    if (!q) { setFiltered(items); return }
-    setFiltered(items.filter(it =>
-      it.title?.toLowerCase().includes(q) ||
-      it.tailor?.business_name?.toLowerCase().includes(q) ||
-      it.tailor?.profile?.full_name?.toLowerCase().includes(q) ||
-      it.service_type?.toLowerCase().includes(q)
-    ))
-  }, [search, items])
 
   async function loadItems() {
     setLoading(true)
@@ -62,6 +41,26 @@ export default function AdminPortfolioPage() {
     setItems((data as ItemWithCreative[]) || [])
     setLoading(false)
   }
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { router.push('/login'); return }
+      const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (p?.role !== 'admin') { router.push('/browse'); return }
+      loadItems()
+    })
+  }, [])
+
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    if (!q) return items
+    return items.filter(it =>
+      it.title?.toLowerCase().includes(q) ||
+      it.tailor?.business_name?.toLowerCase().includes(q) ||
+      it.tailor?.profile?.full_name?.toLowerCase().includes(q) ||
+      it.service_type?.toLowerCase().includes(q)
+    )
+  }, [search, items])
 
   const creativeName = (it: ItemWithCreative) =>
     it.tailor?.business_name || it.tailor?.profile?.full_name || 'Unknown creative'

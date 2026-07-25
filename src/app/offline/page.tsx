@@ -5,7 +5,7 @@ export default function OfflinePage() {
       <div className="w-16 h-16 bg-violet-100 rounded-2xl flex items-center justify-center mb-4">
         <span className="text-3xl">✂️</span>
       </div>
-      <h1 className="text-xl font-bold text-white mb-2">You're offline</h1>
+      <h1 className="text-xl font-bold text-white mb-2">You&apos;re offline</h1>
       <p className="text-zinc-500 text-sm max-w-xs">
         Check your internet connection and try again.
       </p>

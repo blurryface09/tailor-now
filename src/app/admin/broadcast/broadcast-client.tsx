@@ -224,7 +224,7 @@ export function BroadcastClient() {
                 className="w-full border border-white/[0.1] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
               />
               <p className="text-xs text-zinc-600 mt-1">
-                Recipients are greeted "Hi [Name]," automatically.
+                Recipients are greeted &quot;Hi [Name],&quot; automatically.
               </p>
             </div>
 

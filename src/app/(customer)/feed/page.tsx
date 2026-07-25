@@ -582,8 +582,6 @@ export default function FeedPage() {
   const [activeChip, setActiveChip] = useState('')
   const [showInspoModal, setShowInspoModal] = useState(false)
 
-  useEffect(() => { init() }, [])
-
   const init = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
@@ -593,7 +591,7 @@ export default function FeedPage() {
         supabase.from('tailor_profiles').select('id').eq('user_id', user.id).maybeSingle(),
         supabase.from('profiles').select('full_name').eq('id', user.id).single(),
       ])
-      setFollowing(new Set((followsRes.data || []).map((f: any) => f.following_id)))
+      setFollowing(new Set((followsRes.data || []).map((f: { following_id: string }) => f.following_id)))
       setIsCreative(!!creativeRes.data)
       setUserName(profileRes.data?.full_name || '')
     }
@@ -607,13 +605,13 @@ export default function FeedPage() {
         supabase.from('post_likes').select('post_id').eq('user_id', user.id),
         supabase.from('follows').select('following_id').eq('follower_id', user.id),
       ])
-      const likedSet = new Set((liked || []).map((l: any) => l.post_id))
-      const followedSet = new Set((follows || []).map((f: any) => f.following_id))
-      const withMeta = postsData.map((p: any) => ({ ...p, liked_by_me: likedSet.has(p.id) }))
+      const likedSet = new Set((liked || []).map((l: { post_id: string }) => l.post_id))
+      const followedSet = new Set((follows || []).map((f: { following_id: string }) => f.following_id))
+      const withMeta = (postsData as Post[]).map(p => ({ ...p, liked_by_me: likedSet.has(p.id) }))
       // Followed creatives' posts surface first
-      withMeta.sort((a: any, b: any) => {
-        const aFollowed = followedSet.has(a.creative?.user_id) ? 1 : 0
-        const bFollowed = followedSet.has(b.creative?.user_id) ? 1 : 0
+      withMeta.sort((a, b) => {
+        const aFollowed = a.creative?.user_id && followedSet.has(a.creative.user_id) ? 1 : 0
+        const bFollowed = b.creative?.user_id && followedSet.has(b.creative.user_id) ? 1 : 0
         return bFollowed - aFollowed
       })
       setPosts(withMeta)
@@ -622,6 +620,8 @@ export default function FeedPage() {
     }
     setLoading(false)
   }
+
+  useEffect(() => { init() }, [])
 
   const handleLike = async (postId: string, liked: boolean) => {
     if (!userId) { toast.error('Sign in to like posts'); return }
