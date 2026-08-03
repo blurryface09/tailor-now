@@ -8,6 +8,58 @@ function authHeaders() {
 
 export type PaystackBank = { name: string; code: string; slug: string }
 
+export type PaystackTransaction = {
+  status: string
+  reference: string
+  amount: number
+  metadata?: unknown
+}
+
+// Paystack hands metadata back as an object most of the time, but as a JSON
+// string on some channels (and as '' when it was never set). Normalise it so a
+// settled payment is never dropped just because of the shape it came back in.
+function readMetadata(metadata: unknown): Record<string, unknown> | null {
+  if (!metadata) return null
+  if (typeof metadata === 'object') return metadata as Record<string, unknown>
+  if (typeof metadata === 'string') {
+    try {
+      const parsed = JSON.parse(metadata)
+      return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : null
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+// References are minted as `TN-<orderId>-<type>-<timestamp>` at initialize time,
+// so the order is recoverable from the reference alone when metadata is absent.
+const REFERENCE_PATTERN =
+  /^TN-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})-/i
+
+export function orderIdFromReference(reference: string | null | undefined): string | null {
+  const match = typeof reference === 'string' ? reference.match(REFERENCE_PATTERN) : null
+  return match ? match[1].toLowerCase() : null
+}
+
+/** Resolve the order a transaction belongs to, metadata first then the reference. */
+export function orderIdFromTransaction(tx: PaystackTransaction | null | undefined): string | null {
+  if (!tx) return null
+  const fromMetadata = readMetadata(tx.metadata)?.orderId
+  if (typeof fromMetadata === 'string' && fromMetadata) return fromMetadata
+  return orderIdFromReference(tx.reference)
+}
+
+export async function verifyTransaction(reference: string): Promise<PaystackTransaction | null> {
+  const res = await fetch(`${PAYSTACK_BASE_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
+    headers: authHeaders(),
+    cache: 'no-store',
+  })
+  const data = await res.json()
+  if (!data?.status || !data.data) return null
+  return data.data as PaystackTransaction
+}
+
 export async function listBanks(): Promise<PaystackBank[]> {
   const res = await fetch(`${PAYSTACK_BASE_URL}/bank?country=nigeria&currency=NGN`, {
     headers: authHeaders(),

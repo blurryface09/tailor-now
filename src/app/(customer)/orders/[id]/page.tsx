@@ -1,6 +1,6 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
@@ -39,6 +39,8 @@ function OrderDetailContent() {
   const [counterPrice, setCounterPrice] = useState('')
   const [showCounter, setShowCounter] = useState(false)
   const [sendingCounter, setSendingCounter] = useState(false)
+  const [recheckingPayment, setRecheckingPayment] = useState(false)
+  const autoRecheckedRef = useRef(false)
 
   const fetchOrder = async () => {
     const { data } = await supabase.from('orders').select(`
@@ -49,17 +51,68 @@ function OrderDetailContent() {
       const { data: rating } = await supabase.from('ratings').select('*').eq('order_id', id).eq('reviewer_id', userId).single()
       setMyRating(rating)
     }
+    return (data ?? null) as Order | null
+  }
+
+  type ReconcileResult = { ok: boolean; status?: string; recovered?: boolean; error?: string }
+
+  // Ask the server to re-verify this order against Paystack. Covers the case
+  // where the charge went through but neither the webhook nor the checkout
+  // callback managed to record it.
+  const reconcilePayment = async (): Promise<ReconcileResult> => {
+    try {
+      const res = await fetch('/api/payments/reconcile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id }),
+      })
+      const data = await res.json()
+      if (!res.ok) return { ok: false, error: data.error }
+      if (data.status === 'paid') await fetchOrder()
+      return { ok: true, status: data.status, recovered: data.recovered }
+    } catch {
+      return { ok: false }
+    }
+  }
+
+  const recheckPayment = async () => {
+    setRecheckingPayment(true)
+    const result = await reconcilePayment()
+    setRecheckingPayment(false)
+
+    if (!result.ok) {
+      toast.error(result.error || 'Could not check your payment — please try again')
+      return
+    }
+    if (result.status === 'paid') toast.success('Payment confirmed!')
+    else if (result.status === 'failed') toast.error('That payment did not go through. Please try again.')
+    else if (result.status === 'pending') toast('Your payment is still processing — check back shortly.')
+    else toast.error('No completed payment found for this order yet.')
+  }
+
+  // Landing back here from checkout on an order that still reads unpaid means
+  // the charge was never recorded — settle it before the customer is shown
+  // "Ready to pay" for something they already paid for.
+  const recoverUnrecordedPayment = async (loaded: Order | null) => {
+    if (!loaded || loaded.deposit_paid || autoRecheckedRef.current) return
+    const payment = searchParams.get('payment')
+    if (payment !== 'success' && payment !== 'recording_failed' && payment !== 'unconfirmed') return
+    autoRecheckedRef.current = true
+    const result = await reconcilePayment()
+    if (result.recovered) toast.success('Payment confirmed!')
   }
 
   useEffect(() => {
     const payment = searchParams.get('payment')
     if (payment === 'success') toast.success('Payment successful!')
     else if (payment === 'failed') toast.error('Payment failed. Please try again.')
+    else if (payment === 'recording_failed' || payment === 'unconfirmed')
+      toast.loading('Confirming your payment…', { duration: 4000 })
 
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id)
     })
-    fetchOrder()
+    fetchOrder().then(recoverUnrecordedPayment)
     const channel = supabase.channel(`order-${id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders', filter: `id=eq.${id}` },
         () => fetchOrder())
@@ -332,6 +385,13 @@ function OrderDetailContent() {
               <Button className="w-full" size="lg" loading={sendingCounter} onClick={payAgreedPrice}>
                 Pay {formatCurrency(totalCharged)} via Paystack
               </Button>
+              <button
+                onClick={() => recheckPayment()}
+                disabled={recheckingPayment}
+                className="w-full mt-3 text-xs text-violet-700 underline hover:no-underline disabled:opacity-50"
+              >
+                {recheckingPayment ? 'Checking your payment…' : 'Already paid? Re-check payment'}
+              </button>
             </div>
           )
         })()}

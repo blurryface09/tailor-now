@@ -1,66 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { markOrderPaid } from '@/lib/payments'
 import { redirect } from 'next/navigation'
-import crypto from 'crypto'
+import { handlePaystackWebhook, markOrderPaid } from '@/lib/payments'
+import { orderIdFromReference, orderIdFromTransaction, verifyTransaction } from '@/lib/paystack'
 
-// Paystack webhook — called server-to-server after every successful charge
+// Same webhook Paystack posts to /api/payments/webhook — kept here because this
+// URL may already be registered in the Paystack dashboard.
 export async function POST(req: NextRequest) {
-  const secret = process.env.PAYSTACK_SECRET_KEY
-  if (!secret) return NextResponse.json({ error: 'misconfigured' }, { status: 500 })
-
   const body = await req.text()
-  const signature = req.headers.get('x-paystack-signature') ?? ''
-  const expected = crypto.createHmac('sha512', secret).update(body).digest('hex')
-
-  if (signature !== expected) {
-    return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
-  }
-
-  const event = JSON.parse(body)
-  if (event.event !== 'charge.success') {
-    return NextResponse.json({ received: true })
-  }
-
-  const { reference, amount, metadata } = event.data
-  const orderId = metadata?.orderId
-  if (orderId && reference) {
-    try {
-      await markOrderPaid(orderId, reference, amount / 100)
-    } catch (error) {
-      return NextResponse.json(
-        { error: error instanceof Error ? error.message : 'Could not record payment' },
-        { status: 500 }
-      )
-    }
-  }
-
-  return NextResponse.json({ received: true })
+  const { status, body: payload } = await handlePaystackWebhook(
+    body,
+    req.headers.get('x-paystack-signature')
+  )
+  return NextResponse.json(payload, { status })
 }
 
+// Checkout `callback_url` — where Paystack sends the customer's browser back to.
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const reference = searchParams.get('reference')
-  if (!reference) return redirect('/browse')
+  const reference = searchParams.get('reference') || searchParams.get('trxref')
+  if (!reference) redirect('/browse')
 
-  const res = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
-    headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
-  })
-  const data = await res.json()
+  // Fall back to the order encoded in the reference so a customer is always
+  // returned to their own order, even if the verify call itself fails.
+  const referenceOrderId = orderIdFromReference(reference)
+  const backToOrder = (state: string) =>
+    referenceOrderId ? `/orders/${referenceOrderId}?payment=${state}` : `/orders?payment=${state}`
 
-  if (!data.status || data.data.status !== 'success') {
-    return redirect(`/orders?payment=failed`)
+  let transaction
+  try {
+    transaction = await verifyTransaction(reference)
+  } catch (error) {
+    console.error('[payments] verify call failed for', reference, error)
+    redirect(backToOrder('unconfirmed'))
   }
 
-  const { orderId } = data.data.metadata
-  const amount = data.data.amount / 100
+  if (!transaction) redirect(backToOrder('unconfirmed'))
+  if (transaction.status !== 'success') redirect(backToOrder('failed'))
 
-  if (!orderId) return redirect('/browse')
+  const orderId = orderIdFromTransaction(transaction) ?? referenceOrderId
+  if (!orderId) redirect('/browse')
 
   try {
-    await markOrderPaid(orderId, reference, amount)
-  } catch {
-    return redirect(`/orders/${orderId}?payment=recording_failed`)
+    await markOrderPaid(orderId, transaction.reference, (transaction.amount ?? 0) / 100)
+  } catch (error) {
+    console.error(`[payments] could not record payment for order ${orderId}:`, error)
+    redirect(`/orders/${orderId}?payment=recording_failed`)
   }
 
-  return redirect(`/orders/${orderId}?payment=success`)
+  redirect(`/orders/${orderId}?payment=success`)
 }
