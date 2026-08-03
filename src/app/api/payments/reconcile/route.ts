@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { markOrderPaid } from '@/lib/payments'
-import { verifyTransaction } from '@/lib/paystack'
+import { findSuccessfulTransactionForOrder, verifyTransaction } from '@/lib/paystack'
 
 type ReconcileOrder = {
   id: string
@@ -48,15 +48,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: 'paid', recovered: false })
   }
 
-  if (!order.paystack_ref) {
+  // The reference from the latest checkout attempt, when there is one.
+  const attempted = order.paystack_ref ? await verifyTransaction(order.paystack_ref) : null
+
+  // Fall back to searching Paystack directly. Covers orders paid before the
+  // reference was persisted, and earlier attempts that succeeded after the
+  // stored reference had already been overwritten by a later one.
+  const transaction =
+    attempted?.status === 'success' ? attempted : await findSuccessfulTransactionForOrder(order.id)
+
+  if (!transaction) {
+    if (attempted) {
+      return NextResponse.json({ status: attempted.status === 'failed' ? 'failed' : 'pending' })
+    }
     return NextResponse.json({ status: 'no_payment_found' })
-  }
-
-  const transaction = await verifyTransaction(order.paystack_ref)
-  if (!transaction) return NextResponse.json({ status: 'no_payment_found' })
-
-  if (transaction.status !== 'success') {
-    return NextResponse.json({ status: transaction.status === 'failed' ? 'failed' : 'pending' })
   }
 
   try {
