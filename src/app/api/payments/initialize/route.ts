@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateServiceCharge, calculateCommission } from '@/lib/utils'
 
 export async function POST(req: NextRequest) {
@@ -54,6 +55,10 @@ export async function POST(req: NextRequest) {
       }
     : {}
 
+  // Keep the order id in the reference itself so a settled charge can always be
+  // traced back to its order, even if Paystack returns no usable metadata.
+  const reference = `TN-${orderId}-${type}-${Date.now()}`
+
   const res = await fetch('https://api.paystack.co/transaction/initialize', {
     method: 'POST',
     headers: {
@@ -63,7 +68,7 @@ export async function POST(req: NextRequest) {
     body: JSON.stringify({
       email,
       amount: Math.round(totalCharged * 100),
-      reference: `TN-${orderId}-${type}-${Date.now()}`,
+      reference,
       callback_url: `${appUrl}/api/payments/verify`,
       ...splitFields,
       metadata: {
@@ -83,5 +88,16 @@ export async function POST(req: NextRequest) {
 
   const data = await res.json()
   if (!data.status) return NextResponse.json({ error: data.message }, { status: 400 })
+
+  // Record the attempted reference so the payment can be re-checked against
+  // Paystack later if neither the webhook nor the callback lands. `deposit_paid`
+  // stays the authoritative "this order is paid" flag.
+  const { error: refError } = await createAdminClient()
+    .from('orders')
+    .update({ paystack_ref: reference })
+    .eq('id', orderId)
+
+  if (refError) console.error(`[payments] could not store reference for order ${orderId}:`, refError.message)
+
   return NextResponse.json({ ...data.data, serviceCharge, totalCharged })
 }
