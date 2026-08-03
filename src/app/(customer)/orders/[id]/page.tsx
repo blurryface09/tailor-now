@@ -40,6 +40,7 @@ function OrderDetailContent() {
   const [showCounter, setShowCounter] = useState(false)
   const [sendingCounter, setSendingCounter] = useState(false)
   const [recheckingPayment, setRecheckingPayment] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const autoRecheckedRef = useRef(false)
 
   const fetchOrder = async () => {
@@ -109,8 +110,11 @@ function OrderDetailContent() {
     else if (payment === 'recording_failed' || payment === 'unconfirmed')
       toast.loading('Confirming your payment…', { duration: 4000 })
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUserId(user.id)
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      setUserId(user.id)
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      setIsAdmin(profile?.role === 'admin')
     })
     fetchOrder().then(recoverUnrecordedPayment)
     const channel = supabase.channel(`order-${id}`)
@@ -451,6 +455,15 @@ function OrderDetailContent() {
               </div>
               {order.deposit_paid && !['completed'].includes(order.status) && (
                 <p className="text-xs text-zinc-600">Payment held securely — released to creative after you confirm delivery</p>
+              )}
+              {!order.deposit_paid && isAdmin && (
+                <button
+                  onClick={() => recheckPayment()}
+                  disabled={recheckingPayment}
+                  className="w-full mt-2 text-xs text-violet-700 underline hover:no-underline disabled:opacity-50"
+                >
+                  {recheckingPayment ? 'Checking Paystack…' : 'Re-check payment with Paystack'}
+                </button>
               )}
             </div>
           </div>

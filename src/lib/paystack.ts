@@ -50,6 +50,38 @@ export function orderIdFromTransaction(tx: PaystackTransaction | null | undefine
   return orderIdFromReference(tx.reference)
 }
 
+/**
+ * Search recent successful charges for one belonging to `orderId`.
+ *
+ * Recovery path for orders paid before the reference was persisted at
+ * initialize time — there is nothing stored to verify against, so the
+ * transaction has to be found from Paystack's side instead.
+ */
+export async function findSuccessfulTransactionForOrder(
+  orderId: string,
+  maxPages = 5
+): Promise<PaystackTransaction | null> {
+  const wanted = orderId.toLowerCase()
+
+  for (let page = 1; page <= maxPages; page++) {
+    const res = await fetch(
+      `${PAYSTACK_BASE_URL}/transaction?status=success&perPage=100&page=${page}`,
+      { headers: authHeaders(), cache: 'no-store' }
+    )
+    const data = await res.json()
+    if (!data?.status || !Array.isArray(data.data) || data.data.length === 0) return null
+
+    for (const tx of data.data as PaystackTransaction[]) {
+      if (tx.status !== 'success') continue
+      if (orderIdFromTransaction(tx)?.toLowerCase() === wanted) return tx
+    }
+
+    if (data.data.length < 100) return null
+  }
+
+  return null
+}
+
 export async function verifyTransaction(reference: string): Promise<PaystackTransaction | null> {
   const res = await fetch(`${PAYSTACK_BASE_URL}/transaction/verify/${encodeURIComponent(reference)}`, {
     headers: authHeaders(),
