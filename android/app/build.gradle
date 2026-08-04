@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Release signing is driven entirely by env vars so no keystore or password ever
+// lands in the repo. When they are absent (local builds, PR builds) the release
+// variant is left unsigned and only assembleDebug is useful.
+def keystorePath = System.getenv('ANDROID_KEYSTORE_PATH')
+def hasReleaseSigning = keystorePath != null && !keystorePath.isEmpty() && file(keystorePath).exists()
+
+android {
+    namespace 'shop.tailornow.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'shop.tailornow.app'
+        minSdk 21
+        targetSdk 35
+
+        // Bump versionCode for every Play Store upload; CI can override both
+        // via env so a release does not need a commit to change the number.
+        versionCode(System.getenv('ANDROID_VERSION_CODE') ? System.getenv('ANDROID_VERSION_CODE').toInteger() : 1)
+        versionName System.getenv('ANDROID_VERSION_NAME') ?: '1.0.0'
+    }
+
+    if (hasReleaseSigning) {
+        signingConfigs {
+            release {
+                storeFile file(keystorePath)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // The app is a thin shell around the website — there is no app logic
+            // worth shrinking, and minification only risks stripping the
+            // browser-helper classes the manifest names by string.
+            minifyEnabled false
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            // Suffix so a debug build can sit alongside a Play Store install.
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Google's official Trusted Web Activity helper. It provides the
+    // LauncherActivity the manifest points at, handles the Custom Tabs
+    // handshake, the splash screen, and the fallback to a normal Custom Tab on
+    // devices whose browser cannot host a TWA.
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}
