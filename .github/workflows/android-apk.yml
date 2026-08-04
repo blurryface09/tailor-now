@@ -15,8 +15,9 @@ on:
         description: 'versionCode — must increase for every Play Store upload'
         required: false
         default: '1'
+  # Deliberately not limited to main: an Android change should be proven to
+  # still produce an installable APK on the branch, before it is merged.
   push:
-    branches: [main]
     paths:
       - 'android/**'
       - '.github/workflows/android-apk.yml'
