@@ -51,9 +51,20 @@ Verify with Google's checker:
 https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://tailornow.shop&relation=delegate_permission/common.handle_all_urls
 ```
 
-Debug and release builds are signed by **different** keys, so they have different
-fingerprints. `sha256_cert_fingerprints` is an array — list both if you want the
-debug build to run fullscreen too.
+Use the **release** fingerprint here. Debug and release builds are signed by
+different keys, and the debug key is not stable: Gradle generates a fresh random
+`~/.android/debug.keystore` on each CI runner, so a debug APK's fingerprint
+changes on every run. Pasting a debug fingerprint pins the URL bar removal to one
+throwaway build and silently stops working on the next one.
+
+That means a CI-built debug APK always shows the URL bar. It is still perfectly
+usable for testing — the app works, it just is not fullscreen. To get a
+fullscreen build, set up release signing below; that key is stable, so its
+fingerprint stays valid.
+
+(`sha256_cert_fingerprints` is an array, so several keys can be listed at once —
+useful when rotating an upload key, or to add a *locally held* debug keystore
+that you reuse rather than regenerate.)
 
 ## Play Store release
 
