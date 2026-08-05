@@ -15,16 +15,27 @@ on:
         description: 'versionCode — must increase for every Play Store upload'
         required: false
         default: '1'
-  # Deliberately not limited to main: an Android change should be proven to
-  # still produce an installable APK on the branch, before it is merged.
+  # Not limited to main: an Android change should be proven to still produce an
+  # installable APK on the branch, before it is merged.
+  #
+  # No `paths` filter here on purpose. GitHub requires every push filter to match,
+  # so combining `paths` with `tags` would skip a release tag whenever the tagged
+  # commit happened not to touch android/ — exactly the commit that must build.
+  # The job takes about a minute, so building on every push is the cheaper trade.
   push:
-    paths:
-      - 'android/**'
-      - '.github/workflows/android-apk.yml'
+    branches:
+      - '**'
+    # A v* tag publishes the release APK so /download can link to it.
+    tags:
+      - 'v*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # Needed only by the release step; every other step is read-only.
+    permissions:
+      contents: write
 
     env:
       # Resolved at job level because the secrets context is not reliably
@@ -120,3 +131,28 @@ jobs:
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 90
+
+      # Publishes the APK under a fixed asset name so
+      # /releases/latest/download/tailornow.apk is a permanent link the
+      # /download page can point at without being edited each release.
+      - name: Publish release APK
+        if: startsWith(github.ref, 'refs/tags/v') && env.HAS_SIGNING == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          if [ ! -f "$APK" ]; then
+            echo "::error::No release APK at $APK — signing secrets may be incomplete."
+            exit 1
+          fi
+          cp "$APK" tailornow.apk
+          gh release create "${GITHUB_REF_NAME}" tailornow.apk \
+            --title "TailorNow ${GITHUB_REF_NAME}" \
+            --notes "Android app for tailornow.shop. Install instructions: https://tailornow.shop/download" \
+            || gh release upload "${GITHUB_REF_NAME}" tailornow.apk --clobber
+
+      - name: Warn when a tag cannot be released
+        if: startsWith(github.ref, 'refs/tags/v') && env.HAS_SIGNING != 'true'
+        run: |
+          echo "::warning::Tag ${GITHUB_REF_NAME} built, but no release was published \
+          because signing secrets are not configured. A debug APK cannot be shipped to users."
