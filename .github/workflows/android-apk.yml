@@ -78,7 +78,9 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon assembleRelease
+        # Both formats: the AAB is what Google Play accepts for a new app, the
+        # APK is for distributing the same release outside the store.
+        run: ./gradlew --no-daemon assembleRelease bundleRelease
 
       # Each fingerprint below must appear in
       # https://tailornow.shop/.well-known/assetlinks.json or Android shows a
@@ -108,3 +110,13 @@ jobs:
           path: android/app/build/outputs/apk/**/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      # Separate artifact so the Play Store upload is not buried among the APKs.
+      - name: Upload release AAB
+        if: env.HAS_SIGNING == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tailornow-playstore-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 90

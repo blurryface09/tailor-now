@@ -66,9 +66,34 @@ fingerprint stays valid.
 useful when rotating an upload key, or to add a *locally held* debug keystore
 that you reuse rather than regenerate.)
 
-## Play Store release
+## Shipping to real users
 
-The workflow builds a signed release APK only when signing secrets exist.
+A debug APK is for testing only: it is signed with a throwaway key, so it cannot
+be updated in place and always shows the URL bar. Users need a **release** build.
+
+Once signing secrets exist the workflow produces both formats, because they serve
+different channels:
+
+| Artifact | Channel |
+|---|---|
+| `tailornow-playstore-aab` (`.aab`) | Google Play — required format for a new app |
+| `tailornow-apk` (`app-release.apk`) | Direct download from your own site |
+
+Play Store also needs, beyond the AAB: a Play Console account (one-off
+registration fee), a store listing, a content rating questionnaire, the Data
+Safety form, and a privacy policy URL — `/privacy` already exists and can be
+used. Review typically takes a few days for a first submission.
+
+One policy note worth knowing up front: Play rejects low-value webview wrappers
+under its Spam and Minimum Functionality policy. A Trusted Web Activity over a
+real PWA is the pattern Google itself documents for this, so it is the accepted
+form rather than the rejected one — but the listing should describe the service,
+not present the app as a browser.
+
+Direct APK download has no review and no fee, and is a common distribution route
+in Nigeria, but users must permit installs from unknown sources, and nothing
+auto-updates unless you build that yourself.
+
 Generate an upload key once and keep it safe — losing it means you cannot ship
 updates to an existing listing.
 
