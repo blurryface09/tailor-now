@@ -39,7 +39,8 @@ const EXPECTATIONS = [
 ]
 
 // CHECK constraints cannot be inspected through PostgREST, so they cannot be
-// probed read-only. Listed here so they are not silently forgotten.
+// probed from here. supabase/verify-schema.sql checks them as real SQL; these are
+// listed so they are not silently forgotten if that file is not run.
 const UNPROBEABLE = [
   {
     what: "posts_post_type_check must allow 'editorial'",

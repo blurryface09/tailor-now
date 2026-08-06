@@ -21,6 +21,11 @@ NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npm run check:schema
 Read-only. It probes every table and column the app depends on and names the file
 to run for anything missing. Exits non-zero on drift, so it can gate a deploy.
 
+For the fuller picture, paste `verify-schema.sql` into the Supabase SQL editor. It
+covers the same columns and tables plus the CHECK constraints, which the Node check
+cannot see — PostgREST does not expose them, but the SQL editor does. Use it when
+you are unsure whether a particular migration ever ran.
+
 When a new `.sql` file adds something the app reads or writes, add it to
 `EXPECTATIONS` in `scripts/check-schema.mjs`. That list is what makes the check
 meaningful — a migration absent from it is a migration nobody will notice missing.
