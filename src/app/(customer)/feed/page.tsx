@@ -1,6 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
 import Image from 'next/image'
+import { SwipeDeck } from '@/components/feed/swipe-deck'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
@@ -601,6 +602,9 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(true)
   const [activeChip, setActiveChip] = useState('')
   const [showInspoModal, setShowInspoModal] = useState(false)
+  // Scroll stays the default: it is what search engines crawl and what lets people
+  // skim many looks quickly. Discover is the swipe deck.
+  const [mode, setMode] = useState<'scroll' | 'swipe'>('scroll')
 
   const init = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -727,6 +731,18 @@ export default function FeedPage() {
           )}
         </div>
 
+        {/* Mode toggle */}
+        <div className="flex items-center gap-1 p-1 bg-zinc-100 rounded-2xl mb-4">
+          {([['scroll', '☰ Feed'], ['swipe', '✨ Discover']] as const).map(([value, label]) => (
+            <button key={value} onClick={() => setMode(value)}
+              className={`flex-1 text-xs font-bold py-2 rounded-xl transition-all ${
+                mode === value ? 'bg-white text-violet-700 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+              }`}>
+              {label}
+            </button>
+          ))}
+        </div>
+
         {/* Filter chips */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 mb-5">
           {CHIPS.map(chip => (
@@ -749,6 +765,25 @@ export default function FeedPage() {
             <div className="w-10 h-10 rounded-full border-2 border-violet-500/30 border-t-violet-500 animate-spin" />
             <p className="text-zinc-600 text-sm">Loading the feed…</p>
           </div>
+        ) : mode === 'swipe' ? (
+          // Real posts only. The demo showroom exists to make an empty feed look
+          // alive when scrolling; dealing fake cards into a deck someone is
+          // actively judging would just waste their swipes.
+          filteredPosts.length > 0 ? (
+            <SwipeDeck posts={filteredPosts} userId={userId} onLike={handleLike} />
+          ) : (
+            <div className="text-center py-20 bg-white rounded-3xl border border-zinc-200 shadow-sm">
+              <div className="text-4xl mb-3">✨</div>
+              <p className="text-zinc-900 font-semibold text-sm mb-1">Nothing to discover yet</p>
+              <p className="text-zinc-500 text-xs mb-5 max-w-xs mx-auto">
+                {activeChip ? 'No posts in this category.' : 'Once creatives start posting, swipe through their work here.'}
+              </p>
+              <button onClick={() => activeChip ? setActiveChip('') : setMode('scroll')}
+                className="text-xs font-semibold text-violet-600 hover:text-violet-700 transition-colors">
+                {activeChip ? 'View all posts →' : 'Back to the feed →'}
+              </button>
+            </div>
+          )
         ) : (
           <div className="space-y-5">
             {/* Real posts */}
