@@ -214,6 +214,14 @@ function Button({ pos, rot, scale, color, eScale, speed, phase }: {
 }
 
 /* ─── Ambient sparkle dust ───────────────────────────────────── */
+// Deterministic scatter, derived from the particle index. useMemo is a caching
+// hint rather than a guarantee, so Math.random() here let the whole field jump to
+// a new layout any time React chose to recompute it.
+function scatter(i: number, axis: number) {
+  const x = Math.sin(i * 127.1 + axis * 311.7) * 43758.5453
+  return x - Math.floor(x)
+}
+
 function SparkleField({ count = 200, variant }: { count?: number; variant: 'full' | 'subtle' | 'light' }) {
   const pts = useRef<THREE.Points>(null)
   const { positions, colors } = useMemo(() => {
@@ -223,9 +231,9 @@ function SparkleField({ count = 200, variant }: { count?: number; variant: 'full
     const amber  = new THREE.Color('#C68A52')
     const white  = new THREE.Color('#ffffff')
     for (let i = 0; i < count; i++) {
-      positions[i*3]   = (Math.random()-0.5)*28
-      positions[i*3+1] = (Math.random()-0.5)*20
-      positions[i*3+2] = (Math.random()-0.5)*12-3
+      positions[i*3]   = (scatter(i,1)-0.5)*28
+      positions[i*3+1] = (scatter(i,2)-0.5)*20
+      positions[i*3+2] = (scatter(i,3)-0.5)*12-3
       const c = i%5===0 ? amber : i%3===0 ? white : violet
       colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b
     }
@@ -253,6 +261,11 @@ function SparkleField({ count = 200, variant }: { count?: number; variant: 'full
 function CameraRig({ strength }: { strength: number }) {
   const { camera, mouse } = useThree()
   useFrame(() => {
+    // react-hooks/immutability does not model react-three-fiber: useFrame runs on
+    // the render loop rather than during React render, and driving the camera by
+    // mutation is the documented way to do this. Rebuilding the camera through
+    // state every frame would re-render the tree 60 times a second.
+    /* eslint-disable-next-line react-hooks/immutability */
     camera.position.x += (mouse.x * strength - camera.position.x) * 0.05
     camera.position.y += (mouse.y * strength * 0.7 - camera.position.y) * 0.05
     camera.lookAt(0, 0, 0)

@@ -159,7 +159,9 @@ export function ProductClient() {
               {priceLabel}
             </div>
           )}
-          {!priceLabel && post.post_type !== 'inspo' && (
+          {/* Products only. An inspo or editorial post has nothing to buy, and an
+              editorial one has no creative to chat to — creative_id is null. */}
+          {!priceLabel && (post.post_type ?? 'product') === 'product' && (
             <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 text-white/80 text-xs font-semibold px-3 py-2 rounded-2xl">
               Chat for price
             </div>
