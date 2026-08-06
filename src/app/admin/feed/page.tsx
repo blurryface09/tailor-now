@@ -43,6 +43,11 @@ export default function AdminFeedPage() {
   const [images, setImages] = useState<string[]>([])
   const [caption, setCaption] = useState('')
   const [contentTag, setContentTag] = useState('')
+  // Optional attribution. Crediting the creative who made the piece is what turns
+  // an editorial post into proof the marketplace works, and gives creatives a
+  // reason to want featuring.
+  const [creditCreativeId, setCreditCreativeId] = useState('')
+  const [creatives, setCreatives] = useState<{ id: string; business_name: string }[]>([])
 
   // per-post pending image replacement (select → preview → save)
   const [pending, setPending] = useState<Record<string, PendingImage>>({})
@@ -66,8 +71,18 @@ export default function AdminFeedPage() {
       if (p?.role !== 'admin') { router.push('/browse'); return }
       setUserId(user.id)
       loadPosts()
+      loadCreatives()
     })
   }, [])
+
+  async function loadCreatives() {
+    const { data } = await supabase
+      .from('tailor_profiles')
+      .select('id, business_name')
+      .eq('is_verified', true)
+      .order('business_name')
+    setCreatives(data || [])
+  }
 
   async function loadPosts() {
     const { data } = await supabase
@@ -78,7 +93,7 @@ export default function AdminFeedPage() {
     setPosts(data || [])
   }
 
-  const reset = () => { setAdding(false); setImages([]); setCaption(''); setContentTag(''); setEditorialTitle('') }
+  const reset = () => { setAdding(false); setImages([]); setCaption(''); setContentTag(''); setEditorialTitle(''); setCreditCreativeId('') }
 
   const savePost = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,7 +104,9 @@ export default function AdminFeedPage() {
     const fullCaption = contentTag ? `[${contentTag}]\n${caption.trim()}` : caption.trim()
     const { error } = await supabase.from('posts').insert({
       user_id: userId,
-      creative_id: null,
+      // Set only to credit the maker. post_type stays 'editorial', so the feed
+      // keeps TailorNow branding and renders this as attribution.
+      creative_id: creditCreativeId || null,
       title: editorialTitle.trim() || null,
       caption: fullCaption,
       image_urls: images,
@@ -264,6 +281,23 @@ export default function AdminFeedPage() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1.5">
+                Credit a creative <span className="text-zinc-600 normal-case font-normal">(optional)</span>
+              </label>
+              <select
+                value={creditCreativeId}
+                onChange={e => setCreditCreativeId(e.target.value)}
+                className="w-full border border-white/[0.1] rounded-xl px-4 py-2.5 text-sm bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent">
+                <option value="" className="text-black">No credit — links to Browse instead</option>
+                {creatives.map(c => (
+                  <option key={c.id} value={c.id} className="text-black">{c.business_name}</option>
+                ))}
+              </select>
+              <p className="text-zinc-600 text-xs mt-1.5">
+                Shows &ldquo;Tailored by …&rdquo; on the post, linking to their profile. The post stays TailorNow-branded.
+              </p>
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1.5">Caption</label>

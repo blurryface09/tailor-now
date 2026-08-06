@@ -270,7 +270,11 @@ function PostCard({
 
   const isProduct = (post.post_type ?? 'product') === 'product'
   const isInspo = post.post_type === 'inspo'
-  const isAdminPost = !post.creative_id
+  const isEditorial = post.post_type === 'editorial'
+  // An editorial post stays TailorNow-branded even when it credits a creative, so
+  // the credit reads as attribution rather than turning it into the creative's own
+  // post — which is what keying purely off creative_id would have done.
+  const isAdminPost = isEditorial || !post.creative_id
   const creativeUserId = post.creative?.user_id || post.user_id
   const isOwnPost = userId === post.user_id
   const isFollowing = following.has(creativeUserId)
@@ -445,9 +449,25 @@ function PostCard({
             </Link>
           </div>
         ) : (
+          // Editorial. This used to be a dead end: a static "TailorNow Original"
+          // label with nothing to tap, on the one post type whose whole job is to
+          // send people into the marketplace.
           <div className="flex items-center justify-between mt-3">
-            <span className="text-xs text-zinc-600">{formatRelativeTime(post.created_at)}</span>
-            <span className="text-xs font-bold text-violet-400 flex items-center gap-1"><Sparkles size={10} /> TailorNow Original</span>
+            <span className="text-xs font-bold text-violet-400 flex items-center gap-1 flex-shrink-0">
+              <Sparkles size={10} /> TailorNow Original
+            </span>
+            {post.creative_id ? (
+              <Link href={`/tailors/${post.creative_id}`}
+                className="flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors min-w-0">
+                <span className="truncate">Tailored by {post.creative?.business_name || 'a creative'}</span>
+                <ArrowRight size={11} className="flex-shrink-0" />
+              </Link>
+            ) : (
+              <Link href="/browse"
+                className="flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors flex-shrink-0">
+                Get this made <ArrowRight size={11} />
+              </Link>
+            )}
           </div>
         )}
       </div>
