@@ -215,7 +215,9 @@ export interface Post {
   likes_count: number
   comments_count: number
   created_at: string
-  post_type: 'product' | 'inspo'
+  // 'editorial' is an admin-authored feed post: it carries a content tag instead
+  // of a service type, and has no price or ordering actions.
+  post_type: 'product' | 'inspo' | 'editorial'
   price?: number | null
   title?: string | null
   is_available?: boolean

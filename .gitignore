@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# android
+/android/build
+/android/app/build
+/android/.gradle
+/android/local.properties
+# signing material must never be committed — CI reads it from repository secrets
+*.keystore
+*.jks
