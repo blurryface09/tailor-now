@@ -317,12 +317,14 @@ export default function EditCreativeProfile() {
           </div>
 
           {/* Payout account */}
+          <div id="payout-account">
           <PayoutAccountCard
             initialBankCode={payoutAccount.bankCode}
             initialAccountNumber={payoutAccount.accountNumber}
             initialAccountName={payoutAccount.accountName}
             hasSubaccount={payoutAccount.hasSubaccount}
           />
+          </div>
 
           {/* Basic info */}
           <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 space-y-4">

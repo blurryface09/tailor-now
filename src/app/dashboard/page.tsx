@@ -165,6 +165,27 @@ export default async function TailorDashboard() {
           </div>
         )}
 
+        {/* Payout account not set up — earnings would sit in manual payout instead of paying out instantly */}
+        {!tailor.paystack_subaccount_code && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-4 mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <Clock size={18} className="text-green-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-green-300 text-sm">Add your bank account to get paid instantly</p>
+                <p className="text-xs text-green-400/80 mt-0.5">
+                  Right now your earnings need a manual transfer from us. Add your bank details once and every future order pays out to you automatically the moment a customer pays.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/tailor/profile#payout-account"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-950/20 transition-colors hover:bg-green-400 flex-shrink-0"
+            >
+              Add bank account
+            </Link>
+          </div>
+        )}
+
         {pendingOrders > 0 && (
           <div className="bg-violet-50 border border-violet-500/30 rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-2 text-violet-300">
