@@ -162,7 +162,7 @@ export function Navbar() {
     : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'
 
   const dropdownBg = isDark
-    ? 'bg-zinc-900/95 backdrop-blur-xl border border-white/[0.08] shadow-2xl shadow-black/50'
+    ? 'bg-zinc-900 border border-white/[0.08] shadow-2xl shadow-black/50'
     : 'bg-white border border-zinc-200 shadow-xl shadow-zinc-200/60'
 
   const dropdownItem = isDark
