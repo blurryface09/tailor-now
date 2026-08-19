@@ -244,7 +244,7 @@ export default function CreativePostsPage() {
     fetch('/api/posts/notify-followers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ postId: inserted?.id, creativeUserId: userId, postTitle: title.trim() || null, businessName }),
+      body: JSON.stringify({ postId: inserted?.id, creativeUserId: userId, postTitle: title.trim() || null, businessName, image: images[0] || null }),
     }).catch(() => null)
     resetForm()
     loadPosts(creativeId)
