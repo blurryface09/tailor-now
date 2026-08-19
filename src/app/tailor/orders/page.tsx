@@ -1,6 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, formatCurrency, formatDate, cn } from '@/lib/utils'
@@ -297,9 +298,9 @@ export default function TailorOrdersPage() {
       </div>
 
       {/* Quote modal */}
-      {quoteModal && (
+      {quoteModal && createPortal(
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setQuoteModal(null)}>
-          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#1b1626] border border-white/[0.1] rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
             <h2 className="font-bold text-white text-lg mb-1">Send a counter offer</h2>
             <p className="text-sm text-zinc-500 mb-5">
               {quoteModal.currentBudget
@@ -333,7 +334,8 @@ export default function TailorOrdersPage() {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

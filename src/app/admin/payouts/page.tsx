@@ -1,6 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { CheckCircle, Clock, XCircle, AlertCircle, Search, ChevronDown, Download } from 'lucide-react'
@@ -249,16 +250,17 @@ export default function AdminPayoutsPage() {
         </div>
       </div>
 
-      {showBankModal && (
+      {showBankModal && createPortal(
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl p-6 w-full max-w-sm shadow-xl">
+          <div className="bg-[#1b1626] border border-white/[0.1] rounded-2xl p-6 w-full max-w-sm shadow-xl">
             <h3 className="font-bold text-white mb-4">Bank Details</h3>
             <p className="text-sm text-zinc-400 mb-1"><span className="font-medium">Account Name:</span> {showBankModal.account_name || 'N/A'}</p>
             <p className="text-sm text-zinc-400 mb-1"><span className="font-medium">Account Number:</span> {showBankModal.account_number || 'N/A'}</p>
             <p className="text-sm text-zinc-400 mb-4"><span className="font-medium">Bank:</span> {showBankModal.bank_name || 'N/A'}</p>
             <button onClick={() => setShowBankModal(null)} className="w-full py-2.5 bg-white/[0.06] rounded-xl text-sm font-semibold hover:bg-white/[0.08]">Close</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import Image from 'next/image'
 import { SwipeDeck } from '@/components/feed/swipe-deck'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { ImageUpload } from '@/components/ui/image-upload'
@@ -542,9 +543,13 @@ function InspoModal({ userId, onClose, onPosted }: {
     onClose()
   }
 
-  return (
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
       <div className="relative w-full max-w-lg bg-[#0e0e10] border border-white/[0.09] rounded-t-3xl p-6 shadow-2xl"
         style={{ animation: 'fade-up 0.3s cubic-bezier(0.22,1,0.36,1) both' }}>
         {/* Handle */}
@@ -589,7 +594,8 @@ function InspoModal({ userId, onClose, onPosted }: {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
