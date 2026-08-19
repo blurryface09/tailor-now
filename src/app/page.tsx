@@ -191,7 +191,7 @@ export default function LandingPage() {
         <div className="relative w-full max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-16 items-center py-24 lg:py-0 min-h-[calc(100svh-5rem)]">
 
           {/* Text side */}
-          <div className="order-2 lg:order-1 flex flex-col justify-center">
+          <div className="order-1 lg:order-1 flex flex-col justify-center">
             <div className="inline-flex items-center gap-2.5 bg-violet-50 border border-violet-200 rounded-full px-4 py-2 text-xs w-fit mb-8 fade-up">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
               <span className="text-violet-700 font-medium">Nigeria&apos;s #1 fashion marketplace</span>
@@ -244,7 +244,7 @@ export default function LandingPage() {
           </div>
 
           {/* 3D image stack — parallax layers at different depths */}
-          <div className="order-1 lg:order-2 flex justify-center lg:justify-end">
+          <div className="order-2 lg:order-2 flex justify-center lg:justify-end">
             <div className="relative w-80 h-[480px] lg:w-[420px] lg:h-[560px]">
 
               {/* Layer 3 — deepest */}
