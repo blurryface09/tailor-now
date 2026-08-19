@@ -10,6 +10,7 @@ import { Plus, Trash2, X, Heart, MessageSquare, ImageIcon, Sparkles, Edit3, Save
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import type { Post, Profile } from '@/types'
+import { isStaff } from '@/lib/roles'
 
 const FEED_TAGS = [
   { label: '🔥 Style of the Week', value: '🔥 Style of the Week' },
@@ -68,7 +69,7 @@ export default function AdminFeedPage() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/login'); return }
       const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (p?.role !== 'admin') { router.push('/browse'); return }
+      if (!isStaff(p?.role)) { router.push('/browse'); return }
       setUserId(user.id)
       loadPosts()
       loadCreatives()

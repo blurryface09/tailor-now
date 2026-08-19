@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getResend, sendBatch } from '@/lib/email'
+import { isStaff } from '@/lib/roles'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://tailornow.shop'
 
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (adminProfile?.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (!isStaff(adminProfile?.role)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   if (!getResend()) {
     return NextResponse.json(

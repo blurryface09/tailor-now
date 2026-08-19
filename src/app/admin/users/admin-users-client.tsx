@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Mail, Phone, MapPin, ShoppingBag, Scissors, Shield, UserX, UserCheck } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import type { Profile } from '@/types'
@@ -9,30 +8,39 @@ import toast from 'react-hot-toast'
 const ROLE_CONFIG = {
   customer: { label: 'Customer', color: 'bg-blue-100 text-blue-700', icon: <ShoppingBag size={11} /> },
   tailor:   { label: 'Creative', color: 'bg-violet-100 text-violet-700', icon: <Scissors size={11} /> },
+  support:  { label: 'Support',  color: 'bg-amber-100 text-amber-700', icon: <Shield size={11} /> },
   admin:    { label: 'Admin',    color: 'bg-red-100 text-red-400', icon: <Shield size={11} /> },
 }
 
 export function AdminUsersClient({ users: initial, orderCounts }: { users: Profile[]; orderCounts: Record<string, number> }) {
-  const supabase = createClient()
   const [users, setUsers] = useState(initial)
   const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState<'all' | 'customer' | 'tailor' | 'admin'>('all')
+  const [roleFilter, setRoleFilter] = useState<'all' | 'customer' | 'tailor' | 'support' | 'admin'>('all')
 
-  const promoteToAdmin = async (id: string) => {
-    if (!confirm('Make this user an admin? They will have full access to the admin panel.')) return
-    const { error } = await supabase.from('profiles').update({ role: 'admin' }).eq('id', id)
-    if (error) { toast.error(error.message); return }
-    setUsers(u => u.map(x => x.id === id ? { ...x, role: 'admin' } : x))
-    toast.success('User promoted to admin')
-  }
-
-  const demoteUser = async (id: string, currentRole: string) => {
-    if (!confirm(`Remove ${currentRole} role? User will become a regular customer.`)) return
-    const { error } = await supabase.from('profiles').update({ role: 'customer' }).eq('id', id)
-    if (error) { toast.error(error.message); return }
-    setUsers(u => u.map(x => x.id === id ? { ...x, role: 'customer' } : x))
+  const setRole = async (id: string, role: string, confirmMsg: string) => {
+    if (!confirm(confirmMsg)) return
+    const res = await fetch('/api/admin/set-role', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: id, role }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      toast.error(data.error || 'Could not update role')
+      return
+    }
+    setUsers(u => u.map(x => x.id === id ? { ...x, role: role as Profile['role'] } : x))
     toast.success('Role updated')
   }
+
+  const promoteToAdmin = (id: string) =>
+    setRole(id, 'admin', 'Make this user an admin? They will have full access to the admin panel.')
+
+  const promoteToSupport = (id: string) =>
+    setRole(id, 'support', 'Make this user support staff? They can engage creatives, send broadcasts, manage posts, and approve new creatives — but not payouts or account roles.')
+
+  const demoteUser = (id: string, currentRole: string) =>
+    setRole(id, 'customer', `Remove ${currentRole} role? User will become a regular customer.`)
 
   const filtered = users.filter(u => {
     const matchesSearch = !search ||
@@ -48,6 +56,7 @@ export function AdminUsersClient({ users: initial, orderCounts }: { users: Profi
     all: users.length,
     customer: users.filter(u => u.role === 'customer').length,
     tailor: users.filter(u => u.role === 'tailor').length,
+    support: users.filter(u => u.role === 'support').length,
     admin: users.filter(u => u.role === 'admin').length,
   }
 
@@ -66,7 +75,7 @@ export function AdminUsersClient({ users: initial, orderCounts }: { users: Profi
 
       {/* Role filter tabs */}
       <div className="flex gap-2 mb-5 flex-wrap">
-        {(['all', 'customer', 'tailor', 'admin'] as const).map(r => (
+        {(['all', 'customer', 'tailor', 'support', 'admin'] as const).map(r => (
           <button key={r} onClick={() => setRoleFilter(r)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${roleFilter === r ? 'bg-violet-700 text-white' : 'bg-white border border-white/[0.1] text-zinc-400 hover:border-violet-300'}`}>
             {r === 'tailor' ? 'Creative' : r.charAt(0).toUpperCase() + r.slice(1)} <span className="ml-1 opacity-70">({counts[r]})</span>
@@ -125,16 +134,23 @@ export function AdminUsersClient({ users: initial, orderCounts }: { users: Profi
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         {u.role === 'customer' && (
-                          <button onClick={() => promoteToAdmin(u.id)}
-                            className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg border border-transparent hover:border-violet-200 transition-all"
-                            title="Make admin">
-                            <Shield size={13} /> Admin
-                          </button>
+                          <>
+                            <button onClick={() => promoteToSupport(u.id)}
+                              className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg border border-transparent hover:border-amber-200 transition-all"
+                              title="Make support staff">
+                              <Shield size={13} /> Support
+                            </button>
+                            <button onClick={() => promoteToAdmin(u.id)}
+                              className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 rounded-lg border border-transparent hover:border-violet-200 transition-all"
+                              title="Make admin">
+                              <Shield size={13} /> Admin
+                            </button>
+                          </>
                         )}
-                        {u.role === 'admin' && (
+                        {(u.role === 'admin' || u.role === 'support') && (
                           <button onClick={() => demoteUser(u.id, u.role)}
                             className="flex items-center gap-1 px-2.5 py-1 text-xs text-zinc-500 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg border border-transparent hover:border-amber-500/20 transition-all"
-                            title="Remove admin">
+                            title={`Remove ${u.role}`}>
                             <UserX size={13} /> Demote
                           </button>
                         )}

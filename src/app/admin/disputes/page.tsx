@@ -1,10 +1,12 @@
 'use client'
 export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { AlertTriangle, CheckCircle, User, ChevronDown } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { isStaff } from '@/lib/roles'
 
 type Dispute = {
   id: string
@@ -41,11 +43,22 @@ const RESOLUTIONS = [
 
 export default function AdminDisputesPage() {
   const supabase = createClient()
+  const router = useRouter()
   const [disputes, setDisputes] = useState<Dispute[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [updating, setUpdating] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { router.push('/login'); return }
+      const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (!isStaff(p?.role)) { router.push('/browse'); return }
+      setIsAdmin(p?.role === 'admin')
+    })
+  }, [])
 
   async function fetchDisputes() {
     const { data } = await supabase
@@ -195,7 +208,13 @@ export default function AdminDisputesPage() {
                     )}
 
                     {/* Actions */}
-                    {dispute.status === 'open' && (
+                    {!isAdmin && (dispute.status === 'open' || dispute.status === 'under_review') && (
+                      <p className="text-xs text-zinc-500 bg-[#140F1E] rounded-xl p-3">
+                        Only admins can change dispute status or resolve funds. Follow up with the customer or creative using in-app messaging from Manage Creatives.
+                      </p>
+                    )}
+
+                    {isAdmin && dispute.status === 'open' && (
                       <div className="flex gap-2">
                         <button
                           onClick={() => markUnderReview(dispute.id)}
@@ -205,7 +224,7 @@ export default function AdminDisputesPage() {
                       </div>
                     )}
 
-                    {dispute.status === 'under_review' && (
+                    {isAdmin && dispute.status === 'under_review' && (
                       <div className="flex flex-wrap gap-2">
                         {RESOLUTIONS.map(r => (
                           <button

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/layout/navbar'
 import { redirect } from 'next/navigation'
 import { AdminTailorsClient } from './admin-tailors-client'
+import { isStaff } from '@/lib/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +11,7 @@ export default async function AdminTailorsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/browse')
+  if (!isStaff(profile?.role)) redirect('/browse')
 
   const { count: totalMembers } = await supabase
     .from('profiles')

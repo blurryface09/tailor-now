@@ -11,20 +11,21 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
+import { isStaff } from '@/lib/roles'
 
 const ADMIN_LINKS = [
-  { href: '/admin',                 icon: <LayoutDashboard size={14} />, label: 'Dashboard' },
-  { href: '/admin/tailors',         icon: <Scissors size={14} />,        label: 'Creatives' },
-  { href: '/admin/users',           icon: <Users size={14} />,           label: 'Accounts' },
-  { href: '/admin/orders',          icon: <Package size={14} />,         label: 'Orders' },
-  { href: '/admin/reviews',         icon: <Star size={14} />,            label: 'Reviews' },
-  { href: '/admin/disputes',        icon: <AlertTriangle size={14} />,   label: 'Disputes' },
-  { href: '/admin/payouts',         icon: <TrendingUp size={14} />,      label: 'Payouts' },
-  { href: '/admin/marketplace',     icon: <Store size={14} />,           label: 'Marketplace' },
-  { href: '/admin/fabrics',         icon: <Package size={14} />,         label: 'Fabrics' },
-  { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Creative' },
-  { href: '/admin/broadcast',       icon: <Radio size={14} />,           label: 'Broadcast' },
-  { href: '/admin/feed',            icon: <ImageIcon size={14} />,       label: 'Feed Posts' },
+  { href: '/admin',                 icon: <LayoutDashboard size={14} />, label: 'Dashboard',        adminOnly: false },
+  { href: '/admin/tailors',         icon: <Scissors size={14} />,        label: 'Creatives',         adminOnly: false },
+  { href: '/admin/onboard-tailor',  icon: <Scissors size={14} />,        label: 'Onboard Creative',  adminOnly: false },
+  { href: '/admin/broadcast',       icon: <Radio size={14} />,           label: 'Broadcast',         adminOnly: false },
+  { href: '/admin/feed',            icon: <ImageIcon size={14} />,       label: 'Feed Posts',        adminOnly: false },
+  { href: '/admin/disputes',        icon: <AlertTriangle size={14} />,   label: 'Disputes',          adminOnly: false },
+  { href: '/admin/users',           icon: <Users size={14} />,           label: 'Accounts',          adminOnly: true },
+  { href: '/admin/orders',          icon: <Package size={14} />,         label: 'Orders',            adminOnly: true },
+  { href: '/admin/reviews',         icon: <Star size={14} />,            label: 'Reviews',           adminOnly: true },
+  { href: '/admin/payouts',         icon: <TrendingUp size={14} />,      label: 'Payouts',           adminOnly: true },
+  { href: '/admin/marketplace',     icon: <Store size={14} />,           label: 'Marketplace',       adminOnly: true },
+  { href: '/admin/fabrics',         icon: <Package size={14} />,         label: 'Fabrics',           adminOnly: true },
 ]
 
 export function Navbar() {
@@ -181,7 +182,7 @@ export function Navbar() {
     <nav className={cn('sticky top-0 z-50 transition-all duration-300', navBg)}>
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link
-          href={profile?.role === 'tailor' ? '/dashboard' : profile?.role === 'admin' ? '/admin' : profile ? '/home' : '/'}
+          href={profile?.role === 'tailor' ? '/dashboard' : isStaff(profile?.role) ? '/admin' : profile ? '/home' : '/'}
           className="transition-transform hover:scale-[1.02] duration-200"
         >
           <Logo size="sm" variant="full" animated dark={isDark} />
@@ -210,7 +211,7 @@ export function Navbar() {
             </>
           )}
 
-          {profile?.role === 'admin' && (
+          {isStaff(profile?.role) && (
             <div className="relative group">
               <button className={cn(
                 'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200',
@@ -218,12 +219,12 @@ export function Navbar() {
                   ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/30'
                   : 'bg-violet-500/10 text-violet-300 border border-violet-500/20 hover:bg-violet-500/20'
               )}>
-                <Shield size={15} /> Admin
+                <Shield size={15} /> {profile?.role === 'admin' ? 'Admin' : 'Support'}
                 <ChevronDown size={13} className="transition-transform duration-200 group-hover:rotate-180" />
               </button>
               <div className={cn('absolute left-0 top-full mt-2 w-52 rounded-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-50', dropdownBg)}>
                 <p className={cn('px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest', isDark ? 'text-zinc-500' : 'text-zinc-400')}>Admin Panel</p>
-                {ADMIN_LINKS.map(link => (
+                {ADMIN_LINKS.filter(link => profile?.role === 'admin' || !link.adminOnly).map(link => (
                   <Link key={link.href} href={link.href}
                     className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors', isActive(link.href) ? linkActive + ' font-semibold' : dropdownItem)}>
                     {link.icon} {link.label}
@@ -238,7 +239,7 @@ export function Navbar() {
         <div className="flex items-center gap-2">
           {profile ? (
             <>
-              {profile.role !== 'admin' && (
+              {!isStaff(profile.role) && (
                 <Link href={profile.role === 'tailor' ? '/tailor/chat' : '/chat'}
                   className={cn('relative p-2 rounded-xl transition-all duration-200 hover:scale-110', iconBtn)}>
                   <MessageSquare size={20} />
@@ -249,7 +250,7 @@ export function Navbar() {
                   )}
                 </Link>
               )}
-              {profile.role !== 'admin' && (
+              {!isStaff(profile.role) && (
                 <Link href="/notifications"
                   className={cn('relative p-2 rounded-xl transition-all duration-200 hover:scale-110', iconBtn)}>
                   <Bell size={20} />
@@ -263,8 +264,8 @@ export function Navbar() {
               <div className="relative group">
                 <button className={cn('flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-xl transition-all duration-200 border border-transparent', userBtn)}>
                   <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm',
-                    profile.role === 'admin' ? 'bg-gradient-to-br from-violet-600 to-violet-900' : 'bg-gradient-to-br from-violet-500 to-violet-700')}>
-                    {profile.role === 'admin' ? <Shield size={14} /> : (profile.full_name?.[0]?.toUpperCase() || 'U')}
+                    isStaff(profile.role) ? 'bg-gradient-to-br from-violet-600 to-violet-900' : 'bg-gradient-to-br from-violet-500 to-violet-700')}>
+                    {isStaff(profile.role) ? <Shield size={14} /> : (profile.full_name?.[0]?.toUpperCase() || 'U')}
                   </div>
                   <span className={cn('hidden md:block text-sm font-medium', userName)}>{profile.full_name?.split(' ')[0]}</span>
                   <ChevronDown size={14} className={cn('hidden md:block transition-transform duration-200 group-hover:rotate-180', userChevron)} />
@@ -272,11 +273,11 @@ export function Navbar() {
                 <div className={cn('absolute right-0 top-full mt-2 w-52 rounded-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-y-1 group-hover:translate-y-0 z-50', dropdownBg)}>
                   <div className={cn('px-4 py-2 border-b mb-1', dropdownDivider)}>
                     <p className={cn('text-sm font-semibold', isDark ? 'text-white' : 'text-zinc-900')}>{profile.full_name}</p>
-                    <p className={cn('text-xs font-medium capitalize', profile.role === 'admin' ? 'text-violet-500' : isDark ? 'text-zinc-500' : 'text-zinc-400')}>
-                      {profile.role === 'admin' && '⚡ '}{profile.role}
+                    <p className={cn('text-xs font-medium capitalize', isStaff(profile.role) ? 'text-violet-500' : isDark ? 'text-zinc-500' : 'text-zinc-400')}>
+                      {isStaff(profile.role) && '⚡ '}{profile.role}
                     </p>
                   </div>
-                  {profile.role !== 'admin' && (
+                  {!isStaff(profile.role) && (
                     <Link href={profile.role === 'tailor' ? '/tailor/profile' : '/profile'} className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors', dropdownItem)}>
                       <User size={15} /> My Profile
                     </Link>
@@ -286,10 +287,10 @@ export function Navbar() {
                       <Scissors size={15} /> My Orders
                     </Link>
                   )}
-                  {profile.role === 'admin' && (
+                  {isStaff(profile.role) && (
                     <>
                       <Link href="/admin" className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors', dropdownItem)}>
-                        <Shield size={15} /> Admin Dashboard
+                        <Shield size={15} /> {profile.role === 'admin' ? 'Admin Dashboard' : 'Support Dashboard'}
                       </Link>
                       <button onClick={toggleAdminTheme} className={cn('flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors w-full text-left', dropdownItem)}>
                         {adminTheme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
@@ -346,10 +347,10 @@ export function Navbar() {
               <Link href="/contact" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}>Contact</Link>
             </>
           )}
-          {profile?.role === 'admin' && (
+          {isStaff(profile?.role) && (
             <>
-              <p className={cn('px-4 pt-2 text-[10px] font-bold uppercase tracking-widest', isDark ? 'text-zinc-500' : 'text-zinc-400')}>Admin</p>
-              {ADMIN_LINKS.map(link => (
+              <p className={cn('px-4 pt-2 text-[10px] font-bold uppercase tracking-widest', isDark ? 'text-zinc-500' : 'text-zinc-400')}>{profile?.role === 'admin' ? 'Admin' : 'Support'}</p>
+              {ADMIN_LINKS.filter(link => profile?.role === 'admin' || !link.adminOnly).map(link => (
                 <Link key={link.href} href={link.href}
                   className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)}
                   onClick={() => setMenuOpen(false)}>

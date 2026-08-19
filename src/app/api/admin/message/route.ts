@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isStaff } from '@/lib/roles'
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Not logged in' }, { status: 401 })
 
     const { data: adminProfile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (adminProfile?.role !== 'admin') return NextResponse.json({ error: 'Not admin' }, { status: 403 })
+    if (!isStaff(adminProfile?.role)) return NextResponse.json({ error: 'Not admin' }, { status: 403 })
 
     const body = await req.json()
     const { tailorUserId, content } = body

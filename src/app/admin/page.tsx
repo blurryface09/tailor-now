@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { Users, Scissors, Package, TrendingUp, Clock, Star, Image as ImageIcon } from 'lucide-react'
 import { RecentOrdersClient } from './recent-orders-client'
+import { isStaff } from '@/lib/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,7 +14,8 @@ export default async function AdminDashboard() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'admin') redirect('/browse')
+  if (!isStaff(profile?.role)) redirect('/browse')
+  const isAdmin = profile?.role === 'admin'
 
   const [
     { count: totalMembers },
@@ -59,24 +61,34 @@ export default async function AdminDashboard() {
             <Link href="/admin/disputes" className="bg-white border border-red-200 text-red-600 text-sm px-4 py-2 rounded-xl hover:bg-red-50 transition-colors shadow-sm">
               Disputes
             </Link>
-            <Link href="/admin/payouts" className="bg-white border border-green-200 text-green-700 text-sm px-4 py-2 rounded-xl hover:bg-green-50 transition-colors shadow-sm">
-              Payouts
+            <Link href="/admin/broadcast" className="bg-white border border-zinc-200 text-zinc-700 text-sm px-4 py-2 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm">
+              Broadcast
             </Link>
-            <Link href="/admin/users" className="bg-white border border-zinc-200 text-zinc-700 text-sm px-4 py-2 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm">
-              Accounts
+            <Link href="/admin/feed" className="bg-white border border-zinc-200 text-zinc-700 text-sm px-4 py-2 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm">
+              Feed Posts
             </Link>
-            <Link href="/admin/reviews" className="bg-white border border-amber-200 text-amber-700 text-sm px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors shadow-sm">
-              Reviews
-            </Link>
-            <Link href="/admin/fabrics" className="bg-white border border-amber-200 text-amber-700 text-sm px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors shadow-sm">
-              Fabrics
-            </Link>
-            <Link href="/admin/portfolio" className="bg-white border border-violet-200 text-violet-700 text-sm px-4 py-2 rounded-xl hover:bg-violet-50 transition-colors shadow-sm">
-              Polish Portfolio
-            </Link>
-            <Link href="/admin/orders" className="bg-violet-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-violet-800 transition-colors">
-              All Orders
-            </Link>
+            {isAdmin && (
+              <>
+                <Link href="/admin/payouts" className="bg-white border border-green-200 text-green-700 text-sm px-4 py-2 rounded-xl hover:bg-green-50 transition-colors shadow-sm">
+                  Payouts
+                </Link>
+                <Link href="/admin/users" className="bg-white border border-zinc-200 text-zinc-700 text-sm px-4 py-2 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm">
+                  Accounts
+                </Link>
+                <Link href="/admin/reviews" className="bg-white border border-amber-200 text-amber-700 text-sm px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors shadow-sm">
+                  Reviews
+                </Link>
+                <Link href="/admin/fabrics" className="bg-white border border-amber-200 text-amber-700 text-sm px-4 py-2 rounded-xl hover:bg-amber-50 transition-colors shadow-sm">
+                  Fabrics
+                </Link>
+                <Link href="/admin/portfolio" className="bg-white border border-violet-200 text-violet-700 text-sm px-4 py-2 rounded-xl hover:bg-violet-50 transition-colors shadow-sm">
+                  Polish Portfolio
+                </Link>
+                <Link href="/admin/orders" className="bg-violet-700 text-white text-sm px-4 py-2 rounded-xl hover:bg-violet-800 transition-colors">
+                  All Orders
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
@@ -128,13 +140,16 @@ export default async function AdminDashboard() {
             <h2 className="font-bold text-zinc-900 mb-4">Quick Actions</h2>
             <div className="space-y-3">
               {[
-                { href: '/admin/tailors', icon: <Scissors size={18} />, label: 'Manage Creatives', desc: 'Verify, suspend, view profiles' },
-                { href: '/admin/users', icon: <Users size={18} />, label: 'Manage Accounts', desc: 'Customers, creatives, admins' },
-                { href: '/admin/reviews', icon: <Star size={18} />, label: 'Reviews', desc: 'Moderate ratings & reviews' },
-                { href: '/admin/orders', icon: <Package size={18} />, label: 'All Orders', desc: 'Monitor disputes, view history' },
-                { href: '/admin/payouts', icon: <TrendingUp size={18} />, label: 'Payouts', desc: 'Process creative payouts' },
-                { href: '/admin/portfolio', icon: <ImageIcon size={18} />, label: 'Polish Portfolio', desc: 'Download, edit & re-upload creative photos' },
-              ].map(a => (
+                { href: '/admin/tailors', icon: <Scissors size={18} />, label: 'Manage Creatives', desc: 'Verify, suspend, view profiles', adminOnly: false },
+                { href: '/admin/onboard-tailor', icon: <Scissors size={18} />, label: 'Onboard Creative', desc: 'Approve a new creative', adminOnly: false },
+                { href: '/admin/broadcast', icon: <Users size={18} />, label: 'Broadcast', desc: 'Send announcements to users', adminOnly: false },
+                { href: '/admin/feed', icon: <ImageIcon size={18} />, label: 'Feed Posts', desc: 'Manage feed content', adminOnly: false },
+                { href: '/admin/users', icon: <Users size={18} />, label: 'Manage Accounts', desc: 'Customers, creatives, admins', adminOnly: true },
+                { href: '/admin/reviews', icon: <Star size={18} />, label: 'Reviews', desc: 'Moderate ratings & reviews', adminOnly: true },
+                { href: '/admin/orders', icon: <Package size={18} />, label: 'All Orders', desc: 'Monitor disputes, view history', adminOnly: true },
+                { href: '/admin/payouts', icon: <TrendingUp size={18} />, label: 'Payouts', desc: 'Process creative payouts', adminOnly: true },
+                { href: '/admin/portfolio', icon: <ImageIcon size={18} />, label: 'Polish Portfolio', desc: 'Download, edit & re-upload creative photos', adminOnly: true },
+              ].filter(a => isAdmin || !a.adminOnly).map(a => (
                 <Link key={a.href} href={a.href} className="flex items-start gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
                   <div className="w-9 h-9 bg-violet-50 text-violet-600 rounded-xl flex items-center justify-center flex-shrink-0">{a.icon}</div>
                   <div>

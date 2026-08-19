@@ -15,7 +15,7 @@ create table public.profiles (
   phone           text,
   full_name       text not null default '',
   avatar_url      text,
-  role            text not null default 'customer' check (role in ('customer','tailor','admin')),
+  role            text not null default 'customer' check (role in ('customer','tailor','admin','support')),
   address         text,
   city            text,
   state           text,

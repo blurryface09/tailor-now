@@ -1,4 +1,4 @@
-export type UserRole = 'customer' | 'tailor' | 'admin'
+export type UserRole = 'customer' | 'tailor' | 'admin' | 'support'
 
 export type OrderStatus =
   | 'pending'

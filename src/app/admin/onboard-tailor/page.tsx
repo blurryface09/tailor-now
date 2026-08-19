@@ -1,6 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { Button } from '@/components/ui/button'
@@ -9,6 +10,7 @@ import { SERVICE_LABELS } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle, Search, UserPlus } from 'lucide-react'
+import { isStaff } from '@/lib/roles'
 
 const SERVICE_ICONS: Record<string, string> = {
   custom_outfit: '👗', alterations: '✂️', bridal: '💍',
@@ -20,6 +22,15 @@ const toggle = (arr: string[], val: string) =>
 
 export default function AdminOnboardTailorPage() {
   const supabase = createClient()
+  const router = useRouter()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { router.push('/login'); return }
+      const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+      if (!isStaff(p?.role)) router.push('/browse')
+    })
+  }, [])
 
   // Step 1: find the user
   const [emailSearch, setEmailSearch] = useState('')
@@ -66,35 +77,29 @@ export default function AdminOnboardTailorPage() {
 
     setSubmitting(true)
 
-    // Check if tailor profile already exists
-    const { data: existing } = await supabase
-      .from('tailor_profiles')
-      .select('id')
-      .eq('user_id', foundUser.id)
-      .single()
+    const res = await fetch('/api/admin/onboard-tailor', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: foundUser.id,
+        business_name: form.business_name.trim(),
+        bio: form.bio.trim(),
+        city: form.city.trim(),
+        state: form.state.trim(),
+        address: form.address.trim(),
+        specialties: form.specialties,
+        delivery_types: form.delivery_types,
+        response_time_hours: parseInt(form.response_time_hours) || 2,
+      }),
+    })
 
-    if (existing) {
-      toast.error('This user already has a tailor profile')
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      toast.error(data.error || 'Could not onboard this creative')
       setSubmitting(false)
       return
     }
 
-    const { error } = await supabase.from('tailor_profiles').insert({
-      user_id: foundUser.id,
-      business_name: form.business_name.trim(),
-      bio: form.bio.trim() || null,
-      city: form.city.trim(),
-      state: form.state.trim(),
-      address: form.address.trim() || null,
-      specialties: form.specialties,
-      delivery_types: form.delivery_types,
-      response_time_hours: parseInt(form.response_time_hours) || 2,
-      is_verified: true,
-    })
-
-    if (error) { toast.error(error.message); setSubmitting(false); return }
-
-    await supabase.from('profiles').update({ role: 'tailor' }).eq('id', foundUser.id)
     toast.success('Creative onboarded and verified!')
     setDone(true)
     setSubmitting(false)
