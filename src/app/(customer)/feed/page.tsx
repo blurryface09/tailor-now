@@ -352,13 +352,6 @@ function PostCard({
             )
           )}
 
-          {/* Admin badge */}
-          {isAdminPost && (
-            <div className="absolute top-3.5 right-3.5 bg-violet-600/80 backdrop-blur-md border border-violet-500/40 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-              <Scissors size={9} /> TailorNow
-            </div>
-          )}
-
           {/* Multi-image nav */}
           {post.image_urls.length > 1 && (
             <>
@@ -384,7 +377,17 @@ function PostCard({
           <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-10">
             <div className="flex items-end justify-between">
               <div className="flex-1 min-w-0 pr-3">
-                {!isAdminPost && (
+                {isAdminPost ? (
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-full bg-violet-600 flex items-center justify-center flex-shrink-0">
+                      <Scissors size={10} className="text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-white font-bold text-sm truncate leading-tight">TailorNow</p>
+                      <p className="text-white/50 text-[11px] leading-tight">Sponsored</p>
+                    </div>
+                  </div>
+                ) : (
                   <>
                     {isProduct ? (
                       <Link href={`/tailors/${post.creative_id}`} className="text-white font-bold text-sm hover:text-violet-300 transition-colors truncate block">
