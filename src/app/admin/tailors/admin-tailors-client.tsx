@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   CheckCircle, XCircle, Star, MapPin, Eye, Mail, Phone, Search,
   AlertCircle, MessageSquare, Send, X, ChevronRight, User,
@@ -90,7 +91,11 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
     }
   }
 
-  return (
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
+
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
       <div className="bg-white text-zinc-900 border border-zinc-200 shadow-2xl rounded-2xl w-full max-w-lg">
         <div className="flex items-center justify-between p-4 border-b border-zinc-200">
@@ -143,7 +148,8 @@ function ComposeModal({ target, onClose }: { target: ComposeTarget; onClose: () 
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -160,14 +166,18 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
   const done = checks.filter(c => c.done).length
   const pct = Math.round((done / checks.length) * 100)
 
-  return (
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!mounted) return null
+
+  return createPortal(
     <div className="fixed inset-0 z-40 flex">
       {/* Backdrop */}
-      <div className="flex-1 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="flex-1 bg-black/40" onClick={onClose} />
       {/* Drawer */}
       <div className="w-full max-w-md bg-white h-full overflow-y-auto shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-white/95 backdrop-blur-xl border-b border-zinc-200 px-5 py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white border-b border-zinc-200 px-5 py-4 flex items-center justify-between z-10">
           <h2 className="font-bold text-zinc-900">Creative Profile</h2>
           <button onClick={onClose} className="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors">
             <X size={16} />
@@ -291,7 +301,7 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
         </div>
 
         {/* Action bar */}
-        <div className="sticky bottom-0 bg-white/95 backdrop-blur-xl border-t border-zinc-200 p-4 space-y-2">
+        <div className="sticky bottom-0 bg-white border-t border-zinc-200 p-4 space-y-2">
           <div className="flex gap-2">
             <button
               onClick={() => onCompose({ tailorUserId: tailor.user_id, name: tailor.profile?.full_name || tailor.business_name, email: tailor.profile?.email || null })}
@@ -329,7 +339,8 @@ function DetailDrawer({ tailor, onClose, onVerify, onSuspend, onCompose, loading
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
