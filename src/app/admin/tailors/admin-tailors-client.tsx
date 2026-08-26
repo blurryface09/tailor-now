@@ -360,9 +360,12 @@ function InfoRow({ icon, label, value, missing, warn }: {
   )
 }
 
+type TabFilter = 'pending' | 'verified' | 'suspended' | 'all'
+
 export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors: TailorWithProfile[]; totalMembers: number }) {
   const [tailors, setTailors] = useState(initial)
   const [search, setSearch] = useState('')
+  const [tab, setTab] = useState<TabFilter>('pending')
   const [loading, setLoading] = useState<string | null>(null)
   const [detail, setDetail] = useState<TailorWithProfile | null>(null)
   const [compose, setCompose] = useState<ComposeTarget | null>(null)
@@ -406,7 +409,12 @@ export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors
       t.profile?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
       t.profile?.email?.toLowerCase().includes(search.toLowerCase()) ||
       t.city?.toLowerCase().includes(search.toLowerCase())
-    return matchesSearch && !t.is_verified && t.is_active
+    const matchesTab =
+      tab === 'all'       ? true :
+      tab === 'verified'  ? t.is_verified && t.is_active :
+      tab === 'suspended' ? !t.is_active :
+      /* pending */         !t.is_verified && t.is_active
+    return matchesSearch && matchesTab
   })
 
   const counts = {
@@ -419,50 +427,81 @@ export function AdminTailorsClient({ tailors: initial, totalMembers }: { tailors
   return (
     <div className="mx-auto w-full max-w-5xl px-3 py-5 sm:px-4 sm:py-8">
       <div className="mb-5 fade-up sm:mb-6">
-        <div className="inline-flex items-center gap-2 rounded-full bg-violet-50 border border-violet-100 px-3 py-1 text-xs font-bold text-violet-700 mb-3">
-          <ShieldCheck size={13} /> Pending review queue
-        </div>
         <h1 className="text-2xl font-bold text-zinc-900 sm:text-3xl">Manage Creatives</h1>
-        <p className="text-sm text-zinc-500 mt-0.5">Only pending creatives are shown here. Verified creatives stay out of this review queue.</p>
+        <p className="text-sm text-zinc-500 mt-0.5">View and manage all creatives on the platform.</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6 fade-up-1">
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-5 sm:mb-6 fade-up-1">
         <div className="rounded-2xl bg-white border border-zinc-200 p-3 shadow-sm sm:p-4">
-          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-            <span className="text-[10px] font-bold uppercase leading-tight tracking-wider text-zinc-500 sm:text-xs">Total members</span>
-            <User size={17} className="text-zinc-400" />
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 sm:text-xs">Members</span>
+            <User size={15} className="text-zinc-400" />
           </div>
-          <p className="text-2xl font-black text-zinc-900 sm:text-3xl">{totalMembers}</p>
+          <p className="text-2xl font-black text-zinc-900">{totalMembers}</p>
         </div>
         <div className="rounded-2xl bg-white border border-zinc-200 p-3 shadow-sm sm:p-4">
-          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-            <span className="text-[10px] font-bold uppercase leading-tight tracking-wider text-zinc-500 sm:text-xs">Verified creatives</span>
-            <BadgeCheck size={17} className="text-green-600" />
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 sm:text-xs">All creatives</span>
+            <ShieldCheck size={15} className="text-zinc-400" />
           </div>
-          <p className="text-2xl font-black text-zinc-900 sm:text-3xl">{counts.verified}</p>
+          <p className="text-2xl font-black text-zinc-900">{counts.all + counts.suspended}</p>
+        </div>
+        <div className="rounded-2xl bg-white border border-green-200 p-3 shadow-sm sm:p-4">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-green-700 sm:text-xs">Verified</span>
+            <BadgeCheck size={15} className="text-green-600" />
+          </div>
+          <p className="text-2xl font-black text-green-700">{counts.verified}</p>
         </div>
         <div className="rounded-2xl bg-white border border-violet-200 p-3 shadow-sm sm:p-4">
-          <div className="mb-2 flex items-center justify-between gap-2 sm:mb-3">
-            <span className="text-[10px] font-bold uppercase leading-tight tracking-wider text-violet-700 sm:text-xs">Pending creatives</span>
-            <AlertCircle size={17} className="text-violet-600" />
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-700 sm:text-xs">Pending</span>
+            <AlertCircle size={15} className="text-violet-600" />
           </div>
-          <p className="text-2xl font-black text-violet-700 sm:text-3xl">{counts.unverified}</p>
+          <p className="text-2xl font-black text-violet-700">{counts.unverified}</p>
         </div>
+      </div>
+
+      {/* Tab filter */}
+      <div className="flex gap-2 mb-4 fade-up-2 flex-wrap">
+        {([
+          { key: 'pending',   label: 'Pending',   count: counts.unverified },
+          { key: 'verified',  label: 'Verified',  count: counts.verified   },
+          { key: 'suspended', label: 'Suspended', count: counts.suspended  },
+          { key: 'all',       label: 'All',       count: counts.all + counts.suspended },
+        ] as { key: TabFilter; label: string; count: number }[]).map(t => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+              tab === t.key
+                ? 'bg-violet-700 text-white border-violet-700 shadow-sm'
+                : 'bg-white text-zinc-600 border-zinc-200 hover:border-violet-300 hover:text-violet-700'
+            }`}>
+            {t.label}
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-bold ${tab === t.key ? 'bg-white/20 text-white' : 'bg-zinc-100 text-zinc-500'}`}>
+              {t.count}
+            </span>
+          </button>
+        ))}
       </div>
 
       <div className="relative mb-5 fade-up-2">
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
         <input
           className="w-full rounded-xl border border-zinc-200 bg-white pl-9 pr-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
-          placeholder="Search pending creatives by name, email, city..."
+          placeholder="Search creatives by name, email, city..."
           value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       {filtered.length === 0 && (
         <div className="text-center py-16 bg-white rounded-2xl border border-zinc-200 shadow-sm fade-up-3">
           <CheckCircle size={28} className="mx-auto text-green-600 mb-3" />
-          <p className="font-semibold text-zinc-900">No pending creatives found</p>
-          <p className="text-sm text-zinc-500 mt-1">Everyone in the review queue has been handled.</p>
+          <p className="font-semibold text-zinc-900">
+            {tab === 'pending' ? 'No pending creatives' : tab === 'verified' ? 'No verified creatives yet' : 'No creatives found'}
+          </p>
+          <p className="text-sm text-zinc-500 mt-1">
+            {tab === 'pending' ? 'Everyone in the review queue has been handled.' : 'Try a different filter or search.'}
+          </p>
         </div>
       )}
 
