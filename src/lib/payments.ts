@@ -6,10 +6,12 @@ import { orderIdFromTransaction, type PaystackTransaction } from '@/lib/paystack
 type PaidOrder = {
   agreed_price: number | null
   tailor_id: string
+  customer_id: string
   deposit_paid: boolean | null
 }
 
 type TailorPayoutAccount = {
+  user_id: string
   paystack_subaccount_code: string | null
   bank_name: string | null
   account_number: string | null
@@ -40,7 +42,7 @@ export async function markOrderPaid(
 
   const { data: order, error: orderError } = await admin
     .from('orders')
-    .select('agreed_price, tailor_id, deposit_paid')
+    .select('agreed_price, tailor_id, customer_id, deposit_paid')
     .eq('id', orderId)
     .single<PaidOrder>()
 
@@ -81,12 +83,13 @@ async function recordPayout(orderId: string, order: PaidOrder, amountPaid: numbe
 
   const { data: tailor } = await admin
     .from('tailor_profiles')
-    .select('paystack_subaccount_code, bank_name, account_number, account_name')
+    .select('user_id, paystack_subaccount_code, bank_name, account_number, account_name')
     .eq('id', order.tailor_id)
     .single<TailorPayoutAccount>()
 
   const gross = order.agreed_price || amountPaid
-  const { commission, net } = calculateCommission(gross)
+  const waived = tailor ? await isReferralWaiverOrder(admin, orderId, order, tailor.user_id) : false
+  const { commission, net } = waived ? { commission: 0, net: gross } : calculateCommission(gross)
   const isSplit = !!tailor?.paystack_subaccount_code
 
   const { error: payoutError } = await admin.from('payouts').upsert(
@@ -94,7 +97,7 @@ async function recordPayout(orderId: string, order: PaidOrder, amountPaid: numbe
       tailor_id: order.tailor_id,
       order_id: orderId,
       gross_amount: gross,
-      commission_rate: COMMISSION_RATE,
+      commission_rate: waived ? 0 : COMMISSION_RATE,
       commission_amount: commission,
       net_amount: net,
       method: isSplit ? 'split' : 'manual',
@@ -112,6 +115,43 @@ async function recordPayout(orderId: string, order: PaidOrder, amountPaid: numbe
     return false
   }
 
+  return true
+}
+
+/**
+ * A tailor's own referral link gives up 20% commission on business they'd
+ * otherwise keep in full — so the one thing that makes "send your existing
+ * clients here" worth it to them is TailorNow eating the commission on the
+ * order that actually converts the referral. Waives it exactly once: only
+ * for the customer's first paid order, only with the specific tailor who
+ * referred them, and only while the referral hasn't already been used.
+ */
+async function isReferralWaiverOrder(
+  admin: ReturnType<typeof createAdminClient>,
+  orderId: string,
+  order: PaidOrder,
+  tailorUserId: string
+): Promise<boolean> {
+  const { data: referral } = await admin
+    .from('referrals')
+    .select('id, referrer_id')
+    .eq('referred_id', order.customer_id)
+    .eq('status', 'pending')
+    .maybeSingle()
+
+  if (!referral || referral.referrer_id !== tailorUserId) return false
+
+  const { count: priorPaidOrders } = await admin
+    .from('orders')
+    .select('id', { count: 'exact', head: true })
+    .eq('customer_id', order.customer_id)
+    .eq('tailor_id', order.tailor_id)
+    .eq('deposit_paid', true)
+    .neq('id', orderId)
+
+  if ((priorPaidOrders ?? 0) > 0) return false
+
+  await admin.from('referrals').update({ status: 'qualified' }).eq('id', referral.id)
   return true
 }
 
