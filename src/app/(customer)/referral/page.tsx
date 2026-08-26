@@ -9,14 +9,15 @@ import toast from 'react-hot-toast'
 
 export default function ReferralPage() {
   const supabase = createClient()
-  const [profile, setProfile] = useState<{ full_name: string; referral_code: string | null } | null>(null)
+  const [profile, setProfile] = useState<{ full_name: string; referral_code: string | null; role: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [referralCount] = useState(0)
+  const isTailor = profile?.role === 'tailor'
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      const { data } = await supabase.from('profiles').select('full_name, referral_code').eq('id', user.id).single()
+      const { data } = await supabase.from('profiles').select('full_name, referral_code, role').eq('id', user.id).single()
       if (data && !data.referral_code) {
         // Generate and save referral code on first visit
         const code = generateReferralCode(data.full_name || 'USER')
@@ -57,9 +58,24 @@ export default function ReferralPage() {
           </div>
           <h1 className="text-2xl font-black text-zinc-900">Refer and Earn</h1>
           <p className="text-zinc-500 mt-2 max-w-sm mx-auto">
-            Invite tailors to TailorNow. Earn ₦2,000 credit when they complete their first 3 orders.
+            {isTailor
+              ? 'Invite your own clients or other creatives — both pay off.'
+              : 'Invite creatives to TailorNow. Earn ₦2,000 credit when they complete their first 3 orders.'}
           </p>
         </div>
+
+        {isTailor && (
+          <div className="bg-gradient-to-br from-violet-600 to-violet-800 rounded-2xl shadow-sm p-6 mb-6 text-white">
+            <p className="text-xs font-bold uppercase tracking-wider text-violet-200 mb-2">For your own clients</p>
+            <h2 className="text-lg font-black mb-1.5">Keep 100% on their first order</h2>
+            <p className="text-sm text-violet-100 leading-relaxed">
+              Send this same link to a client you already work with. When they sign up through it and place
+              their first order with <strong>you</strong>, TailorNow waives its commission on that order —
+              you keep the full amount. After that, the normal rate applies. Every order after also builds
+              your public rating, which is what brings you customers you didn&apos;t already have.
+            </p>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -99,7 +115,12 @@ export default function ReferralPage() {
 
         {/* How it works */}
         <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
-          <h2 className="text-base font-bold text-zinc-900 mb-4">How it works</h2>
+          <h2 className="text-base font-bold text-zinc-900 mb-1">
+            {isTailor ? 'Referring other creatives' : 'How it works'}
+          </h2>
+          {isTailor && (
+            <p className="text-xs text-zinc-500 mb-4">A separate bonus from the client-invite offer above.</p>
+          )}
           <div className="space-y-4">
             {[
               { step: '1', title: 'Share your link', desc: 'Send your referral link to creatives you know via WhatsApp, Instagram, or anywhere.' },

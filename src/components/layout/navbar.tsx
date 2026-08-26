@@ -206,6 +206,7 @@ export function Navbar() {
               <Link href="/tailor/orders" className={cn('px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200', isActive('/tailor/orders') ? linkActive : linkBase)}>Orders</Link>
               <Link href="/tailor/posts" className={cn('px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200', isActive('/tailor/posts') ? linkActive : linkBase)}>Posts</Link>
               <Link href="/tailor/portfolio" className={cn('px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200', isActive('/tailor/portfolio') ? linkActive : linkBase)}>Portfolio</Link>
+              <Link href="/referral" className={cn('px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200', isActive('/referral') ? linkActive : linkBase)}>🎁 Refer &amp; Earn</Link>
               <Link href="/hall-of-fame" className={cn('px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200', isActive('/hall-of-fame') ? linkActive : linkBase)}>🏆 Hall of Fame</Link>
               <Link href="/contact" className={cn('px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200', isActive('/contact') ? linkActive : linkBase)}>Contact</Link>
             </>
@@ -343,6 +344,7 @@ export function Navbar() {
               <Link href="/dashboard" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}><LayoutDashboard size={15} /> Dashboard</Link>
               <Link href="/tailor/orders" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}>Orders</Link>
               <Link href="/tailor/posts" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}>Posts</Link>
+              <Link href="/referral" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}>🎁 Refer &amp; Earn</Link>
               <Link href="/hall-of-fame" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}>🏆 Hall of Fame</Link>
               <Link href="/contact" className={cn('flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors', mobileItem)} onClick={() => setMenuOpen(false)}>Contact</Link>
             </>
