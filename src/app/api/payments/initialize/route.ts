@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateServiceCharge, calculateCommission } from '@/lib/utils'
+import { checkReferralWaiver } from '@/lib/payments'
 
 export async function POST(req: NextRequest) {
   const { orderId, amount, email, type } = await req.json()
@@ -41,17 +42,25 @@ export async function POST(req: NextRequest) {
   // checkout instead of collecting it all and paying out manually later.
   const { data: tailor } = await supabase
     .from('tailor_profiles')
-    .select('paystack_subaccount_code')
+    .select('user_id, paystack_subaccount_code')
     .eq('id', order.tailor_id)
     .single()
+
+  // Read-only check — must not consume the referral here. This only
+  // decides what Paystack is told to split at checkout; the waiver is
+  // actually marked used once the payment is confirmed via webhook.
+  const waived = tailor
+    ? await checkReferralWaiver(createAdminClient(), orderId, order.customer_id, order.tailor_id, tailor.user_id)
+    : false
 
   const splitFields = tailor?.paystack_subaccount_code
     ? {
         subaccount: tailor.paystack_subaccount_code,
         bearer: 'account' as const,
-        // Platform keeps its 20% commission plus the full service charge;
+        // Platform keeps its commission plus the full service charge;
         // the rest settles straight to the tailor's own bank account.
-        transaction_charge: Math.round((calculateCommission(amount).commission + serviceCharge) * 100),
+        // Waived referral orders pass through only the service charge.
+        transaction_charge: Math.round(((waived ? 0 : calculateCommission(amount).commission) + serviceCharge) * 100),
       }
     : {}
 

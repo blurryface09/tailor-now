@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { CheckCircle, Clock, XCircle, AlertCircle, Search, ChevronDown, Download } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { COMMISSION_RATE } from '@/lib/utils'
 
 type Payout = {
   id: string
@@ -124,7 +125,7 @@ export default function AdminPayoutsPage() {
           <div className="bg-white/[0.05] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-5 shadow-sm">
             <p className="text-xs text-zinc-500 uppercase tracking-wider font-semibold">Platform Commission</p>
             <p className="text-2xl font-black text-violet-600 mt-1">₦{totalCommission.toLocaleString()}</p>
-            <p className="text-xs text-zinc-600 mt-0.5">20% on all completed orders</p>
+            <p className="text-xs text-zinc-600 mt-0.5">{COMMISSION_RATE * 100}% on all completed orders</p>
           </div>
         </div>
 

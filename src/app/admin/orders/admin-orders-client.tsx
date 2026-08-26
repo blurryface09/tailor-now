@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, AlertTriangle } from 'lucide-react'
-import { formatDate, formatCurrency } from '@/lib/utils'
+import { formatDate, formatCurrency, COMMISSION_RATE } from '@/lib/utils'
 import type { Order, Profile, TailorProfile } from '@/types'
 
 type OrderWithRelations = Order & {
@@ -90,8 +90,8 @@ export function AdminOrdersClient({ orders, initialStatus }: { orders: OrderWith
           <p className="text-xs text-zinc-500">Total value</p>
         </div>
         <div className="bg-white/[0.05] backdrop-blur-xl rounded-xl border border-white/[0.08] p-3 text-center">
-          <p className="text-lg font-bold text-violet-700">{formatCurrency(totalValue * 0.20)}</p>
-          <p className="text-xs text-zinc-500">Platform commission (20%)</p>
+          <p className="text-lg font-bold text-violet-700">{formatCurrency(totalValue * COMMISSION_RATE)}</p>
+          <p className="text-xs text-zinc-500">Platform commission ({COMMISSION_RATE * 100}%)</p>
         </div>
       </div>
 

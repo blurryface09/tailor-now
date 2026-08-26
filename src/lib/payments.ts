@@ -81,6 +81,17 @@ export async function markOrderPaid(
 async function recordPayout(orderId: string, order: PaidOrder, amountPaid: number): Promise<boolean> {
   const admin = createAdminClient()
 
+  // Idempotency guard: recomputing the referral waiver on a retry would
+  // consume-then-recompute into a different (non-waived) result and
+  // overwrite an already-correct payout row. If one exists, there's
+  // nothing left to do.
+  const { data: existingPayout } = await admin
+    .from('payouts')
+    .select('id')
+    .eq('order_id', orderId)
+    .maybeSingle()
+  if (existingPayout) return true
+
   const { data: tailor } = await admin
     .from('tailor_profiles')
     .select('user_id, paystack_subaccount_code, bank_name, account_number, account_name')
@@ -88,7 +99,10 @@ async function recordPayout(orderId: string, order: PaidOrder, amountPaid: numbe
     .single<TailorPayoutAccount>()
 
   const gross = order.agreed_price || amountPaid
-  const waived = tailor ? await isReferralWaiverOrder(admin, orderId, order, tailor.user_id) : false
+  const waived = tailor
+    ? await checkReferralWaiver(admin, orderId, order.customer_id, order.tailor_id, tailor.user_id)
+    : false
+  if (waived && tailor) await consumeReferralWaiver(admin, order.customer_id, tailor.user_id)
   const { commission, net } = waived ? { commission: 0, net: gross } : calculateCommission(gross)
   const isSplit = !!tailor?.paystack_subaccount_code
 
@@ -119,23 +133,30 @@ async function recordPayout(orderId: string, order: PaidOrder, amountPaid: numbe
 }
 
 /**
- * A tailor's own referral link gives up 20% commission on business they'd
+ * A tailor's own referral link gives up the platform commission on business they'd
  * otherwise keep in full — so the one thing that makes "send your existing
  * clients here" worth it to them is TailorNow eating the commission on the
- * order that actually converts the referral. Waives it exactly once: only
- * for the customer's first paid order, only with the specific tailor who
+ * order that actually converts the referral. Waived exactly once: only for
+ * the customer's first paid order, only with the specific tailor who
  * referred them, and only while the referral hasn't already been used.
+ *
+ * Read-only — safe to call before payment (to tell Paystack the correct
+ * split at checkout time) as well as after. Use `consumeReferralWaiver`
+ * to actually mark it used, and only once the payment has genuinely
+ * succeeded — checking this at initialize time must never itself burn
+ * the one-time discount on a checkout the customer abandons.
  */
-async function isReferralWaiverOrder(
+export async function checkReferralWaiver(
   admin: ReturnType<typeof createAdminClient>,
   orderId: string,
-  order: PaidOrder,
+  customerId: string,
+  tailorId: string,
   tailorUserId: string
 ): Promise<boolean> {
   const { data: referral } = await admin
     .from('referrals')
     .select('id, referrer_id')
-    .eq('referred_id', order.customer_id)
+    .eq('referred_id', customerId)
     .eq('status', 'pending')
     .maybeSingle()
 
@@ -144,15 +165,25 @@ async function isReferralWaiverOrder(
   const { count: priorPaidOrders } = await admin
     .from('orders')
     .select('id', { count: 'exact', head: true })
-    .eq('customer_id', order.customer_id)
-    .eq('tailor_id', order.tailor_id)
+    .eq('customer_id', customerId)
+    .eq('tailor_id', tailorId)
     .eq('deposit_paid', true)
     .neq('id', orderId)
 
-  if ((priorPaidOrders ?? 0) > 0) return false
+  return (priorPaidOrders ?? 0) === 0
+}
 
-  await admin.from('referrals').update({ status: 'qualified' }).eq('id', referral.id)
-  return true
+async function consumeReferralWaiver(
+  admin: ReturnType<typeof createAdminClient>,
+  customerId: string,
+  tailorUserId: string
+): Promise<void> {
+  await admin
+    .from('referrals')
+    .update({ status: 'qualified' })
+    .eq('referred_id', customerId)
+    .eq('referrer_id', tailorUserId)
+    .eq('status', 'pending')
 }
 
 function signatureMatches(signature: string | null, expected: string): boolean {

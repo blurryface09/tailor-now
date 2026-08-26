@@ -127,7 +127,7 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   disputed: 'bg-orange-100 text-orange-800',
 }
 
-export const COMMISSION_RATE = 0.20
+export const COMMISSION_RATE = 0.10
 export const SERVICE_CHARGE_RATE = 0.03
 
 export function calculateServiceCharge(agreedPrice: number) {

@@ -49,7 +49,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-bold text-white mb-3">5. Payments</h2>
             <ul className="space-y-2 list-disc list-inside text-sm">
               <li>All payments are processed by Paystack and held in escrow until the customer confirms delivery.</li>
-              <li>TailorNow charges a <strong>20% platform commission</strong> on every completed order. Creatives receive 80% of the agreed price.</li>
+              <li>TailorNow charges a <strong>10% platform commission</strong> on every completed order. Creatives receive 90% of the agreed price.</li>
               <li>Payments are released to the creative after the customer confirms delivery, or automatically 7 days after the order is marked as delivered if no confirmation is received.</li>
               <li>Refunds are issued at TailorNow&apos;s discretion following our dispute resolution process.</li>
               <li>Attempting to conduct payments outside the platform to avoid commission is a violation of these terms and grounds for account termination.</li>
