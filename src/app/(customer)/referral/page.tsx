@@ -7,11 +7,13 @@ import { generateReferralCode } from '@/lib/utils'
 import { Copy, Check, Gift, Users, TrendingUp, Share2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
+type ReferralStats = { referred: number; active: number; earned: number }
+
 export default function ReferralPage() {
   const supabase = createClient()
   const [profile, setProfile] = useState<{ full_name: string; referral_code: string | null; role: string } | null>(null)
   const [copied, setCopied] = useState(false)
-  const [referralCount] = useState(0)
+  const [stats, setStats] = useState<ReferralStats>({ referred: 0, active: 0, earned: 0 })
   const isTailor = profile?.role === 'tailor'
 
   useEffect(() => {
@@ -25,6 +27,19 @@ export default function ReferralPage() {
         setProfile({ ...data, referral_code: code })
       } else {
         setProfile(data)
+      }
+
+      const { data: referrals } = await supabase
+        .from('referrals')
+        .select('status, reward_amount')
+        .eq('referrer_id', user.id)
+
+      if (referrals) {
+        setStats({
+          referred: referrals.length,
+          active: referrals.filter(r => r.status === 'qualified' || r.status === 'rewarded').length,
+          earned: referrals.reduce((sum, r) => sum + (r.reward_amount || 0), 0),
+        })
       }
     })
   }, [])
@@ -80,9 +95,9 @@ export default function ReferralPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
-            { icon: <Users size={18} />, label: 'Referred', value: referralCount, color: 'text-violet-600 bg-violet-50' },
-            { icon: <TrendingUp size={18} />, label: 'Active', value: 0, color: 'text-green-700 bg-green-100' },
-            { icon: <Gift size={18} />, label: 'Earned (₦)', value: '0', color: 'text-amber-600 bg-amber-100' },
+            { icon: <Users size={18} />, label: 'Referred', value: stats.referred, color: 'text-violet-600 bg-violet-50' },
+            { icon: <TrendingUp size={18} />, label: 'Active', value: stats.active, color: 'text-green-700 bg-green-100' },
+            { icon: <Gift size={18} />, label: 'Earned (₦)', value: Math.round(stats.earned).toLocaleString(), color: 'text-amber-600 bg-amber-100' },
           ].map(s => (
             <div key={s.label} className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-4 text-center card-lift">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-2 ${s.color}`}>{s.icon}</div>

@@ -102,8 +102,8 @@ async function recordPayout(orderId: string, order: PaidOrder, amountPaid: numbe
   const waived = tailor
     ? await checkReferralWaiver(admin, orderId, order.customer_id, order.tailor_id, tailor.user_id)
     : false
-  if (waived && tailor) await consumeReferralWaiver(admin, order.customer_id, tailor.user_id)
   const { commission, net } = waived ? { commission: 0, net: gross } : calculateCommission(gross)
+  if (waived && tailor) await consumeReferralWaiver(admin, order.customer_id, tailor.user_id, gross * COMMISSION_RATE)
   const isSplit = !!tailor?.paystack_subaccount_code
 
   const { error: payoutError } = await admin.from('payouts').upsert(
@@ -176,11 +176,12 @@ export async function checkReferralWaiver(
 async function consumeReferralWaiver(
   admin: ReturnType<typeof createAdminClient>,
   customerId: string,
-  tailorUserId: string
+  tailorUserId: string,
+  amountSaved: number
 ): Promise<void> {
   await admin
     .from('referrals')
-    .update({ status: 'qualified' })
+    .update({ status: 'qualified', reward_amount: amountSaved })
     .eq('referred_id', customerId)
     .eq('referrer_id', tailorUserId)
     .eq('status', 'pending')
