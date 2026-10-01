@@ -5,6 +5,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Nigeria's Independence Day (Oct 1) — checked against Nigeria's own
+// calendar date (Africa/Lagos), not the viewer's or server's local time,
+// so the doodle/banner show correctly for everyone regardless of timezone
+// and revert automatically the next day with nothing to turn off.
+export function isIndependenceDay(): boolean {
+  const lagosDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Lagos',
+    month: 'numeric',
+    day: 'numeric',
+  }).format(new Date())
+  return lagosDate === '10/1'
+}
+
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-NG', {
     style: 'currency',

@@ -5,6 +5,8 @@ import Image from 'next/image'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { Logo } from '@/components/ui/logo'
+import { IndependenceDayBanner } from '@/components/layout/IndependenceDayBanner'
+import { isIndependenceDay } from '@/lib/utils'
 import { ArrowRight, Star, CheckCircle, Zap, Users, Package, MapPin } from 'lucide-react'
 
 const ThreeBackground = dynamic(
@@ -149,10 +151,15 @@ export default function LandingPage() {
       style={{ background: 'linear-gradient(135deg, #f3eeff 0%, #ffffff 45%, #fffbf0 100%)', color: '#18181b' }}>
       <ThreeBackground variant="light" />
 
+      <IndependenceDayBanner />
+
       {/* ── Floating Navbar ──────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 z-50 w-full px-4 pt-3">
+      <nav className={`fixed z-50 w-full px-4 pt-3 transition-[top] duration-300 ${isIndependenceDay() ? 'top-12' : 'top-0'}`}>
         <div className="max-w-7xl mx-auto bg-white/80 backdrop-blur-2xl border border-zinc-200/70 rounded-2xl px-5 h-14 flex items-center justify-between shadow-lg shadow-zinc-200/60">
-          <Link href="/"><Logo size="sm" variant="full" /></Link>
+          <Link href="/" className="flex items-center gap-2">
+            <Logo size="sm" variant="full" />
+            {isIndependenceDay() && <span className="text-xl leading-none" aria-label="Nigerian flag">🇳🇬</span>}
+          </Link>
           <div className="hidden md:flex items-center gap-6 text-sm text-zinc-500">
             <Link href="/browse" className="hover:text-zinc-900 transition-colors duration-200">Find Creatives</Link>
             <Link href="/signup?as=tailor" className="hover:text-zinc-900 transition-colors duration-200">Join as Creative</Link>

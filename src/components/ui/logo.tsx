@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn, isIndependenceDay } from '@/lib/utils'
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl'
@@ -10,19 +10,6 @@ interface LogoProps {
 
 // Brand gradient: warm tan → mauve → deep purple (from brand guide SVG #3008)
 const BRAND_GRAD_ID = 'tn-brand-grad'
-
-// One-day "Doodle": the logo switches to Nigerian flag green on Independence
-// Day (Oct 1) and reverts automatically the next day — no manual toggle,
-// no settings to remember to turn back off. Checked against Nigeria's own
-// calendar date (Africa/Lagos), not the viewer's or server's local time.
-function isIndependenceDay(): boolean {
-  const lagosDate = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Africa/Lagos',
-    month: 'numeric',
-    day: 'numeric',
-  }).format(new Date())
-  return lagosDate === '10/1'
-}
 
 function BrandIcon({ width, dark, animated }: { width: number; dark?: boolean; animated?: boolean }) {
   const h = Math.round(width * (120 / 140))

@@ -9,10 +9,11 @@ import {
   ChevronDown, Menu, X, Shield, Users, Package, Star, TrendingUp,
   AlertTriangle, Store, Radio, ImageIcon, Sun, Moon,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, isIndependenceDay } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
 import { isStaff } from '@/lib/roles'
 import { AnnouncementBanner } from '@/components/layout/AnnouncementBanner'
+import { IndependenceDayBanner } from '@/components/layout/IndependenceDayBanner'
 
 const ADMIN_LINKS = [
   { href: '/admin',                 icon: <LayoutDashboard size={14} />, label: 'Dashboard',        adminOnly: false },
@@ -181,14 +182,16 @@ export function Navbar() {
 
   return (
     <>
+      <IndependenceDayBanner />
       <AnnouncementBanner />
       <nav className={cn('sticky top-0 z-50 transition-all duration-300', navBg)}>
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link
           href={profile?.role === 'tailor' ? '/dashboard' : isStaff(profile?.role) ? '/admin' : profile ? '/home' : '/'}
-          className="transition-transform hover:scale-[1.02] duration-200"
+          className="transition-transform hover:scale-[1.02] duration-200 flex items-center gap-2"
         >
           <Logo size="sm" variant="full" animated dark={isDark} />
+          {isIndependenceDay() && <span className="text-xl leading-none" aria-label="Nigerian flag">🇳🇬</span>}
         </Link>
 
         {/* Desktop nav links */}
