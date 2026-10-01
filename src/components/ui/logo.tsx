@@ -11,11 +11,25 @@ interface LogoProps {
 // Brand gradient: warm tan → mauve → deep purple (from brand guide SVG #3008)
 const BRAND_GRAD_ID = 'tn-brand-grad'
 
+// One-day "Doodle": the logo switches to Nigerian flag green on Independence
+// Day (Oct 1) and reverts automatically the next day — no manual toggle,
+// no settings to remember to turn back off. Checked against Nigeria's own
+// calendar date (Africa/Lagos), not the viewer's or server's local time.
+function isIndependenceDay(): boolean {
+  const lagosDate = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Africa/Lagos',
+    month: 'numeric',
+    day: 'numeric',
+  }).format(new Date())
+  return lagosDate === '10/1'
+}
+
 function BrandIcon({ width, dark, animated }: { width: number; dark?: boolean; animated?: boolean }) {
   const h = Math.round(width * (120 / 140))
-  const top    = dark ? '#DEB995' : '#C68A52'   // warm tan
-  const bottom = dark ? '#D9A6C2' : '#8C5A78'   // mauve
-  const pivot  = dark ? '#9A8FA4' : '#4B3B66'   // brand purple
+  const festive = isIndependenceDay()
+  const top    = festive ? (dark ? '#6EE7A0' : '#00A859') : (dark ? '#DEB995' : '#C68A52')   // warm tan / flag green
+  const bottom = festive ? (dark ? '#BBF7D4' : '#006B3F') : (dark ? '#D9A6C2' : '#8C5A78')   // mauve / deep flag green
+  const pivot  = festive ? (dark ? '#F0FDF6' : '#013220') : (dark ? '#9A8FA4' : '#4B3B66')   // brand purple / near-black green
 
   return (
     <svg
@@ -80,8 +94,9 @@ export function Logo({ size = 'md', variant = 'icon', className, animated = fals
   }
   const s = sizes[size]
   // Light-on-dark: cream heading, tan accent; Dark-on-light: deep purple heading, tan accent
-  const tailorColor = dark ? 'text-amber-300' : 'text-violet-900'
-  const nowColor    = dark ? 'text-amber-200' : 'text-violet-700'
+  const festive = isIndependenceDay()
+  const tailorColor = festive ? (dark ? 'text-green-300' : 'text-green-800') : (dark ? 'text-amber-300' : 'text-violet-900')
+  const nowColor    = festive ? (dark ? 'text-green-200' : 'text-green-700') : (dark ? 'text-amber-200' : 'text-violet-700')
 
   if (variant === 'icon') {
     return <BrandIcon width={s.icon} dark={dark} animated={animated} />
