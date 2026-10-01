@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/ui/logo'
 import { isStaff } from '@/lib/roles'
+import { AnnouncementBanner } from '@/components/layout/AnnouncementBanner'
 
 const ADMIN_LINKS = [
   { href: '/admin',                 icon: <LayoutDashboard size={14} />, label: 'Dashboard',        adminOnly: false },
@@ -179,7 +180,9 @@ export function Navbar() {
   const mobileMenuBtn = isDark ? 'text-zinc-400 hover:bg-white/[0.08] hover:text-white' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
 
   return (
-    <nav className={cn('sticky top-0 z-50 transition-all duration-300', navBg)}>
+    <>
+      <AnnouncementBanner />
+      <nav className={cn('sticky top-0 z-50 transition-all duration-300', navBg)}>
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link
           href={profile?.role === 'tailor' ? '/dashboard' : isStaff(profile?.role) ? '/admin' : profile ? '/home' : '/'}
@@ -404,5 +407,6 @@ export function Navbar() {
         </div>
       </div>
     </nav>
+    </>
   )
 }
