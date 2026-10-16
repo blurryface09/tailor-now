@@ -17,6 +17,12 @@ CREATE TABLE IF NOT EXISTS product_waitlist (
 
 ALTER TABLE product_waitlist ENABLE ROW LEVEL SECURITY;
 
+-- Safe to re-run: drop before create since Postgres has no
+-- "CREATE POLICY IF NOT EXISTS".
+DROP POLICY IF EXISTS "waitlist_owner_read"   ON product_waitlist;
+DROP POLICY IF EXISTS "waitlist_owner_insert" ON product_waitlist;
+DROP POLICY IF EXISTS "waitlist_owner_delete" ON product_waitlist;
+
 CREATE POLICY "waitlist_owner_read"   ON product_waitlist FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "waitlist_owner_insert" ON product_waitlist FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "waitlist_owner_delete" ON product_waitlist FOR DELETE USING (auth.uid() = user_id);
