@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Heart, MessageSquare, Share2, ShoppingBag,
   Scissors, MapPin, Star, CheckCircle, ChevronLeft, ChevronRight,
-  Send, ExternalLink, Sparkles,
+  Send, ExternalLink, Sparkles, Bell, Check,
 } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
@@ -24,6 +24,7 @@ export function ProductClient() {
   const [userId, setUserId] = useState<string | null>(null)
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
+  const [waitlisted, setWaitlisted] = useState(false)
   const [commentText, setCommentText] = useState('')
   const [posting, setPosting] = useState(false)
   const [imgIdx, setImgIdx] = useState(0)
@@ -47,6 +48,8 @@ export function ProductClient() {
     if (user) {
       const { data: likeData } = await supabase.from('post_likes').select('id').eq('post_id', id).eq('user_id', user.id).maybeSingle()
       setLiked(!!likeData)
+      const { data: waitlistData } = await supabase.from('product_waitlist').select('id').eq('post_id', id).eq('user_id', user.id).maybeSingle()
+      setWaitlisted(!!waitlistData)
     }
 
     // Load comments
@@ -74,6 +77,19 @@ export function ProductClient() {
     setLikeCount(v => liked ? v - 1 : v + 1)
     if (liked) await supabase.from('post_likes').delete().eq('post_id', id).eq('user_id', userId)
     else await supabase.from('post_likes').insert({ post_id: id, user_id: userId })
+  }
+
+  const toggleWaitlist = async () => {
+    if (!userId) { toast.error('Sign in to join the waitlist'); return }
+    if (waitlisted) {
+      setWaitlisted(false)
+      await supabase.from('product_waitlist').delete().eq('post_id', id).eq('user_id', userId)
+    } else {
+      setWaitlisted(true)
+      const { error } = await supabase.from('product_waitlist').insert({ post_id: id, user_id: userId })
+      if (error) { setWaitlisted(false); toast.error(error.message); return }
+      toast.success("You're on the list! We'll email you when it drops.")
+    }
   }
 
   const submitComment = async (e: React.FormEvent) => {
@@ -114,6 +130,7 @@ export function ProductClient() {
   const priceLabel = post.price ? `₦${Number(post.price).toLocaleString()}` : null
   const authorName = post.creative?.business_name || post.author?.full_name || 'TailorNow'
   const isAdminPost = !post.creative_id
+  const isShowroomPending = (post.post_type ?? 'product') === 'product' && !!post.is_showroom && !post.is_available
 
   return (
     <div className="min-h-screen bg-[#140F1E] text-white">
@@ -153,15 +170,19 @@ export function ProductClient() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
           {/* Price badge */}
-          {priceLabel && (
+          {isShowroomPending ? (
+            <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-violet-600 text-white text-sm font-black px-4 py-2 rounded-2xl shadow-xl shadow-violet-500/40"
+              style={{ animation: 'bounce-in 0.4s 0.1s ease both' }}>
+              <Sparkles size={14} /> Coming Soon
+            </div>
+          ) : priceLabel ? (
             <div className="absolute top-4 right-4 bg-amber-400 text-black text-sm font-black px-4 py-2 rounded-2xl shadow-xl shadow-amber-500/40"
               style={{ animation: 'bounce-in 0.4s 0.1s ease both' }}>
               {priceLabel}
             </div>
-          )}
-          {/* Products only. An inspo or editorial post has nothing to buy, and an
-              editorial one has no creative to chat to — creative_id is null. */}
-          {!priceLabel && (post.post_type ?? 'product') === 'product' && (
+          ) : (post.post_type ?? 'product') === 'product' && (
+            // Products only. An inspo or editorial post has nothing to buy, and an
+            // editorial one has no creative to chat to — creative_id is null.
             <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 text-white/80 text-xs font-semibold px-3 py-2 rounded-2xl">
               Chat for price
             </div>
@@ -236,18 +257,27 @@ export function ProductClient() {
 
           {/* CTAs */}
           {!isAdminPost && post.creative_id && (
-            <div className="flex gap-2.5 mb-6" style={{ animation: 'fade-up 0.5s 0.15s ease both' }}>
-              <Link
-                href={`/orders/new?tailor=${post.creative_id}&post=${post.id}`}
-                className="flex-1 flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-black font-black py-4 rounded-2xl transition-all hover:scale-[1.02] shadow-2xl shadow-amber-500/30 text-sm">
-                <ShoppingBag size={16} /> Order this fit
-              </Link>
-              <Link
-                href={`/orders/new?tailor=${post.creative_id}&custom=true`}
-                className="flex items-center gap-2 bg-white/[0.07] hover:bg-violet-500/15 border border-white/[0.1] hover:border-violet-500/30 text-white hover:text-violet-300 font-bold py-4 px-5 rounded-2xl transition-all text-sm">
-                <Scissors size={15} /> Custom
-              </Link>
-            </div>
+            isShowroomPending ? (
+              <div className="mb-6" style={{ animation: 'fade-up 0.5s 0.15s ease both' }}>
+                <button onClick={toggleWaitlist}
+                  className={`w-full flex items-center justify-center gap-2 font-black py-4 rounded-2xl transition-all text-sm ${waitlisted ? 'bg-violet-500/15 border border-violet-500/30 text-violet-300' : 'bg-violet-600 hover:bg-violet-500 text-white hover:scale-[1.02] shadow-2xl shadow-violet-500/30'}`}>
+                  {waitlisted ? <><Check size={16} /> You&apos;re on the list</> : <><Bell size={16} /> Notify me when it drops</>}
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2.5 mb-6" style={{ animation: 'fade-up 0.5s 0.15s ease both' }}>
+                <Link
+                  href={`/orders/new?tailor=${post.creative_id}&post=${post.id}`}
+                  className="flex-1 flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-black font-black py-4 rounded-2xl transition-all hover:scale-[1.02] shadow-2xl shadow-amber-500/30 text-sm">
+                  <ShoppingBag size={16} /> Order this fit
+                </Link>
+                <Link
+                  href={`/orders/new?tailor=${post.creative_id}&custom=true`}
+                  className="flex items-center gap-2 bg-white/[0.07] hover:bg-violet-500/15 border border-white/[0.1] hover:border-violet-500/30 text-white hover:text-violet-300 font-bold py-4 px-5 rounded-2xl transition-all text-sm">
+                  <Scissors size={15} /> Custom
+                </Link>
+              </div>
+            )
           )}
 
           {/* Creative profile card */}

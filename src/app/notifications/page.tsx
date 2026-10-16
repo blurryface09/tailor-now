@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Navbar } from '@/components/layout/navbar'
 import { formatRelativeTime } from '@/lib/utils'
-import { Bell, Package, Heart, UserPlus, MessageSquare, CheckCircle, CreditCard } from 'lucide-react'
+import { Bell, Package, Heart, UserPlus, MessageSquare, CheckCircle, CreditCard, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import type { Notification } from '@/types'
 
@@ -16,6 +16,8 @@ const TYPE_CONFIG: Record<string, { icon: React.ReactNode; color: string }> = {
   new_follower: { icon: <UserPlus size={16} />, color: 'bg-amber-100 text-amber-400' },
   new_message:  { icon: <MessageSquare size={16} />, color: 'bg-violet-100 text-violet-700' },
   new_post:     { icon: <CheckCircle size={16} />, color: 'bg-fuchsia-100 text-fuchsia-600' },
+  showroom_request:  { icon: <Sparkles size={16} />, color: 'bg-violet-100 text-violet-700' },
+  product_released:  { icon: <Sparkles size={16} />, color: 'bg-violet-100 text-violet-700' },
 }
 
 export default function NotificationsPage() {

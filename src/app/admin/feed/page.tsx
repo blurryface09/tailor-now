@@ -128,6 +128,34 @@ export default function AdminFeedPage() {
     toast.success('Deleted')
   }
 
+  // ── Showroom curation ──────────────────────────────────────────────────────
+
+  const toggleShowroom = async (post: Post) => {
+    const next = !post.is_showroom
+    const res = await fetch('/api/admin/posts/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId: post.id, is_showroom: next }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { toast.error(data.error || 'Could not update'); return }
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_showroom: next } : p))
+    toast.success(next ? 'Featured in the Showroom' : 'Removed from the Showroom')
+  }
+
+  const releaseProduct = async (post: Post) => {
+    if (!confirm('Release this piece? Everyone on its waitlist will be notified by email.')) return
+    const res = await fetch('/api/admin/showroom/release', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId: post.id }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) { toast.error(data.error || 'Could not release'); return }
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_available: true } : p))
+    toast.success(`Released — ${data.notified ?? 0} waitlist email(s) sent`)
+  }
+
   // ── Text editing ─────────────────────────────────────────────────────────────
 
   const startEdit = (post: Post & { author?: Profile }) => {
@@ -448,6 +476,23 @@ export default function AdminFeedPage() {
                           : <Sparkles size={13} />}
                         AI Polish
                       </button>
+                    )}
+
+                    {post.post_type === 'product' && (
+                      <>
+                        <button onClick={() => toggleShowroom(post)}
+                          className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${post.is_showroom ? 'text-violet-300 bg-violet-500/15 hover:bg-violet-500/20' : 'text-zinc-500 hover:text-violet-300 hover:bg-white/[0.06]'}`}
+                          title={post.is_showroom ? 'Remove from Showroom' : 'Feature in Showroom'}>
+                          <Sparkles size={13} /> {post.is_showroom ? 'In Showroom' : post.showroom_requested ? 'Requested' : 'Showroom'}
+                        </button>
+                        {post.is_showroom && !post.is_available && (
+                          <button onClick={() => releaseProduct(post)}
+                            className="flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 px-2.5 py-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors"
+                            title="Make this available and notify everyone on its waitlist">
+                            <Check size={13} /> Release
+                          </button>
+                        )}
+                      </>
                     )}
 
                     <div className="ml-auto flex items-center gap-1">

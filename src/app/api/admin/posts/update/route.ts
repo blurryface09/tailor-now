@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const { postId, ...fields } = body
   if (!postId) return NextResponse.json({ error: 'Missing postId' }, { status: 400 })
 
-  const allowed = ['image_urls', 'title', 'caption']
+  const allowed = ['image_urls', 'title', 'caption', 'is_showroom']
   const update: Record<string, unknown> = {}
   for (const key of allowed) {
     if (key in fields) update[key] = fields[key]

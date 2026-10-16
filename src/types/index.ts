@@ -221,9 +221,13 @@ export interface Post {
   price?: number | null
   title?: string | null
   is_available?: boolean
+  // Showroom placement is staff-curated: tailors can only request it (below).
+  is_showroom?: boolean
+  showroom_requested?: boolean
   author?: Profile
   creative?: TailorProfile
   liked_by_me?: boolean
+  waitlisted_by_me?: boolean
 }
 
 export type FabricType =

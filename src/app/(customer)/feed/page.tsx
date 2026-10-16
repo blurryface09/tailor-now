@@ -11,7 +11,7 @@ import { SERVICE_LABELS, formatRelativeTime } from '@/lib/utils'
 import {
   Heart, MessageSquare, Send, ChevronLeft, ChevronRight,
   MapPin, Star, CheckCircle, Scissors, Sparkles, Share2,
-  ShoppingBag, Lightbulb, Plus, X, Camera, ArrowRight,
+  ShoppingBag, Lightbulb, Plus, X, Camera, ArrowRight, Bell, Check,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -43,6 +43,7 @@ function sharePost(postId: string, title?: string | null) {
 const CHIPS = [
   { label: 'All', value: '', icon: '' },
   { label: 'Products', value: 'product', icon: '🛍️' },
+  { label: 'Showroom', value: 'showroom', icon: '✨' },
   { label: 'Inspo', value: 'inspo', icon: '💡' },
   { label: 'Ankara', value: 'ankara', icon: '🌍' },
   { label: 'Bridal', value: 'bridal', icon: '💍' },
@@ -255,11 +256,12 @@ function DemoInspoCard({ post, idx }: { post: DemoInspo; idx: number }) {
 
 // ── Real PostCard ─────────────────────────────────────────────────────────────
 function PostCard({
-  post, userId, userName, onLike, onFollow, following, idx,
+  post, userId, userName, onLike, onFollow, onWaitlist, following, idx,
 }: {
   post: Post; userId: string | null; userName: string
   onLike: (id: string, liked: boolean) => void
   onFollow: (uid: string, isFollowing: boolean) => void
+  onWaitlist: (id: string, joined: boolean) => void
   following: Set<string>
   idx: number
 }) {
@@ -273,6 +275,10 @@ function PostCard({
   const isProduct = (post.post_type ?? 'product') === 'product'
   const isInspo = post.post_type === 'inspo'
   const isEditorial = post.post_type === 'editorial'
+  // Showroom: staff-curated preview of unreleased pieces — no price/order yet,
+  // just a waitlist. Once staff "releases" it, is_available flips and it's a
+  // normal shoppable product.
+  const isShowroomPending = isProduct && !!post.is_showroom && !post.is_available
   // An editorial post stays TailorNow-branded even when it credits a creative, so
   // the credit reads as attribution rather than turning it into the creative's own
   // post — which is what keying purely off creative_id would have done.
@@ -342,7 +348,11 @@ function PostCard({
 
           {/* Price badge (products only) */}
           {isProduct && (
-            priceLabel ? (
+            isShowroomPending ? (
+              <div className="absolute top-3.5 right-3.5 flex items-center gap-1 bg-violet-600 text-white text-xs font-black px-3 py-1.5 rounded-full shadow-lg shadow-violet-500/40">
+                <Sparkles size={11} /> Coming Soon
+              </div>
+            ) : priceLabel ? (
               <div className="absolute top-3.5 right-3.5 bg-amber-400 text-black text-xs font-black px-3 py-1.5 rounded-full shadow-lg shadow-amber-500/40 animate-[bounce-in_0.3s_ease]">
                 {priceLabel}
               </div>
@@ -429,7 +439,21 @@ function PostCard({
         {post.title && <p className="font-bold text-zinc-900 text-sm mb-1">{post.title}</p>}
         {captionBody && <p className="text-sm text-zinc-500 leading-relaxed line-clamp-2">{captionBody}</p>}
 
-        {isProduct && !isAdminPost ? (
+        {isShowroomPending && !isAdminPost ? (
+          <div className="flex gap-2 mt-3.5">
+            <button
+              onClick={() => { if (!userId) { toast.error('Sign in to join the waitlist'); return }; onWaitlist(post.id, post.waitlisted_by_me || false) }}
+              className={`flex-1 flex items-center justify-center gap-1.5 font-bold text-xs py-2.5 rounded-2xl transition-all ${post.waitlisted_by_me ? 'bg-violet-100 text-violet-700 border border-violet-300' : 'bg-violet-600 hover:bg-violet-500 text-white hover:scale-[1.02] shadow-lg shadow-violet-500/25'}`}>
+              {post.waitlisted_by_me ? <><Check size={12} /> You&apos;re on the list</> : <><Bell size={12} /> Notify me when it drops</>}
+            </button>
+            {!isOwnPost && userId && (
+              <button onClick={() => onFollow(creativeUserId, isFollowing)}
+                className={`flex items-center text-xs font-semibold px-3 py-2.5 rounded-2xl border transition-all ${isFollowing ? 'border-zinc-200 text-zinc-400 hover:text-red-500' : 'border-violet-300 text-violet-600 hover:bg-violet-50'}`}>
+                {isFollowing ? '✓' : '+'}
+              </button>
+            )}
+          </div>
+        ) : isProduct && !isAdminPost ? (
           <div className="flex gap-2 mt-3.5">
             <Link href={`/orders/new?tailor=${post.creative_id}${post.id ? `&post=${post.id}` : ''}`}
               className="flex-1 flex items-center justify-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs py-2.5 rounded-2xl transition-all hover:scale-[1.02] shadow-lg shadow-amber-500/25">
@@ -634,13 +658,15 @@ export default function FeedPage() {
       .order('created_at', { ascending: false })
       .limit(40)
     if (postsData && user) {
-      const [{ data: liked }, { data: follows }] = await Promise.all([
+      const [{ data: liked }, { data: follows }, { data: waitlisted }] = await Promise.all([
         supabase.from('post_likes').select('post_id').eq('user_id', user.id),
         supabase.from('follows').select('following_id').eq('follower_id', user.id),
+        supabase.from('product_waitlist').select('post_id').eq('user_id', user.id),
       ])
       const likedSet = new Set((liked || []).map((l: { post_id: string }) => l.post_id))
       const followedSet = new Set((follows || []).map((f: { following_id: string }) => f.following_id))
-      const withMeta = (postsData as Post[]).map(p => ({ ...p, liked_by_me: likedSet.has(p.id) }))
+      const waitlistedSet = new Set((waitlisted || []).map((w: { post_id: string }) => w.post_id))
+      const withMeta = (postsData as Post[]).map(p => ({ ...p, liked_by_me: likedSet.has(p.id), waitlisted_by_me: waitlistedSet.has(p.id) }))
       // Followed creatives' posts surface first
       withMeta.sort((a, b) => {
         const aFollowed = a.creative?.user_id && followedSet.has(a.creative.user_id) ? 1 : 0
@@ -663,6 +689,16 @@ export default function FeedPage() {
       : p))
     if (liked) await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
     else await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+  }
+
+  const handleWaitlist = async (postId: string, joined: boolean) => {
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, waitlisted_by_me: !joined } : p))
+    if (joined) await supabase.from('product_waitlist').delete().eq('post_id', postId).eq('user_id', userId)
+    else {
+      const { error } = await supabase.from('product_waitlist').insert({ post_id: postId, user_id: userId })
+      if (error) { setPosts(prev => prev.map(p => p.id === postId ? { ...p, waitlisted_by_me: false } : p)); toast.error(error.message); return }
+      toast.success("You're on the list! We'll email you when it drops.")
+    }
   }
 
   const handleFollow = async (creativeUserId: string, isFollowing: boolean) => {
@@ -688,6 +724,7 @@ export default function FeedPage() {
   const filteredPosts = posts.filter(p => {
     if (!activeChip) return true
     if (activeChip === 'product') return (p.post_type ?? 'product') === 'product'
+    if (activeChip === 'showroom') return (p.post_type ?? 'product') === 'product' && !!p.is_showroom
     if (activeChip === 'inspo') return p.post_type === 'inspo'
     const { tag } = extractTag(p.caption)
     const t = (tag || '').toLowerCase()
@@ -797,7 +834,7 @@ export default function FeedPage() {
           <div className="space-y-5">
             {/* Real posts */}
             {filteredPosts.map((post, i) => (
-              <PostCard key={post.id} post={post} userId={userId} userName={userName} onLike={handleLike} onFollow={handleFollow} following={following} idx={i} />
+              <PostCard key={post.id} post={post} userId={userId} userName={userName} onLike={handleLike} onFollow={handleFollow} onWaitlist={handleWaitlist} following={following} idx={i} />
             ))}
 
             {/* Demo showroom when empty */}

@@ -257,6 +257,25 @@ export default function CreativePostsPage() {
     toast.success('Deleted')
   }
 
+  // Showroom placement is staff-curated — this only flags the post as
+  // requested and pings the team. The actual feature toggle lives in Admin.
+  const requestShowroom = async (post: Post) => {
+    const { error } = await supabase.from('posts').update({ showroom_requested: true }).eq('id', post.id)
+    if (error) { toast.error(error.message); return }
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, showroom_requested: true } : p))
+    const { data: staff } = await supabase.from('profiles').select('id').in('role', ['admin', 'support'])
+    if (staff && staff.length > 0) {
+      await supabase.from('notifications').insert(staff.map(s => ({
+        user_id: s.id,
+        type: 'showroom_request',
+        title: `${businessName} wants a piece in the Showroom`,
+        body: post.title ? `"${post.title}" — review and feature it from Admin → Feed` : 'Review and feature it from Admin → Feed',
+        data: { post_id: post.id },
+      })))
+    }
+    toast.success('Sent to the TailorNow team!')
+  }
+
   return (
     <div className="min-h-screen bg-[#140F1E]">
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -461,7 +480,11 @@ export default function CreativePostsPage() {
                       {post.title && <p className="font-bold text-white text-sm truncate">{post.title}</p>}
                       {post.caption && <p className="text-sm text-zinc-400 mt-0.5 leading-relaxed line-clamp-2">{post.caption}</p>}
                     </div>
-                    {post.price && (
+                    {post.is_showroom ? (
+                      <span className="flex-shrink-0 bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-black px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <Sparkles size={11} /> Showroom
+                      </span>
+                    ) : post.price && (
                       <span className="flex-shrink-0 bg-amber-400/15 border border-amber-500/30 text-amber-400 text-xs font-black px-2.5 py-1 rounded-full">
                         ₦{post.price.toLocaleString()}
                       </span>
@@ -474,6 +497,13 @@ export default function CreativePostsPage() {
                       <span className="text-xs text-zinc-600">{formatRelativeTime(post.created_at)}</span>
                     </div>
                     <div className="flex items-center gap-1">
+                      {!post.is_showroom && (
+                        <button onClick={() => requestShowroom(post)} disabled={!!post.showroom_requested}
+                          className={`p-1.5 rounded-lg transition-colors ${post.showroom_requested ? 'text-violet-400/50 cursor-default' : 'text-zinc-600 hover:text-violet-400 hover:bg-violet-500/10'}`}
+                          title={post.showroom_requested ? 'Requested — the team will review it' : 'Request Showroom feature'}>
+                          <Sparkles size={14} />
+                        </button>
+                      )}
                       <button onClick={() => sharePost(post.id)}
                         className="p-1.5 text-zinc-600 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition-colors"
                         title="Share product link">
