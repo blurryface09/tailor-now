@@ -140,7 +140,7 @@ export default function AdminFeedPage() {
     const data = await res.json().catch(() => ({}))
     if (!res.ok) { toast.error(data.error || 'Could not update'); return }
     setPosts(prev => prev.map(p => p.id === post.id ? { ...p, is_showroom: next } : p))
-    toast.success(next ? 'Featured in the Showroom' : 'Removed from the Showroom')
+    toast.success(next ? 'Marked Unreleased' : 'Removed from Unreleased')
   }
 
   const releaseProduct = async (post: Post) => {
@@ -482,8 +482,8 @@ export default function AdminFeedPage() {
                       <>
                         <button onClick={() => toggleShowroom(post)}
                           className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${post.is_showroom ? 'text-violet-300 bg-violet-500/15 hover:bg-violet-500/20' : 'text-zinc-500 hover:text-violet-300 hover:bg-white/[0.06]'}`}
-                          title={post.is_showroom ? 'Remove from Showroom' : 'Feature in Showroom'}>
-                          <Sparkles size={13} /> {post.is_showroom ? 'In Showroom' : post.showroom_requested ? 'Requested' : 'Showroom'}
+                          title={post.is_showroom ? 'Remove from Unreleased' : 'Mark as Unreleased'}>
+                          <Sparkles size={13} /> {post.is_showroom ? 'Unreleased' : post.showroom_requested ? 'Requested' : 'Mark Unreleased'}
                         </button>
                         {post.is_showroom && !post.is_available && (
                           <button onClick={() => releaseProduct(post)}

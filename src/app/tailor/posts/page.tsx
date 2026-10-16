@@ -268,7 +268,7 @@ export default function CreativePostsPage() {
       await supabase.from('notifications').insert(staff.map(s => ({
         user_id: s.id,
         type: 'showroom_request',
-        title: `${businessName} wants a piece in the Showroom`,
+        title: `${businessName} wants a piece marked Unreleased`,
         body: post.title ? `"${post.title}" — review and feature it from Admin → Feed` : 'Review and feature it from Admin → Feed',
         data: { post_id: post.id },
       })))
@@ -482,7 +482,7 @@ export default function CreativePostsPage() {
                     </div>
                     {post.is_showroom ? (
                       <span className="flex-shrink-0 bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-black px-2.5 py-1 rounded-full flex items-center gap-1">
-                        <Sparkles size={11} /> Showroom
+                        <Sparkles size={11} /> Unreleased
                       </span>
                     ) : post.price && (
                       <span className="flex-shrink-0 bg-amber-400/15 border border-amber-500/30 text-amber-400 text-xs font-black px-2.5 py-1 rounded-full">
@@ -500,7 +500,7 @@ export default function CreativePostsPage() {
                       {!post.is_showroom && (
                         <button onClick={() => requestShowroom(post)} disabled={!!post.showroom_requested}
                           className={`p-1.5 rounded-lg transition-colors ${post.showroom_requested ? 'text-violet-400/50 cursor-default' : 'text-zinc-600 hover:text-violet-400 hover:bg-violet-500/10'}`}
-                          title={post.showroom_requested ? 'Requested — the team will review it' : 'Request Showroom feature'}>
+                          title={post.showroom_requested ? 'Requested — the team will review it' : 'Request to feature as Unreleased'}>
                           <Sparkles size={14} />
                         </button>
                       )}

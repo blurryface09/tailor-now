@@ -43,7 +43,7 @@ function sharePost(postId: string, title?: string | null) {
 const CHIPS = [
   { label: 'All', value: '', icon: '' },
   { label: 'Products', value: 'product', icon: '🛍️' },
-  { label: 'Showroom', value: 'showroom', icon: '✨' },
+  { label: 'Unreleased', value: 'unreleased', icon: '✨' },
   { label: 'Inspo', value: 'inspo', icon: '💡' },
   { label: 'Ankara', value: 'ankara', icon: '🌍' },
   { label: 'Bridal', value: 'bridal', icon: '💍' },
@@ -724,7 +724,7 @@ export default function FeedPage() {
   const filteredPosts = posts.filter(p => {
     if (!activeChip) return true
     if (activeChip === 'product') return (p.post_type ?? 'product') === 'product'
-    if (activeChip === 'showroom') return (p.post_type ?? 'product') === 'product' && !!p.is_showroom
+    if (activeChip === 'unreleased') return (p.post_type ?? 'product') === 'product' && !!p.is_showroom
     if (activeChip === 'inspo') return p.post_type === 'inspo'
     const { tag } = extractTag(p.caption)
     const t = (tag || '').toLowerCase()
